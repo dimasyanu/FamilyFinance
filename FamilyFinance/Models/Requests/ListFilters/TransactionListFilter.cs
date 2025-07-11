@@ -10,4 +10,5 @@ public class TransactionListFilter : BaseListFilter
     public IEnumerable<string>? CategoryIds { get; set; }
     public string? SortBy { get; set; }
     public string? SortDirection { get; set; }
+    public bool? IsActive { get; set; } = true;
 }

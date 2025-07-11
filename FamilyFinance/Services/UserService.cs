@@ -19,18 +19,17 @@ public class UserService(AppDbContext dbContext) : BaseService(dbContext), IUser
     /// <param name="request"></param>
     /// <returns></returns>
     /// <exception cref="OperationCanceledException"></exception>
-    public async Task<Guid> CreateUserAsync(UserSaveRequest request)
+    public async Task<Guid> CreateUserAsync(UserSaveRequest request, Guid currentUserId)
     {
-        var timestamp = request.Timestamp ?? DateTime.Now;
-        var userId = request.UserId ?? throw new OperationCanceledException("Creator not found");
+        var now = DateTime.Now;
         var newUser = new User {
             Name = request.Name,
             Username = request.Username,
             PasswordHash = PasswordUtil.HashPassword(request.Password),
-            CreatedAt = timestamp,
-            CreatedBy = userId,
-            UpdatedAt = timestamp,
-            UpdatedBy = userId,
+            CreatedAt = now,
+            CreatedBy = currentUserId,
+            UpdatedAt = now,
+            UpdatedBy = currentUserId,
         };
         await DbContext.Users.AddAsync(newUser);
         await DbContext.SaveChangesAsync();
@@ -103,14 +102,14 @@ public class UserService(AppDbContext dbContext) : BaseService(dbContext), IUser
     /// <param name="request"></param>
     /// <returns></returns>
     /// <exception cref="NotImplementedException"></exception>
-    public async Task<UserDto> UpdateUserAsync(Guid userId, UserSaveRequest request)
+    public async Task<UserDto> UpdateUserAsync(Guid userId, UserSaveRequest request, Guid currentUserId)
     {
         var user = await DbContext.Users.FindAsync(userId)
             ?? throw new EntityNotFoundException($"User with ID {userId} not found.");
 
-        user.UpdatedAt = request.Timestamp ?? DateTime.Now;
-        user.UpdatedBy = request.UserId ?? throw new OperationCanceledException("Modifier not found");
         user.Name = request.Name;
+        user.UpdatedAt = DateTime.Now;
+        user.UpdatedBy = currentUserId;
         DbContext.Users.Update(user);
         await DbContext.SaveChangesAsync();
 
@@ -141,17 +140,17 @@ public class UserService(AppDbContext dbContext) : BaseService(dbContext), IUser
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="newPassword"></param>
-    /// <param name="updatedBy"></param>
+    /// <param name="currentUserId"></param>
     /// <returns></returns>
     /// <exception cref="EntityNotFoundException"></exception>
-    public async Task<Guid> ResetPassword(Guid userId, string newPassword, Guid updatedBy)
+    public async Task<Guid> ResetPassword(Guid userId, string newPassword, Guid currentUserId)
     {
         var user = await DbContext.Users.FindAsync(userId)
             ?? throw new EntityNotFoundException($"User with ID {userId} not found.");
         
         user.PasswordHash = PasswordUtil.HashPassword(newPassword);
         user.UpdatedAt = DateTime.Now;
-        user.UpdatedBy = updatedBy;
+        user.UpdatedBy = currentUserId;
         DbContext.Users.Update(user);
         await DbContext.SaveChangesAsync();
         return user.Id;
@@ -172,5 +171,26 @@ public class UserService(AppDbContext dbContext) : BaseService(dbContext), IUser
         user.DeletedBy = modifierId;
 
         await DbContext.SaveChangesAsync();
+    }
+
+    /// <summary>
+    /// Restore a deleted user by their ID.
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="currentUserId"></param>
+    /// <returns></returns>
+    public async Task<UserDto> RestoreAsync(Guid userId, Guid currentUserId)
+    {
+        var user = await DbContext.Users
+            .FirstOrDefaultAsync(u => u.Id == userId && u.DeletedAt != null)
+            ?? throw new EntityNotFoundException($"User with ID {userId} not found or not deleted.");
+
+        user.UpdatedAt = DateTime.Now;
+        user.UpdatedBy = currentUserId;
+        user.DeletedAt = null;
+        user.DeletedBy = null;
+
+        await DbContext.SaveChangesAsync();
+        return new UserDto(user);
     }
 }

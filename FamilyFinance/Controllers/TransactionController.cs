@@ -41,9 +41,8 @@ public class TransactionController(TransactionService service) : BaseController
         if (!ModelState.IsValid) return BadRequest(ModelState);
         
         var user = await GetCurrentUser();
-        request.SetCurrentUser(user.Id);
 
-        var transaction = await _service.CreateAsync(request);
+        var transaction = await _service.CreateAsync(request, user.Id);
         return Ok(transaction, "Transaction created successfully");
     }
 
@@ -55,9 +54,7 @@ public class TransactionController(TransactionService service) : BaseController
         if (!ModelState.IsValid) return BadRequest(ModelState);
         
         var user = await GetCurrentUser();
-        request.SetCurrentUser(user.Id);
-
-        var transaction = await _service.UpdateAsync(transactionId, request);
+        var transaction = await _service.UpdateAsync(transactionId, request, user.Id);
         return Ok(transaction, "Transaction updated successfully");
     }
 
@@ -67,5 +64,14 @@ public class TransactionController(TransactionService service) : BaseController
     {
         await _service.DeleteAsync(transactionId);
         return Ok<object>(null, "Transaction deleted successfully");
+    }
+
+    [HttpPut]
+    [Route("{transactionId:guid}/Restore")]
+    public async Task<ActionResult<Response<TransactionDto>>> Restore(Guid transactionId)
+    {
+        var user = await GetCurrentUser();
+        var transaction = await _service.RestoreAsync(transactionId, user.Id);
+        return Ok(transaction, "Transaction restored successfully");
     }
 }

@@ -11,12 +11,4 @@ public class CategorySaveRequest
 
     [Required]
     public string Color { get; set; } = string.Empty;
-    public Guid? UserId { get; private set; } = null;
-    public DateTime? Timestamp { get; private set; } = null;
-
-    public void SetCurrentUser(Guid userId)
-    {
-        UserId = userId;
-        Timestamp = DateTime.Now;
-    }
 }

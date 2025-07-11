@@ -52,20 +52,20 @@ public class TransactionService(AppDbContext dbContext) : BaseService(dbContext)
     /// <param name="request"></param>
     /// <returns></returns>
     /// <exception cref="UnauthorizedAccessException"></exception>
-    public async Task<TransactionDto> CreateAsync(TransactionSaveRequest request)
+    public async Task<TransactionDto> CreateAsync(TransactionSaveRequest request, Guid currentUserId)
     {
-        var editorId = request.EditorId ?? throw new UnauthorizedAccessException();
+        var now = DateTime.Now;
         var transaction = new Transaction {
             Description = request.Description,
             Amount = request.Amount,
             Date = request.TransactionDate,
             CategoryId = request.CategoryId,
-            UserId = request.UserId,
+            AccountId = request.AccountId,
             TransactionType = request.TransactionType,
-            CreatedAt = request.Timestamp,
-            CreatedBy = editorId,
-            UpdatedAt = request.Timestamp,
-            UpdatedBy = editorId,
+            CreatedAt = now,
+            CreatedBy = currentUserId,
+            UpdatedAt = now,
+            UpdatedBy = currentUserId,
         };
         DbContext.Transactions.Add(transaction);
         await DbContext.SaveChangesAsync();
@@ -80,17 +80,16 @@ public class TransactionService(AppDbContext dbContext) : BaseService(dbContext)
     /// <returns></returns>
     /// <exception cref="UnauthorizedAccessException"></exception>
     /// <exception cref="EntityNotFoundException"></exception>
-    public async Task<TransactionDto> UpdateAsync(Guid transactionId, TransactionSaveRequest request)
+    public async Task<TransactionDto> UpdateAsync(Guid transactionId, TransactionSaveRequest request, Guid currentUserId)
     {
-        var editorId = request.EditorId ?? throw new UnauthorizedAccessException();
         var transaction = await DbContext.Transactions.FirstOrDefaultAsync(x => x.Id == transactionId)
             ?? throw new EntityNotFoundException("Transaction is not found");
 
         if (transaction.Description != request.Description) {
             transaction.Description = request.Description;
         }
-        if (transaction.UserId != request.UserId) {
-            transaction.UserId = request.UserId;
+        if (transaction.AccountId != request.AccountId) {
+            transaction.AccountId = request.AccountId;
         }
         if (transaction.Amount != request.Amount) {
             transaction.Amount = request.Amount;
@@ -105,8 +104,8 @@ public class TransactionService(AppDbContext dbContext) : BaseService(dbContext)
             transaction.TransactionType = request.TransactionType;
         }
 
-        transaction.UpdatedAt = request.Timestamp;
-        transaction.UpdatedBy = editorId;
+        transaction.UpdatedAt = DateTime.Now;
+        transaction.UpdatedBy = currentUserId;
 
         DbContext.Transactions.Update(transaction);
         await DbContext.SaveChangesAsync();
@@ -126,5 +125,25 @@ public class TransactionService(AppDbContext dbContext) : BaseService(dbContext)
 
         DbContext.Transactions.Remove(transaction);
         await DbContext.SaveChangesAsync();
+    }
+
+    /// <summary>
+    /// Restores a deleted transaction by its ID.
+    /// </summary>
+    /// <param name="transactionId"></param>
+    /// <param name="currentUserId"></param>
+    /// <returns></returns>
+    /// <exception cref="EntityNotFoundException"></exception>
+    public async Task<TransactionDto> RestoreAsync(Guid transactionId, Guid currentUserId)
+    {
+        var transaction = await DbContext.Transactions.FirstOrDefaultAsync(x => x.Id == transactionId)
+            ?? throw new EntityNotFoundException("Transaction is not found");
+        transaction.DeletedAt = null;
+        transaction.DeletedBy = null;
+        transaction.UpdatedAt = DateTime.Now;
+        transaction.UpdatedBy = currentUserId;
+        DbContext.Transactions.Update(transaction);
+        await DbContext.SaveChangesAsync();
+        return new(transaction);
     }
 }

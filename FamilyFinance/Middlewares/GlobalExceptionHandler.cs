@@ -1,4 +1,5 @@
-﻿using FamilyFinance.Models.Responses;
+﻿using FamilyFinance.Exceptions;
+using FamilyFinance.Models.Responses;
 using Microsoft.AspNetCore.Diagnostics;
 using ILogger = Serilog.ILogger;
 
@@ -33,6 +34,10 @@ public class GlobalExceptionHandler(ILogger logger) : IExceptionHandler
         else if (exception is BadHttpRequestException) {
             httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
             problemDetails.Message = "Bad request: Invalid input or missing parameters.";
+        }
+        else if (exception is EntityNotFoundException) {
+            httpContext.Response.StatusCode = StatusCodes.Status404NotFound;
+            problemDetails.Message = exception.Message ?? "Resource not found.";
         }
         else {
             httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;

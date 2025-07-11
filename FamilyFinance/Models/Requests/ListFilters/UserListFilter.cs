@@ -2,5 +2,5 @@
 
 public class UserListFilter : BaseListFilter
 {
-    public bool? IsActive { get; set; }
+    public bool? IsActive { get; set; } = true;
 }

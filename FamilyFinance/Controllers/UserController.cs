@@ -40,10 +40,9 @@ public class UserController(IUserService service) : BaseController
         if (request == null) return BadRequest("Request cannot be null.");
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        var user = await GetCurrentUser();
-        request.SetCurrentUser(user.Id);
+        var currentUser = await GetCurrentUser();
 
-        var id = await _service.CreateUserAsync(request);
+        var id = await _service.CreateUserAsync(request, currentUser.Id);
         return Ok(new CreationResponse(id), "User created successfully");
     }
 
@@ -54,10 +53,9 @@ public class UserController(IUserService service) : BaseController
         if (request == null) return BadRequest("Request cannot be null.");
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        var user = await GetCurrentUser();
-        request.SetCurrentUser(user.Id);
+        var currentUser = await GetCurrentUser();
 
-        var item = await _service.UpdateUserAsync(userId, request);
+        var item = await _service.UpdateUserAsync(userId, request, currentUser.Id);
         return Ok(item, "User updated successfully.");
     }
 
@@ -68,5 +66,14 @@ public class UserController(IUserService service) : BaseController
         var user = await GetCurrentUser();
         await _service.DeleteUserAsync(userId, user.Id);
         return Ok("User deleted successfully.");
+    }
+
+    [HttpPut]
+    [Route("{userId:guid}/Restore")]
+    public async Task<ActionResult> Restore(Guid userId)
+    {
+        var currentUserId = await GetCurrentUser();
+        await _service.RestoreAsync(userId, currentUserId.Id);
+        return Ok("User restored successfully.");
     }
 }

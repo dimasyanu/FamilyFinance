@@ -13,7 +13,8 @@ public interface IUserService
     Task<Paginated<UserListItem>> ListAsync(UserListFilter filter);
     Task<UserDto> GetUserByIdAsync(Guid userId);
     Task<UserDto> GetUserByUsernameAsync(string username);
-    Task<Guid> CreateUserAsync(UserSaveRequest request);
-    Task<UserDto> UpdateUserAsync(Guid userId, UserSaveRequest request);
-    Task DeleteUserAsync(Guid userId, Guid modifierId);
+    Task<Guid> CreateUserAsync(UserSaveRequest request, Guid currentUserId);
+    Task<UserDto> UpdateUserAsync(Guid userId, UserSaveRequest request, Guid currentUserId);
+    Task DeleteUserAsync(Guid userId, Guid currentUserId);
+    Task<UserDto> RestoreAsync(Guid userId, Guid currentUserId);
 }

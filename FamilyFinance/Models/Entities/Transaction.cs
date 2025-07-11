@@ -6,8 +6,8 @@ namespace FamilyFinance.Models.Entities;
 [Table("transactions")]
 public class Transaction : BaseModel
 {
-    [Column("user_id")]
-    public required Guid UserId { get; set; }
+    [Column("account_id")]
+    public required Guid AccountId { get; set; }
 
     [Column("transaction_type")]
     [Required]
@@ -29,8 +29,8 @@ public class Transaction : BaseModel
     [Column("category_id")]
     public Guid? CategoryId { get; set; }
 
-    [ForeignKey("UserId")]
-    public virtual User? User { get; set; }
+    [ForeignKey("AccountId")]
+    public virtual Account? Account { get; set; }
 
     [ForeignKey("CategoryId")]
     public virtual Category? Category { get; set; }

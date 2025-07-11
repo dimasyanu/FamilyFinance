@@ -19,6 +19,64 @@ namespace FamilyFinance.Migrations
                 .HasAnnotation("ProductVersion", "8.0.18")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
+            modelBuilder.Entity("FamilyFinance.Models.Entities.Account", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("Balance")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("balance");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("deleted_by");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("name");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid>("UpdatedBy")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("updated_by");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("accounts");
+                });
+
             modelBuilder.Entity("FamilyFinance.Models.Entities.Category", b =>
                 {
                     b.Property<Guid>("Id")
@@ -60,7 +118,7 @@ namespace FamilyFinance.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("categories", (string)null);
+                    b.ToTable("categories");
                 });
 
             modelBuilder.Entity("FamilyFinance.Models.Entities.Transaction", b =>
@@ -69,6 +127,10 @@ namespace FamilyFinance.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)")
                         .HasColumnName("id");
+
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("account_id");
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)")
@@ -116,17 +178,13 @@ namespace FamilyFinance.Migrations
                         .HasColumnType("char(36)")
                         .HasColumnName("updated_by");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("char(36)")
-                        .HasColumnName("user_id");
-
                     b.HasKey("Id");
+
+                    b.HasIndex("AccountId");
 
                     b.HasIndex("CategoryId");
 
-                    b.HasIndex("UserId");
-
-                    b.ToTable("transactions", (string)null);
+                    b.ToTable("transactions");
                 });
 
             modelBuilder.Entity("FamilyFinance.Models.Entities.User", b =>
@@ -186,7 +244,7 @@ namespace FamilyFinance.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("users", (string)null);
+                    b.ToTable("users");
 
                     b.HasData(
                         new
@@ -203,21 +261,37 @@ namespace FamilyFinance.Migrations
                         });
                 });
 
-            modelBuilder.Entity("FamilyFinance.Models.Entities.Transaction", b =>
+            modelBuilder.Entity("FamilyFinance.Models.Entities.Account", b =>
                 {
-                    b.HasOne("FamilyFinance.Models.Entities.Category", "Category")
-                        .WithMany("Transactions")
-                        .HasForeignKey("CategoryId");
-
                     b.HasOne("FamilyFinance.Models.Entities.User", "User")
-                        .WithMany("Transactions")
+                        .WithMany("Accounts")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Category");
-
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("FamilyFinance.Models.Entities.Transaction", b =>
+                {
+                    b.HasOne("FamilyFinance.Models.Entities.Account", "Account")
+                        .WithMany("Transactions")
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FamilyFinance.Models.Entities.Category", "Category")
+                        .WithMany("Transactions")
+                        .HasForeignKey("CategoryId");
+
+                    b.Navigation("Account");
+
+                    b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("FamilyFinance.Models.Entities.Account", b =>
+                {
+                    b.Navigation("Transactions");
                 });
 
             modelBuilder.Entity("FamilyFinance.Models.Entities.Category", b =>
@@ -227,7 +301,7 @@ namespace FamilyFinance.Migrations
 
             modelBuilder.Entity("FamilyFinance.Models.Entities.User", b =>
                 {
-                    b.Navigation("Transactions");
+                    b.Navigation("Accounts");
                 });
 #pragma warning restore 612, 618
         }

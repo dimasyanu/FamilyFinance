@@ -1,5 +1,4 @@
-﻿using Org.BouncyCastle.Asn1.Mozilla;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FamilyFinance.Models.Entities;
@@ -26,5 +25,5 @@ public class User : BaseModel
     [MaxLength(255)]
     public string RefreshToken { get; set; } = string.Empty;
 
-    public virtual ICollection<Transaction> Transactions { get; set; } = [];
+    public virtual ICollection<Account> Accounts { get; set; } = [];
 }

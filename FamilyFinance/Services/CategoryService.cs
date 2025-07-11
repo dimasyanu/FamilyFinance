@@ -59,14 +59,15 @@ public class CategoryService(AppDbContext dbContext) : BaseService(dbContext)
     /// </summary>
     /// <param name="request"></param>
     /// <returns></returns>
-    public async Task<CategoryDto> CreateAsync(CategorySaveRequest request)
+    public async Task<CategoryDto> CreateAsync(CategorySaveRequest request, Guid currentUserId)
     {
+        var now = DateTime.Now;
         var newCategory = new Category {
             Name = request.Name,
             Description = request.Description,
             Color = request.Color,
-            CreatedAt = request.Timestamp ?? DateTime.Now,
-            CreatedBy = request.UserId ?? throw new UnauthorizedAccessException(),
+            CreatedAt = now,
+            CreatedBy = currentUserId,
         };
         await DbContext.Categories.AddAsync(newCategory);
         await DbContext.SaveChangesAsync();

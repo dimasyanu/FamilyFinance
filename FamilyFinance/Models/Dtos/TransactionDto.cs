@@ -9,7 +9,7 @@ public class TransactionDto
     public decimal Amount { get; set; }
     public DateTime TransactionDate { get; set; }
     public CategoryDto? Category { get; set; }
-    public Guid UserId { get; set; }
+    public Guid AccountId { get; set; }
 
     public TransactionDto()
     {
@@ -24,6 +24,6 @@ public class TransactionDto
         if (transaction.Category != null) {
             Category = new(transaction.Category);
         }
-        UserId = transaction.UserId;
+        AccountId = transaction.AccountId;
     }
 }

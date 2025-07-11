@@ -40,10 +40,9 @@ public class CategoryController(CategoryService service) : BaseController
         if (request == null) return BadRequest("Request cannot be null.");
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        var user = await GetCurrentUser();
-        request.SetCurrentUser(user.Id);
+        var currentUser = await GetCurrentUser();
 
-        var category = await _service.CreateAsync(request);
+        var category = await _service.CreateAsync(request, currentUser.Id);
         return Ok(category, "Category created successfully");
     }
 
@@ -53,9 +52,6 @@ public class CategoryController(CategoryService service) : BaseController
     {
         if (request == null) return BadRequest("Request cannot be null.");
         if (!ModelState.IsValid) return BadRequest(ModelState);
-        
-        var user = await GetCurrentUser();
-        request.SetCurrentUser(user.Id);
 
         var category = await _service.UpdateAsync(categoryId, request);
         return Ok(category, "Category updated successfully");

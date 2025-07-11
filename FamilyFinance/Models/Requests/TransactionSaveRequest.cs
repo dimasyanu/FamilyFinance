@@ -10,18 +10,5 @@ public class TransactionSaveRequest
     public TransactionType TransactionType { get; set; }
     public DateTime TransactionDate { get; set; }
     public Guid? CategoryId { get; set; }
-    public Guid UserId { get; set; }
-
-    public Guid? EditorId { get; private set; }
-    public DateTime Timestamp { get; private set; }
-
-    public TransactionSaveRequest()
-    {
-    }
-
-    public void SetCurrentUser(Guid userId)
-    {
-        EditorId = userId;
-        Timestamp = DateTime.Now;
-    }
+    public Guid AccountId { get; set; }
 }
