@@ -1,4 +1,5 @@
-﻿using FamilyFinance.Models.Dtos;
+﻿using FamilyFinance.ActionFilters;
+using FamilyFinance.Models.Dtos;
 using FamilyFinance.Models.Requests;
 using FamilyFinance.Models.Requests.ListFilters;
 using FamilyFinance.Models.Responses;
@@ -10,8 +11,9 @@ using Microsoft.AspNetCore.Mvc;
 namespace FamilyFinance.Controllers;
 
 [ApiController]
-[Route("Api/Transactions")]
 [Authorize]
+[AuthUser]
+[Route("Api/Transactions")]
 public class TransactionController(TransactionService service) : BaseController
 {
     private readonly TransactionService _service = service ?? throw new ArgumentNullException(nameof(service));
@@ -39,10 +41,8 @@ public class TransactionController(TransactionService service) : BaseController
     {
         if (request == null) return BadRequest("Request cannot be null.");
         if (!ModelState.IsValid) return BadRequest(ModelState);
-        
-        var user = await GetCurrentUser();
 
-        var transaction = await _service.CreateAsync(request, user.Id);
+        var transaction = await _service.CreateAsync(request, CurrentUser.Id);
         return Ok(transaction, "Transaction created successfully");
     }
 
@@ -53,8 +53,7 @@ public class TransactionController(TransactionService service) : BaseController
         if (request == null) return BadRequest("Request cannot be null.");
         if (!ModelState.IsValid) return BadRequest(ModelState);
         
-        var user = await GetCurrentUser();
-        var transaction = await _service.UpdateAsync(transactionId, request, user.Id);
+        var transaction = await _service.UpdateAsync(transactionId, request, CurrentUser.Id);
         return Ok(transaction, "Transaction updated successfully");
     }
 
@@ -70,8 +69,7 @@ public class TransactionController(TransactionService service) : BaseController
     [Route("{transactionId:guid}/Restore")]
     public async Task<ActionResult<Response<TransactionDto>>> Restore(Guid transactionId)
     {
-        var user = await GetCurrentUser();
-        var transaction = await _service.RestoreAsync(transactionId, user.Id);
+        var transaction = await _service.RestoreAsync(transactionId, CurrentUser.Id);
         return Ok(transaction, "Transaction restored successfully");
     }
 }

@@ -1,4 +1,5 @@
-﻿using FamilyFinance.Models.Dtos;
+﻿using FamilyFinance.ActionFilters;
+using FamilyFinance.Models.Dtos;
 using FamilyFinance.Models.Requests;
 using FamilyFinance.Models.Requests.ListFilters;
 using FamilyFinance.Models.Responses;
@@ -11,6 +12,7 @@ namespace FamilyFinance.Controllers;
 
 [ApiController]
 [Authorize]
+[AuthUser]
 [Route("Api/Categories")]
 public class CategoryController(CategoryService service) : BaseController
 {
@@ -40,9 +42,7 @@ public class CategoryController(CategoryService service) : BaseController
         if (request == null) return BadRequest("Request cannot be null.");
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        var currentUser = await GetCurrentUser();
-
-        var category = await _service.CreateAsync(request, currentUser.Id);
+        var category = await _service.CreateAsync(request, CurrentUser.Id);
         return Ok(category, "Category created successfully");
     }
 

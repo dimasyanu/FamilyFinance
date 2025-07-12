@@ -1,4 +1,5 @@
-﻿using FamilyFinance.Models.Dtos;
+﻿using FamilyFinance.ActionFilters;
+using FamilyFinance.Models.Dtos;
 using FamilyFinance.Models.Requests;
 using FamilyFinance.Models.Requests.ListFilters;
 using FamilyFinance.Models.Responses;
@@ -11,6 +12,7 @@ namespace FamilyFinance.Controllers;
 
 [ApiController]
 [Authorize]
+[AuthUser]
 [Route("Api/Users")]
 public class AccountController(AccountService service) : BaseController
 {
@@ -38,8 +40,8 @@ public class AccountController(AccountService service) : BaseController
     {
         if (request == null) return BadRequest("Request cannot be null.");
         if (!ModelState.IsValid) return BadRequest(ModelState);
-        var currentUser = await GetCurrentUser();
-        var account = await _service.CreateAsync(userId, request, currentUser.Id);
+
+        var account = await _service.CreateAsync(userId, request, CurrentUser.Id);
         return Ok(account, "Account created successfully");
     }
 
@@ -49,8 +51,8 @@ public class AccountController(AccountService service) : BaseController
     {
         if (request == null) return BadRequest("Request cannot be null.");
         if (!ModelState.IsValid) return BadRequest(ModelState);
-        var currentUser = await GetCurrentUser();
-        var account = await _service.UpdateAsync(userId, accountId, request, currentUser.Id);
+
+        var account = await _service.UpdateAsync(userId, accountId, request, CurrentUser.Id);
         return Ok(account, "Account updated successfully");
     }
 
@@ -58,8 +60,7 @@ public class AccountController(AccountService service) : BaseController
     [Route("{userId:guid}/Accounts/{accountId:guid}")]
     public async Task<ActionResult> DeleteAccount(Guid userId, Guid accountId)
     {
-        var currentUser = await GetCurrentUser();
-        await _service.DeleteAsync(userId, accountId, currentUser.Id);
+        await _service.DeleteAsync(userId, accountId, CurrentUser.Id);
         return Ok("Account deleted successfully");
     }
 
@@ -67,8 +68,7 @@ public class AccountController(AccountService service) : BaseController
     [Route("{userId:guid}/Accounts/{accountId:guid}/Restore")]
     public async Task<ActionResult<Response<AccountDto>>> RestoreAccount(Guid userId, Guid accountId)
     {
-        var currentUser = await GetCurrentUser();
-        var account = await _service.RestoreAsync(userId, accountId, currentUser.Id);
+        var account = await _service.RestoreAsync(userId, accountId, CurrentUser.Id);
         return Ok(account, "Account restored successfully");
     }
 }

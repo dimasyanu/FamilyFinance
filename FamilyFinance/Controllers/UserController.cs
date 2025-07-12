@@ -1,4 +1,5 @@
 using FamilyFinance.Abstractions;
+using FamilyFinance.ActionFilters;
 using FamilyFinance.Models.Dtos;
 using FamilyFinance.Models.Requests;
 using FamilyFinance.Models.Requests.ListFilters;
@@ -11,6 +12,7 @@ namespace FamilyFinance.Controllers;
 
 [ApiController]
 [Authorize]
+[AuthUser]
 [Route("Api/Users")]
 public class UserController(IUserService service) : BaseController
 {
@@ -40,9 +42,7 @@ public class UserController(IUserService service) : BaseController
         if (request == null) return BadRequest("Request cannot be null.");
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        var currentUser = await GetCurrentUser();
-
-        var id = await _service.CreateUserAsync(request, currentUser.Id);
+        var id = await _service.CreateUserAsync(request, CurrentUser.Id);
         return Ok(new CreationResponse(id), "User created successfully");
     }
 
@@ -53,9 +53,7 @@ public class UserController(IUserService service) : BaseController
         if (request == null) return BadRequest("Request cannot be null.");
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        var currentUser = await GetCurrentUser();
-
-        var item = await _service.UpdateUserAsync(userId, request, currentUser.Id);
+        var item = await _service.UpdateUserAsync(userId, request, CurrentUser.Id);
         return Ok(item, "User updated successfully.");
     }
 
@@ -63,8 +61,7 @@ public class UserController(IUserService service) : BaseController
     [Route("{userId:guid}")]
     public async Task<ActionResult> Delete(Guid userId)
     {
-        var user = await GetCurrentUser();
-        await _service.DeleteUserAsync(userId, user.Id);
+        await _service.DeleteUserAsync(userId, CurrentUser.Id);
         return Ok("User deleted successfully.");
     }
 
@@ -72,8 +69,7 @@ public class UserController(IUserService service) : BaseController
     [Route("{userId:guid}/Restore")]
     public async Task<ActionResult> Restore(Guid userId)
     {
-        var currentUserId = await GetCurrentUser();
-        await _service.RestoreAsync(userId, currentUserId.Id);
+        await _service.RestoreAsync(userId, CurrentUser.Id);
         return Ok("User restored successfully.");
     }
 }
