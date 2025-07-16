@@ -77,6 +77,60 @@ namespace FamilyFinance.Migrations
                     b.ToTable("accounts");
                 });
 
+            modelBuilder.Entity("FamilyFinance.Models.Entities.Budget", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("amount");
+
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("category_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("deleted_by");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("end_date");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("start_date");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid>("UpdatedBy")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
+
+                    b.ToTable("Budgets");
+                });
+
             modelBuilder.Entity("FamilyFinance.Models.Entities.Category", b =>
                 {
                     b.Property<Guid>("Id")
@@ -270,6 +324,17 @@ namespace FamilyFinance.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("FamilyFinance.Models.Entities.Budget", b =>
+                {
+                    b.HasOne("FamilyFinance.Models.Entities.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
                 });
 
             modelBuilder.Entity("FamilyFinance.Models.Entities.Transaction", b =>
