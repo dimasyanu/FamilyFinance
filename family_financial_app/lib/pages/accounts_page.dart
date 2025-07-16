@@ -1,19 +1,11 @@
+import 'package:family_financial_app/models/mypage.dart';
 import 'package:flutter/material.dart';
 
-class AccountsPage extends Scaffold {
+class AccountsPage extends MyPage {
   static const currentKey = 'AccountsPage';
-  final String title = 'Accounts';
+  static const String title = 'Accounts';
   final BuildContext _context;
 
-  const AccountsPage(BuildContext context) : _context = context, super(key: const Key(currentKey));
-
-  @override
-  PreferredSizeWidget? get appBar => AppBar(
-    title: Text(title),
-  );
-
-  @override
-  Widget? get body => Center(
-    child: const Text('This is the Accounts page.'),
-  );
+  AccountsPage(BuildContext context) : _context = context, 
+  super(appBar: AppBar(title: Text(title)), body: Center(child: const Text('This is the Accounts page.')));
 }

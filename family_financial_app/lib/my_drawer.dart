@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class MyDrawer extends Drawer {
-  final List<Widget> drawerItems;
+  final List<ListTile> drawerItems;
 
   const MyDrawer(this.drawerItems, {super.key});
 

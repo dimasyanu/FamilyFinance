@@ -18,93 +18,111 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> {
-
-  List<Widget> drawerWidgets = [];
+  List<ListTile> drawerWidgets = [];
   List<DrawerItem> drawerItems = [];
-  String currentPageAlias = 'overview';
+  final ValueNotifier<String> _currentPageAlias = ValueNotifier<String>(
+    'overview',
+  );
 
   _HomepageState() {
     // Initialize any necessary data or state here
 
-    // drawerItems = <DrawerItem>[
-    //   DrawerItem(
-    //     alias: 'overview',
-    //     title: 'Overview',
-    //     icon: Icons.dashboard,
-    //     page: OverviewPage(context),
-    //   ),
-    //   DrawerItem(
-    //     alias: 'transactions',
-    //     title: 'Transactions',
-    //     icon: Icons.receipt,
-    //     page: TransactionsPage(context),
-    //   ),
-    //   DrawerItem(
-    //     alias: 'accounts',
-    //     title: 'Accounts',
-    //     icon: Icons.wallet,
-    //     page: AccountsPage(context),
-    //   ),
-    //   DrawerItem(
-    //     alias: 'categories',
-    //     title: 'Categories',
-    //     icon: Icons.category,
-    //     page: CategoriesPage(context),
-    //   ),
-    //   DrawerItem(
-    //     alias: 'settings',
-    //     title: 'Settings',
-    //     icon: Icons.settings,
-    //     page: const SettingsPage(),
-    //     newScreen: true, // This indicates that the settings page should be opened in a new screen
-    //   ),
-    // ];
+    drawerItems = <DrawerItem>[
+      DrawerItem(
+        alias: 'overview',
+        title: 'Overview',
+        icon: Icons.dashboard,
+        initPage: () => OverviewPage(context),
+      ),
+      //   DrawerItem(
+      //     alias: 'transactions',
+      //     title: 'Transactions',
+      //     icon: Icons.receipt,
+      //     page: TransactionsPage(context),
+      //   ),
+      DrawerItem(
+        alias: 'accounts',
+        title: 'Accounts',
+        icon: Icons.wallet,
+        initPage: () => AccountsPage(context),
+      ),
+      //   DrawerItem(
+      //     alias: 'categories',
+      //     title: 'Categories',
+      //     icon: Icons.category,
+      //     page: CategoriesPage(context),
+      //   ),
+      //   DrawerItem(
+      //     alias: 'settings',
+      //     title: 'Settings',
+      //     icon: Icons.settings,
+      //     page: const SettingsPage(),
+      //     newScreen: true, // This indicates that the settings page should be opened in a new screen
+      //   ),
+    ];
 
-    // drawerWidgets = drawerItems.map((item) {
-    //   if (!item.newScreen) {
-    //     return ListTile(
-    //       title: Text(item.title),
-    //       leading: Icon(item.icon, color: Colors.green),
-    //       selectedTileColor: Colors.green.shade100,
-    //       selected: item.page.key == context.widget.key,
-    //       onTap: () {
-    //         if (currentPageAlias == item.alias) {
-    //           return;
-    //         }
-    //         currentPageAlias = item.alias;
-    //       },
-    //     );
-    //   }
+    drawerWidgets = drawerItems.map((item) {
+      if (!item.newScreen) {
+        return ListTile(
+          title: Text(item.title),
+          leading: Icon(item.icon, color: Colors.green),
+          selectedTileColor: Colors.green.shade100,
+          selected: (() => item.alias == _currentPageAlias.value)(),
+          onTap: () {
+            if (_currentPageAlias.value == item.alias) return;
+            _currentPageAlias.value = item.alias;
+            Navigator.pop(context);
+          },
+        );
+      }
 
-    //   return ListTile(
-    //     title: Text(item.title),
-    //     leading: Icon(item.icon, color: Colors.green),
-    //     selectedTileColor: Colors.green.shade100,
-    //     selected: item.page.key == context.widget.key,
-    //     onTap: () {
-    //       if (context.widget.key == item.page.key) {
-    //         return;
-    //       }
-    //       Navigator.pushReplacement(
-    //         context,
-    //         MaterialPageRoute(builder: (context) => item.page),
-    //       );
-    //     },
-    //   );
-    // }).toList();
+      print('Creating new screen for ${item.alias}');
+      return ListTile(
+        title: Text(item.title),
+        leading: Icon(item.icon, color: Colors.green),
+        selectedTileColor: Colors.green.shade100,
+        selected: item.alias == _currentPageAlias.value,
+        onTap: () {
+          if (item.alias == _currentPageAlias.value) {
+            return;
+          }
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => Scaffold(
+                appBar: item.initPage().appBar,
+                body: item.initPage().body,
+              ),
+            ),
+          );
+        },
+      );
+    }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
-    const String page = 'overview';
-    return AccountsPage(context);
-
-    // return Scaffold(
-    //   appBar: AppBar(
-    //     title: Text(drawerItems.firstWhere((item) => item.alias == page).title),
-    //   ),
-    //   body: drawerItems.firstWhere((item) => item.alias == page).page,
-    //   drawer: MyDrawer(drawerWidgets, key: const Key('AppDrawer')),
-    // );
+    return Scaffold(
+      appBar: AppBar(
+        title: ValueListenableBuilder(
+          valueListenable: _currentPageAlias,
+          builder: (context, value, child) {
+            return Text(
+              drawerItems.firstWhere((item) => item.alias == value).title,
+            );
+          },
+        ),
+      ),
+      body: ValueListenableBuilder(
+        valueListenable: _currentPageAlias,
+        builder: (context, value, child) {
+          return drawerItems
+              .firstWhere((item) => item.alias == value)
+              .initPage()
+              .body;
+        },
+      ),
+      drawer: MyDrawer(drawerWidgets, key: const Key('AppDrawer')),
+    );
   }
 }
