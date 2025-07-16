@@ -1,50 +1,33 @@
-import 'package:family_financial_app/my_drawer.dart';
 import 'package:flutter/material.dart';
 
-class OverviewPage extends StatefulWidget {
+class OverviewPage extends Scaffold {
   static const currentKey = 'OverviewPage';
   final String title = 'Overview';
 
-  const OverviewPage() : super(key: const Key(currentKey));
+  final BuildContext _context;
+
+  const OverviewPage(BuildContext context) : _context = context, super(key: const Key(currentKey));
 
   @override
-  State<OverviewPage> createState() => _OverviewPageState();
-}
-
-class _OverviewPageState extends State<OverviewPage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
+  PreferredSizeWidget? get appBar => AppBar(
+    backgroundColor: Theme.of(_context).colorScheme.inversePrimary,
+    title: Text(title),
+  );
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
+  Widget? get body => Center(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        const Text('This is the Overview page.'),
+        const SizedBox(height: 20),
+        ElevatedButton(
+          onPressed: () {
+            // Action for button
+          },
+          child: const Text('Action Button'),
         ),
-      ),
-      drawer: MyDrawer(key: const Key(OverviewPage.currentKey)),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
-    );
-  }
+      ],
+    ),
+  );
 }

@@ -1,5 +1,5 @@
+import 'package:family_financial_app/pages/homepage.dart';
 import 'package:flutter/material.dart';
-import 'pages/overview_page.dart';
 
 void main() {
   runApp(const FamilyFinancialApp());
@@ -16,7 +16,7 @@ class FamilyFinancialApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
       ),
-      home: const OverviewPage(),
+      home: const Homepage(),
     );
   }
 }

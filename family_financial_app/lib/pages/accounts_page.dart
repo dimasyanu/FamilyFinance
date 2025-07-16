@@ -1,29 +1,19 @@
 import 'package:flutter/material.dart';
 
-import '../my_drawer.dart';
-
-class AccountsPage extends StatefulWidget {
+class AccountsPage extends Scaffold {
   static const currentKey = 'AccountsPage';
   final String title = 'Accounts';
+  final BuildContext _context;
 
-  const AccountsPage() : super(key: const Key(currentKey));
-
-  @override
-  State<AccountsPage> createState() => _AccountsPageState();
-}
-
-class _AccountsPageState extends State<AccountsPage> {
+  const AccountsPage(BuildContext context) : _context = context, super(key: const Key(currentKey));
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: const Text('This is the Accounts page.'),
-      ),
-      drawer: MyDrawer(key: Key(AccountsPage.currentKey),),
-    );
-  }
+  PreferredSizeWidget? get appBar => AppBar(
+    title: Text(title),
+  );
+
+  @override
+  Widget? get body => Center(
+    child: const Text('This is the Accounts page.'),
+  );
 }
