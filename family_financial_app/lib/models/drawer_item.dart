@@ -6,13 +6,11 @@ class DrawerItem {
   final String title;
   final IconData icon;
   final MyPage Function() initPage;
-  final bool newScreen;
 
   DrawerItem({
     required this.alias,
     required this.title,
     required this.icon,
     required this.initPage,
-    this.newScreen = false,
   });
 }

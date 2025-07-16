@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 
-class MyPage {
+abstract class MyPage {
   final AppBar appBar;
-  final Widget body;
 
-  MyPage({required this.appBar, required this.body});
+  MyPage({required this.appBar}) {
+    onMounted();
+  }
+
+  Widget body();
+  void onMounted();
 }

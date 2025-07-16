@@ -16,15 +16,6 @@ class _SettingsPageState extends State<SettingsPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              // Handle settings action
-              Navigator.pop(context);
-            },
-          ),
-        ],
       ),
       body: Center(
         child: const Text('This is the Settings page.'),
