@@ -1,4 +1,4 @@
-﻿namespace FamilyFinance.Models.Requests;
+﻿namespace FamilyFinance.Models.Requests.ListFilters;
 
 public class BaseListFilter
 {

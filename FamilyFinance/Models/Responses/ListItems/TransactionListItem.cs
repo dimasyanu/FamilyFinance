@@ -8,8 +8,8 @@ public class TransactionListItem
     public string Description { get; set; } = string.Empty;
     public decimal Amount { get; set; }
     public DateTime TransactionDate { get; set; }
-    public Guid? CategoryId { get; set; }
-    public Guid AccountId { get; set; }
+    public CategoryListItem Category { get; set; }
+    public AccountListItem Account { get; set; }
     public string? Notes { get; set; }
 
     public TransactionListItem()
@@ -22,7 +22,7 @@ public class TransactionListItem
         Description = transaction.Description;
         Amount = transaction.Amount;
         TransactionDate = transaction.Date;
-        CategoryId = transaction.CategoryId;
-        AccountId = transaction.AccountId;
+        Category = new(transaction.Category ?? new());
+        Account = new(transaction.Account ?? new());
     }
 }

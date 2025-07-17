@@ -2,8 +2,8 @@
 
 public class LoginResponse
 {
-    public required string Username { get; set; }
-    public required string AccessToken { get; set; }
-    public required string RefreshToken { get; set; }
-    public required DateTime Expiration { get; set; }
+    public string Username { get; set; } = string.Empty;
+    public string AccessToken { get; set; } = string.Empty;
+    public string RefreshToken { get; set; } = string.Empty;
+    public DateTime Expiration { get; set; }
 }
