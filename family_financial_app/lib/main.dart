@@ -1,8 +1,19 @@
 import 'package:family_financial_app/login.dart';
+import 'package:family_financial_app/store.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:provider/provider.dart';
 
-void main() {
-  runApp(const FamilyFinancialApp());
+Future main() async {
+  await dotenv.load(fileName: '.env');
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => Store())
+      ],
+      child: const FamilyFinancialApp(),
+    ),
+  );
 }
 
 class FamilyFinancialApp extends StatelessWidget {
@@ -16,7 +27,7 @@ class FamilyFinancialApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
       ),
-      home: const Login(), // Use Login widget as the home page
+      home: Login(), // Use Login widget as the home page
     );
   }
 }
