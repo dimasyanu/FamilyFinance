@@ -1,9 +1,19 @@
-﻿namespace FamilyFinance.Models.Requests;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace FamilyFinance.Models.Requests;
 
 public class UserSaveRequest
 {
-    public required string Name { get; set; }
-    public required string Username { get; set; }
-    public required string Password { get; set; }
-    public required string RepeatPassword { get; set; }
+
+    [Required]
+    public string Name { get; set; } = string.Empty;
+    
+    [Required]
+    public string Username { get; set; } = string.Empty;
+    
+    [Required]
+    public string Password { get; set; } = string.Empty;
+    
+    [Required]
+    public string RepeatPassword { get; set; } = string.Empty;
 }

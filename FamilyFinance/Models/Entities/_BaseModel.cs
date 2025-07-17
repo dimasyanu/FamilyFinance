@@ -8,11 +8,11 @@ public class BaseModel : BasicModel
 
     [Column("updated_at")]
     [Required]
-    public required DateTime UpdatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
 
     [Column("updated_by")]
     [Required]
-    public required Guid UpdatedBy { get; set; }
+    public Guid UpdatedBy { get; set; }
 
     [Column("deleted_at")]
     public DateTime? DeletedAt { get; set; }
@@ -30,9 +30,9 @@ public class BasicModel
 
     [Column("created_at")]
     [Required]
-    public required DateTime CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
 
     [Column("created_by")]
     [Required]
-    public required Guid CreatedBy { get; set; }
+    public Guid CreatedBy { get; set; }
 }

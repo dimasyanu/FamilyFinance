@@ -9,7 +9,7 @@ public class Category : BasicModel
     [Column("name")]
     [MaxLength(100)]
     [Required]
-    public required string Name { get; set; }
+    public string Name { get; set; } = string.Empty;
 
     [Column("description")]
     [MaxLength(500)]
@@ -18,7 +18,7 @@ public class Category : BasicModel
     [Column("color")]
     [MaxLength(10)]
     [Required]
-    public required string Color { get; set; }
+    public string Color { get; set; } = string.Empty;
 
     [Column("icon")]
     [MaxLength(50)]
