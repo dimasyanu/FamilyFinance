@@ -20,7 +20,11 @@ class Api {
     );
 
     if (response.statusCode != 200) {
-      throw Exception('Failed to login: ${response.statusCode}');
+      final body = Response.fromJson(
+        jsonDecode(response.body),
+        (data) => data,
+      );
+      throw Exception(body.message ?? 'Login failed');
     }
 
     final result = Response<LoginResponse>.fromJson(

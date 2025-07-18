@@ -14,8 +14,8 @@ class LoginResponse {
   factory LoginResponse.fromJson(Map<String, dynamic> json) {
     return LoginResponse(
       username: json['username'],
-      accessToken: json['access_token'],
-      refreshToken: json['refresh_token'],
+      accessToken: json['accessToken'],
+      refreshToken: json['refreshToken'],
       expiration: DateTime.parse(json['expiration']),
     );
   }

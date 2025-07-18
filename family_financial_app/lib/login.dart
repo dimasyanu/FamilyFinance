@@ -16,20 +16,90 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
+  late final ValueNotifier<bool> isFormValid = ValueNotifier(
+    widget.username.value.isNotEmpty && widget.password.value.isNotEmpty,
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    
+    widget.username.addListener(_updateFormValid);
+    widget.password.addListener(_updateFormValid);
+  }
+
+  void _updateFormValid() {
+    isFormValid.value =
+        widget.username.value.isNotEmpty && widget.password.value.isNotEmpty;
+  }
+
+  @override
+  void dispose() {
+    widget.username.removeListener(_updateFormValid);
+    widget.password.removeListener(_updateFormValid);
+    isFormValid.dispose();
+    super.dispose();
+  }
+
+  void login(BuildContext context) {
+    // Navigate to the homepage after login
+    final theme = Theme.of(context);
+    final navigator = Navigator.of(context);
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final store = context.read<Store>();
+
+    store
+        .login(widget.username.value, widget.password.value)
+        .then((response) {
+          if (!response.success) {
+            // Show error message
+            scaffoldMessenger.showSnackBar(
+              SnackBar(content: Text(response.message ?? 'Login failed')),
+            );
+            return response;
+          }
+          navigator.pushReplacement(
+            MaterialPageRoute(builder: (context) => const Homepage()),
+          );
+        })
+        .catchError((error, stackTrace) {
+          scaffoldMessenger.showSnackBar(
+            SnackBar(
+              backgroundColor: theme.colorScheme.error,
+              behavior: SnackBarBehavior.floating,
+              content: Text(error.message)
+            ),
+          );
+          return Response<LoginResponse>(
+            success: false,
+            message: error.toString(),
+          );
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final loginBtnStyle = ElevatedButton.styleFrom(
+      backgroundColor: theme.colorScheme.primary,
+      foregroundColor: theme.colorScheme.onPrimary,
+      minimumSize: const Size(200, 50),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(8)),
+      ),
+    );
     return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
       body: Form(
         child: Center(
           child: Row(
             children: [
-              Expanded(flex:1, child: Column()),
+              Expanded(flex: 2, child: Column()),
               Expanded(
-                flex: 8,
+                flex: 6,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
+                  spacing: 20,
                   children: [
                     Text(
                       'Login to your account',
@@ -44,52 +114,29 @@ class _LoginState extends State<Login> {
                       obscureText: true,
                       onChanged: (value) => widget.password.value = value,
                     ),
-                    ElevatedButton(
-                      onPressed: () async {
-                        // Navigate to the homepage after login
-                        final navigator = Navigator.of(context);
-                        final scaffoldMessenger = ScaffoldMessenger.of(context);
-                        final store = context.read<Store>();
-
-                        store.login(
-                          widget.username.value,
-                          widget.password.value,
-                        ).then((response) {
-                          if (!response.success) {
-                            // Show error message
-                            scaffoldMessenger.showSnackBar(
-                              SnackBar(content: Text(response.message ?? 'Login failed')),
+                    SizedBox(
+                      width: double.infinity,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 0,
+                          vertical: 20,
+                        ),
+                        child: ValueListenableBuilder<bool>(
+                          valueListenable: isFormValid,
+                          builder: (context, valid, child) {
+                            return ElevatedButton(
+                              style: loginBtnStyle,
+                              onPressed: valid ? () => login(context) : null,
+                              child: const Text('Login'),
                             );
-                            return response;
-                          }
-                          navigator.pushReplacement(
-                            MaterialPageRoute(
-                              builder: (context) => const Homepage(),
-                            ),
-                          );
-                        }).catchError((error) {
-                          scaffoldMessenger.showSnackBar(
-                            SnackBar(content: Text(error.toString())),
-                          );
-                          return Response<LoginResponse>(
-                            success: false,
-                            message: error.toString(),
-                          );
-                        });
-                      },
-                      child: const Text('Login'),
+                          },
+                        ),
+                      ),
                     ),
-                    ElevatedButton(
-                      onPressed: () {
-                        final store = context.read<Store>();
-                        store.test();
-                      },
-                      child: const Text('Test Store'),
-                    )
                   ],
                 ),
               ),
-              Expanded(flex:1, child: Column()),
+              Expanded(flex: 2, child: Column()),
             ],
           ),
         ),
