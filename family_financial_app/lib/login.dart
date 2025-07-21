@@ -1,15 +1,20 @@
+import 'dart:convert';
+
+import 'package:family_financial_app/constants/storage_key.dart';
 import 'package:family_financial_app/models/responses/login_response.dart';
 import 'package:family_financial_app/models/responses/response.dart';
 import 'package:family_financial_app/pages/homepage.dart';
 import 'package:family_financial_app/store.dart';
 import 'package:flutter/material.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
 
 class Login extends StatefulWidget {
   Login({super.key});
 
-  final ValueNotifier<String> username = ValueNotifier('');
-  final ValueNotifier<String> password = ValueNotifier('');
+  final username = ValueNotifier('');
+  final password = ValueNotifier('');
+  final isLoadingUser = ValueNotifier(false);
 
   @override
   State<Login> createState() => _LoginState();
@@ -23,7 +28,8 @@ class _LoginState extends State<Login> {
   @override
   void initState() {
     super.initState();
-    
+
+    widget.isLoadingUser.value = true;
     widget.username.addListener(_updateFormValid);
     widget.password.addListener(_updateFormValid);
   }
@@ -39,6 +45,30 @@ class _LoginState extends State<Login> {
     widget.password.removeListener(_updateFormValid);
     isFormValid.dispose();
     super.dispose();
+  }
+
+  Future<void> checkUser(BuildContext context) async {
+    final storage = context.read<Store>().storage;
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+    final user = await storage.read(key: StorageKey.user);
+    if (user == null) return;
+
+    try {
+      final loginResponse = LoginResponse.fromJson(jsonDecode(user));
+      final now = DateTime.now();
+      if (loginResponse.username.isNotEmpty &&
+          loginResponse.accessToken.isNotEmpty &&
+          loginResponse.expiration.isAfter(now)) {
+        navigator.pushReplacement(
+          MaterialPageRoute(builder: (context) => const Homepage()),
+        );
+      }
+    } catch (e) {
+      messenger.showSnackBar(
+        SnackBar(content: Text('Error reading user data')),
+      );
+    }
   }
 
   void login(BuildContext context) {
@@ -67,7 +97,7 @@ class _LoginState extends State<Login> {
             SnackBar(
               backgroundColor: theme.colorScheme.error,
               behavior: SnackBarBehavior.floating,
-              content: Text(error.message)
+              content: Text(error.message),
             ),
           );
           return Response<LoginResponse>(
@@ -88,56 +118,67 @@ class _LoginState extends State<Login> {
         borderRadius: BorderRadius.all(Radius.circular(8)),
       ),
     );
-    return Scaffold(
-      body: Form(
-        child: Center(
-          child: Row(
-            children: [
-              Expanded(flex: 2, child: Column()),
-              Expanded(
-                flex: 6,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  spacing: 20,
-                  children: [
-                    Text(
-                      'Login to your account',
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    ),
-                    TextField(
-                      decoration: const InputDecoration(labelText: 'Username'),
-                      onChanged: (value) => widget.username.value = value,
-                    ),
-                    TextField(
-                      decoration: const InputDecoration(labelText: 'Password'),
-                      obscureText: true,
-                      onChanged: (value) => widget.password.value = value,
-                    ),
-                    SizedBox(
-                      width: double.infinity,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 0,
-                          vertical: 20,
+    return FutureBuilder(
+      future: checkUser(context),
+      builder: (context, snapshot) => Scaffold(
+        body: LoaderOverlay(
+          child: Form(
+            child: Center(
+              child: Row(
+                children: [
+                  Expanded(flex: 1, child: Column()),
+                  Expanded(
+                    flex: 6,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      spacing: 20,
+                      children: [
+                        Text(
+                          'Login to your account',
+                          style: Theme.of(context).textTheme.headlineMedium,
                         ),
-                        child: ValueListenableBuilder<bool>(
-                          valueListenable: isFormValid,
-                          builder: (context, valid, child) {
-                            return ElevatedButton(
-                              style: loginBtnStyle,
-                              onPressed: valid ? () => login(context) : null,
-                              child: const Text('Login'),
-                            );
-                          },
+                        TextFormField(
+                          decoration: const InputDecoration(
+                            labelText: 'Username',
+                          ),
+                          onChanged: (value) => widget.username.value = value,
                         ),
-                      ),
+                        TextFormField(
+                          decoration: const InputDecoration(
+                            labelText: 'Password',
+                          ),
+                          obscureText: true,
+                          onChanged: (value) => widget.password.value = value,
+                        ),
+                        SizedBox(
+                          width: double.infinity,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 0,
+                              vertical: 20,
+                            ),
+                            child: ValueListenableBuilder<bool>(
+                              valueListenable: isFormValid,
+                              builder: (context, valid, child) {
+                                return ElevatedButton(
+                                  style: loginBtnStyle,
+                                  onPressed: valid
+                                      ? () => login(context)
+                                      : null,
+                                  child: const Text('Login'),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                  Expanded(flex: 1, child: Column()),
+                ],
               ),
-              Expanded(flex: 2, child: Column()),
-            ],
+            ),
           ),
         ),
       ),

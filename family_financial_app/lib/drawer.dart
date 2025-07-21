@@ -1,6 +1,9 @@
+import 'package:family_financial_app/login.dart';
 import 'package:family_financial_app/models/drawer_item.dart';
 import 'package:family_financial_app/pages/settings_page.dart';
+import 'package:family_financial_app/store.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class MyDrawer extends Drawer {
   final List<DrawerItem> drawerItems;
@@ -22,7 +25,7 @@ class MyDrawer extends Drawer {
             child: Center(
               child: CircleAvatar(
                 radius: 50,
-                backgroundImage: AssetImage('../assets/images/profile.png'),
+                // backgroundImage: AssetImage('../assets/images/profile.png'),
               ),
             ),
           ),
@@ -66,7 +69,10 @@ class MyDrawer extends Drawer {
                 leading: Icon(Icons.logout, color: Colors.red),
                 textColor: Colors.red,
                 onTap: () {
-                  // Handle logout action
+                  context.read<Store>().logout();
+                  Navigator.pushReplacement(context, MaterialPageRoute(
+                    builder: (context) => Login(),
+                  ));
                 },
               ),
             ),

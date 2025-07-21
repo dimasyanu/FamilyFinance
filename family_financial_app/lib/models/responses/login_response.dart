@@ -16,7 +16,16 @@ class LoginResponse {
       username: json['username'],
       accessToken: json['accessToken'],
       refreshToken: json['refreshToken'],
-      expiration: DateTime.parse(json['expiration']),
+      expiration: DateTime.parse(json['expiration']).toLocal(),
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'username': username,
+      'accessToken': accessToken,
+      'refreshToken': refreshToken,
+      'expiration': expiration.toIso8601String(),
+    };
   }
 }
