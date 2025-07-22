@@ -1,10 +1,10 @@
 import 'dart:convert';
 
+import 'package:family_financial_app/abstractions/store.dart';
 import 'package:family_financial_app/constants/storage_key.dart';
 import 'package:family_financial_app/models/responses/login_response.dart';
 import 'package:family_financial_app/models/responses/response.dart';
 import 'package:family_financial_app/pages/homepage.dart';
-import 'package:family_financial_app/store.dart';
 import 'package:flutter/material.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
@@ -48,10 +48,10 @@ class _LoginState extends State<Login> {
   }
 
   Future<void> checkUser(BuildContext context) async {
-    final storage = context.read<Store>().storage;
+    final store = context.read<Store>();
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
-    final user = await storage.read(key: StorageKey.user);
+    final user = await store.(key: StorageKey.user);
     if (user == null) return;
 
     try {

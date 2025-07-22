@@ -1,15 +1,23 @@
+import 'package:family_financial_app/abstractions/store.dart';
 import 'package:family_financial_app/login.dart';
-import 'package:family_financial_app/store.dart';
+import 'package:family_financial_app/plugins/mobile_store.dart';
+import 'package:family_financial_app/plugins/web_store.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:localstorage/localstorage.dart';
 import 'package:provider/provider.dart';
 
 Future main() async {
   await dotenv.load(fileName: '.env');
+
+  if (kIsWeb) await initLocalStorage();
+  final Store store = kIsWeb ? WebStore() : MobileStore();
+
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => Store())
+        ChangeNotifierProvider(create: (_) => store),
       ],
       child: const FamilyFinancialApp(),
     ),

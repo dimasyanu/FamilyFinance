@@ -1,4 +1,6 @@
-class LoginResponse {
+import 'package:family_financial_app/abstractions/serializable.dart';
+
+class LoginResponse implements Serializable {
   final String username;
   final String accessToken;
   final String refreshToken;
@@ -20,6 +22,7 @@ class LoginResponse {
     );
   }
 
+  @override
   Map<String, dynamic> toJson() {
     return {
       'username': username,

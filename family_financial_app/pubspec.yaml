@@ -39,6 +39,7 @@ dependencies:
   provider: ^6.1.5
   flutter_secure_storage: ^9.2.4
   loader_overlay: ^5.0.0
+  localstorage: ^6.0.0
 
 dev_dependencies:
   flutter_test:
