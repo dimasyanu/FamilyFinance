@@ -21,37 +21,37 @@ class _HomepageState extends State<Homepage> {
   List<DrawerItem> drawerItems = [];
 
   final ValueNotifier<String> _currentPageAlias = ValueNotifier<String>(
-    'overview',
+    'accounts',
   );
 
   _HomepageState() {
     // Initialize any necessary data or state here
 
     drawerItems = <DrawerItem>[
-      DrawerItem(
-        alias: 'overview',
-        title: 'Overview',
-        icon: Icons.dashboard,
-        initPage: () => OverviewPage(context),
-      ),
-      DrawerItem(
-        alias: 'transactions',
-        title: 'Transactions',
-        icon: Icons.receipt,
-        initPage: () => TransactionsPage(context),
-      ),
+      // DrawerItem(
+        // alias: 'overview',
+        // title: 'Overview',
+        // icon: Icons.dashboard,
+        // initPage: () => OverviewPage(context),
+      // ),
+      // DrawerItem(
+        // alias: 'transactions',
+        // title: 'Transactions',
+        // icon: Icons.receipt,
+        // initPage: () => TransactionsPage(context),
+      // ),
       DrawerItem(
         alias: 'accounts',
         title: 'Accounts',
         icon: Icons.wallet,
         initPage: () => AccountsPage(context),
       ),
-      DrawerItem(
-        alias: 'categories',
-        title: 'Categories',
-        icon: Icons.category,
-        initPage: () => CategoriesPage(context),
-      ),
+      // DrawerItem(
+        // alias: 'categories',
+        // title: 'Categories',
+        // icon: Icons.category,
+        // initPage: () => CategoriesPage(context),
+      // ),
     ];
   }
 

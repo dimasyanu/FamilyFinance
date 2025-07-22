@@ -1,5 +1,6 @@
 using FamilyFinance.Abstractions;
 using FamilyFinance.Middlewares;
+using FamilyFinance.Models.Entities;
 using FamilyFinance.Services;
 using FamilyFinance.Utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -16,6 +17,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<AccountService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<TransactionService>();

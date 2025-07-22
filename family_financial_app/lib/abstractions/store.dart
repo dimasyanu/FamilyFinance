@@ -1,20 +1,27 @@
-import 'dart:convert';
-
+import 'package:family_financial_app/abstractions/serializable.dart';
 import 'package:family_financial_app/api.dart';
 import 'package:family_financial_app/constants/storage_key.dart';
 import 'package:family_financial_app/models/responses/login_response.dart';
 import 'package:family_financial_app/models/responses/response.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 abstract class Store with ChangeNotifier, DiagnosticableTreeMixin {
-  final Api api = Api();
+  final Api api;
 
-  LoginResponse? loginResponse;
+  Store(BuildContext? context) : api = Api(context);
+
+  String get loginTitle => throw UnimplementedError('loginTitle must be implemented in subclasses');
+
+  LoginResponse? user;
 
   // Abstract methods for store operations
-  void set(String key, Map<String, dynamic> value);
-  T get<T>(String key);
+  Future<void> set<T extends Serializable>(String key, T value);
+  Future<Map<String, dynamic>> get(String key);
   Future<void> delete(String key);
+  LoginResponse? getUser() {
+    return user;
+  }
 
   Future<Response<LoginResponse>> login(String username, String password) async {
     // Implement login logic here
@@ -22,15 +29,16 @@ abstract class Store with ChangeNotifier, DiagnosticableTreeMixin {
     if (response.data == null) {
       throw Exception('Login failed');
     }
-    loginResponse = response.data;
+    user = response.data;
     notifyListeners();
-    set(StorageKey.user, loginResponse!.toJson());
+    set(StorageKey.user, user!);
     return response;
   }
 
   Future<void> logout() async {
-    loginResponse = null;
+    user = null;
     await delete(StorageKey.user);
     notifyListeners();
   }
+
 }

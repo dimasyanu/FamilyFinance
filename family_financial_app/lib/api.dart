@@ -1,13 +1,22 @@
 import 'dart:convert';
 
+import 'package:family_financial_app/abstractions/store.dart';
 import 'package:family_financial_app/models/requests/login_request.dart';
+import 'package:family_financial_app/models/responses/item_account.dart';
 import 'package:family_financial_app/models/responses/login_response.dart';
+import 'package:family_financial_app/models/responses/paginated.dart';
 import 'package:family_financial_app/models/responses/response.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 
 class Api {
   final String baseUrl = dotenv.env['API_BASE_URL'] ?? 'http://localhost:5000';
+  final BuildContext? context;
+  final String accessToken; // You can set this from your authentication flow
+
+  Api(this.context) : accessToken = context?.read<Store>().getUser()?.accessToken ?? '';
 
   Future<Response<LoginResponse>> login(String username, String password) async {
     final url = Uri.parse('$baseUrl/api/auth/login');
@@ -38,6 +47,41 @@ class Api {
 
     if (result.data == null) {
       throw Exception('Login response data is null');
+    }
+
+    return result;
+  }
+
+  Future<Response<Paginated<ItemAccount>>> getAccounts({
+    required String userId,
+    int page = 1,
+    int pageSize = 25,
+  }) async {
+    final url = Uri.parse('$baseUrl/api/users/$userId/accounts?page=$page&pageSize=$pageSize');
+
+    final response = await http.get(url, headers: {
+      'Content-Type': 'application/json',
+      if (accessToken.isNotEmpty) 'Authorization': 'Bearer $accessToken',
+    });
+
+    if (response.statusCode != 200) {
+      final body = Response.fromJson(
+        jsonDecode(response.body),
+        (data) => data,
+      );
+      throw Exception(body.message ?? 'Failed to fetch accounts');
+    }
+
+    final result = Response<Paginated<ItemAccount>>.fromJson(
+      jsonDecode(response.body),
+      (data) => Paginated<ItemAccount>.fromJson(
+        data,
+        (item) => ItemAccount.fromJson(item),
+      ),
+    );
+
+    if (result.hasError) {
+      throw Exception('Failed to fetch accounts: ${result.errors?.join(', ')}');
     }
 
     return result;

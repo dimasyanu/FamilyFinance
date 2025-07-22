@@ -1,7 +1,7 @@
+import 'package:family_financial_app/abstractions/store.dart';
 import 'package:family_financial_app/login.dart';
 import 'package:family_financial_app/models/drawer_item.dart';
 import 'package:family_financial_app/pages/settings_page.dart';
-import 'package:family_financial_app/store.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

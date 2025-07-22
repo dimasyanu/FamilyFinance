@@ -37,6 +37,7 @@ public class AuthService(IConfiguration config, AppDbContext dbContext)
         var (accessToken, tokenExpiration) = GenerateToken(user.Username);
         return new LoginResponse {
             Username = user.Username,
+            UserId = user.Id,
             AccessToken = accessToken,
             RefreshToken = newRefreshToken,
             Expiration = tokenExpiration

@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:family_financial_app/abstractions/store.dart';
 import 'package:family_financial_app/constants/storage_key.dart';
 import 'package:family_financial_app/models/responses/login_response.dart';
@@ -51,11 +49,9 @@ class _LoginState extends State<Login> {
     final store = context.read<Store>();
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
-    final user = await store.(key: StorageKey.user);
-    if (user == null) return;
 
     try {
-      final loginResponse = LoginResponse.fromJson(jsonDecode(user));
+      final loginResponse = LoginResponse.fromJson(await store.get(StorageKey.user));
       final now = DateTime.now();
       if (loginResponse.username.isNotEmpty &&
           loginResponse.accessToken.isNotEmpty &&
@@ -97,7 +93,7 @@ class _LoginState extends State<Login> {
             SnackBar(
               backgroundColor: theme.colorScheme.error,
               behavior: SnackBarBehavior.floating,
-              content: Text(error.message),
+              content: Text(error.message ?? 'An error occurred during login'),
             ),
           );
           return Response<LoginResponse>(
@@ -134,6 +130,10 @@ class _LoginState extends State<Login> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       spacing: 20,
                       children: [
+                        // Text(
+                          // context.read<Store>().loginTitle,
+                          // style: theme.textTheme.headlineLarge,
+                        // ),
                         Text(
                           'Login to your account',
                           style: Theme.of(context).textTheme.headlineMedium,

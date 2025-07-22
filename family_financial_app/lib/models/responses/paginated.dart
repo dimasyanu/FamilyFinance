@@ -14,4 +14,13 @@ class Paginated<T> {
     required this.pageSize,
     required this.page,
   });
+
+  factory Paginated.fromJson(Map<String, dynamic> json, T Function(Map<String, dynamic>) fromJsonT) {
+    return Paginated<T>(
+      items: (json['items'] as List).map((item) => fromJsonT(item as Map<String, dynamic>)).toList(),
+      totalCount: json['totalCount'] as int,
+      pageSize: json['pageSize'] as int,
+      page: json['page'] as int,
+    );
+  }
 }
