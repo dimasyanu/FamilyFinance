@@ -1,5 +1,6 @@
 import 'package:family_financial_app/abstractions/store.dart';
-import 'package:family_financial_app/api.dart';
+import 'package:family_financial_app/pages/accounts_detail_page.dart';
+import 'package:family_financial_app/plugins/api.dart';
 import 'package:family_financial_app/models/mypage.dart';
 import 'package:family_financial_app/models/responses/item_account.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +8,8 @@ import 'package:provider/provider.dart';
 
 class AccountsPage extends MyPage {
   static const currentKey = 'AccountsPage';
-  static const String title = 'Accounts';
+  @override
+  String get title => 'Accounts';
   final Api api;
   final Store store;
   final ScaffoldMessengerState messenger;
@@ -19,12 +21,11 @@ class AccountsPage extends MyPage {
   final ValueNotifier<bool> isLoading = ValueNotifier<bool>(false);
   final ValueNotifier<bool> isError = ValueNotifier<bool>(false);
 
-
   AccountsPage(BuildContext context) 
   : store = context.read<Store>(),
-  api = Api(context),
-  messenger = ScaffoldMessenger.of(context),
-  super(appBar: AppBar(title: Text(title)));
+    api = Api(context),
+    messenger = ScaffoldMessenger.of(context),
+    super(route: 'AccountsPage', title: 'Accounts');
 
   @override
   Widget body() {
@@ -43,6 +44,21 @@ class AccountsPage extends MyPage {
     // Perform any additional setup or state initialization here
     loadTable();
   }
+
+  @override
+  FloatingActionButton? floatingActionButton(BuildContext context) {
+    return FloatingActionButton(
+      key: const Key('addAccountButton'),
+      onPressed: () {
+        // Navigate to the add account page
+        Navigator.push(context, MaterialPageRoute(
+          builder: (context) => AccountsDetailPage(isNew: true),
+        ));
+      },
+      shape: CircleBorder(),
+      child: const Icon(Icons.add),
+    );
+  } 
 
   /// Load the accounts table or any necessary data.
   void loadTable() {
@@ -67,5 +83,16 @@ class AccountsPage extends MyPage {
     }).whenComplete(() {
       isLoading.value = false;
     });
+  }
+
+  @override
+  void dispose() {
+    accounts.dispose();
+    totalCount.dispose();
+    pageSize.dispose();
+    page.dispose();
+    isLoading.dispose();
+    isError.dispose();
+    super.dispose();
   }
 }

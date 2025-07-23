@@ -2,10 +2,7 @@ import 'package:family_financial_app/models/mypage.dart';
 import 'package:flutter/material.dart';
 
 class TransactionsPage extends MyPage {
-  static const currentKey = 'TransactionsPage';
-  static const String title = 'Transactions';
-
-  TransactionsPage(BuildContext context) : super(appBar: AppBar(title: Text(title)));
+  TransactionsPage(BuildContext context) : super(route: 'TransactionsPage', title: 'Transactions');
 
   @override
   Widget body() {

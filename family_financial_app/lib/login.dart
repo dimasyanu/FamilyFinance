@@ -2,46 +2,49 @@ import 'package:family_financial_app/abstractions/store.dart';
 import 'package:family_financial_app/constants/storage_key.dart';
 import 'package:family_financial_app/models/responses/login_response.dart';
 import 'package:family_financial_app/models/responses/response.dart';
-import 'package:family_financial_app/pages/homepage.dart';
+import 'package:family_financial_app/app.dart';
 import 'package:flutter/material.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
 
 class Login extends StatefulWidget {
-  Login({super.key});
-
-  final username = ValueNotifier('');
-  final password = ValueNotifier('');
-  final isLoadingUser = ValueNotifier(false);
+  const Login({super.key});
 
   @override
   State<Login> createState() => _LoginState();
 }
 
 class _LoginState extends State<Login> {
+  final username = ValueNotifier('');
+  final password = ValueNotifier('');
+  final isLoadingUser = ValueNotifier(false);
+
   late final ValueNotifier<bool> isFormValid = ValueNotifier(
-    widget.username.value.isNotEmpty && widget.password.value.isNotEmpty,
+    username.value.isNotEmpty && password.value.isNotEmpty,
   );
 
   @override
   void initState() {
     super.initState();
 
-    widget.isLoadingUser.value = true;
-    widget.username.addListener(_updateFormValid);
-    widget.password.addListener(_updateFormValid);
+    isLoadingUser.value = true;
+    username.addListener(_updateFormValid);
+    password.addListener(_updateFormValid);
   }
 
   void _updateFormValid() {
     isFormValid.value =
-        widget.username.value.isNotEmpty && widget.password.value.isNotEmpty;
+        username.value.isNotEmpty && password.value.isNotEmpty;
   }
 
   @override
   void dispose() {
-    widget.username.removeListener(_updateFormValid);
-    widget.password.removeListener(_updateFormValid);
+    username.removeListener(_updateFormValid);
+    password.removeListener(_updateFormValid);
     isFormValid.dispose();
+    isLoadingUser.dispose();
+    username.dispose();
+    password.dispose();
     super.dispose();
   }
 
@@ -57,7 +60,7 @@ class _LoginState extends State<Login> {
           loginResponse.accessToken.isNotEmpty &&
           loginResponse.expiration.isAfter(now)) {
         navigator.pushReplacement(
-          MaterialPageRoute(builder: (context) => const Homepage()),
+          MaterialPageRoute(builder: (context) => const App()),
         );
       }
     } catch (e) {
@@ -77,7 +80,7 @@ class _LoginState extends State<Login> {
     loader.show();
 
     store
-        .login(widget.username.value, widget.password.value)
+        .login(username.value, password.value)
         .then((response) {
           if (!response.success) {
             // Show error message
@@ -87,7 +90,7 @@ class _LoginState extends State<Login> {
             return response;
           }
           navigator.pushReplacement(
-            MaterialPageRoute(builder: (context) => const Homepage()),
+            MaterialPageRoute(builder: (context) => const App()),
           );
         })
         .catchError((error, stackTrace) {
@@ -145,14 +148,14 @@ class _LoginState extends State<Login> {
                           decoration: const InputDecoration(
                             labelText: 'Username',
                           ),
-                          onChanged: (value) => widget.username.value = value,
+                          onChanged: (value) => username.value = value,
                         ),
                         TextFormField(
                           decoration: const InputDecoration(
                             labelText: 'Password',
                           ),
                           obscureText: true,
-                          onChanged: (value) => widget.password.value = value,
+                          onChanged: (value) => password.value = value,
                         ),
                         SizedBox(
                           width: double.infinity,

@@ -2,15 +2,15 @@ import 'package:family_financial_app/models/mypage.dart';
 import 'package:flutter/material.dart';
 
 class DrawerItem {
-  final String alias;
+  final String route;
   final String title;
   final IconData icon;
-  final MyPage Function() initPage;
+  final MyPage Function() page;
 
   DrawerItem({
-    required this.alias,
+    required this.route,
     required this.title,
     required this.icon,
-    required this.initPage,
+    required this.page,
   });
 }

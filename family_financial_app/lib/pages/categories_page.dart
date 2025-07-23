@@ -2,15 +2,7 @@ import 'package:family_financial_app/models/mypage.dart';
 import 'package:flutter/material.dart';
 
 class CategoriesPage extends MyPage {
-  static const currentKey = 'CategoriesPage';
-  static const String title = 'Categories';
-
-  CategoriesPage(BuildContext context) : super(
-    appBar: AppBar(
-      title: Text(title),
-      backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-    ),
-  );
+  CategoriesPage(BuildContext context) : super(route: 'CategoriesPage', title: 'Categories');
 
   @override
   Widget body() {

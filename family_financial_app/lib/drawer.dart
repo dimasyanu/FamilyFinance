@@ -7,11 +7,11 @@ import 'package:provider/provider.dart';
 
 class MyDrawer extends Drawer {
   final List<DrawerItem> drawerItems;
-  final ValueNotifier<String> currentPageAlias;
+  final ValueNotifier<String> currentPageRoute;
 
   const MyDrawer({
     required this.drawerItems,
-    required this.currentPageAlias,
+    required this.currentPageRoute,
     super.key,
   });
 
@@ -35,10 +35,10 @@ class MyDrawer extends Drawer {
               title: Text(item.title),
               leading: Icon(item.icon, color: Colors.green),
               selectedTileColor: Colors.green.shade100,
-              selected: item.alias == currentPageAlias.value,
+              selected: item.route == currentPageRoute.value,
               onTap: () {
-                if (currentPageAlias.value == item.alias) return;
-                currentPageAlias.value = item.alias;
+                if (currentPageRoute.value == item.route) return;
+                currentPageRoute.value = item.route;
                 Navigator.pop(context);
               },
             ),

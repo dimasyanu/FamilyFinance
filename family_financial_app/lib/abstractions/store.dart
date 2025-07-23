@@ -1,5 +1,5 @@
 import 'package:family_financial_app/abstractions/serializable.dart';
-import 'package:family_financial_app/api.dart';
+import 'package:family_financial_app/plugins/api.dart';
 import 'package:family_financial_app/constants/storage_key.dart';
 import 'package:family_financial_app/models/responses/login_response.dart';
 import 'package:family_financial_app/models/responses/response.dart';
@@ -40,5 +40,4 @@ abstract class Store with ChangeNotifier, DiagnosticableTreeMixin {
     await delete(StorageKey.user);
     notifyListeners();
   }
-
 }

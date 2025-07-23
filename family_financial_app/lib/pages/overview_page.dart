@@ -2,17 +2,9 @@ import 'package:family_financial_app/models/mypage.dart';
 import 'package:flutter/material.dart';
 
 class OverviewPage extends MyPage {
-  static const currentKey = 'OverviewPage';
-  static const String title = 'Overview';
-
   ValueNotifier<int> counter = ValueNotifier<int>(0);
 
-  OverviewPage(BuildContext context) : super(
-    appBar: AppBar(
-      backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      title: Text(title),
-    ),
-  );
+  OverviewPage(BuildContext context) : super(route: 'OverviewPage', title: 'Overview');
 
   @override
   Widget body() {
@@ -43,5 +35,11 @@ class OverviewPage extends MyPage {
   void onMounted() {
     // Perform any additional setup or state initialization here
     debugPrint('OverviewPage mounted');
+  }
+
+  @override
+  void dispose() {
+    counter.dispose();
+    super.dispose();
   }
 }

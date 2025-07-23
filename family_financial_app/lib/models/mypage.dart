@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 
 abstract class MyPage {
-  final AppBar appBar;
+  late final AppBar appBar;
+  final String route;
+  final String title;
 
-  MyPage({required this.appBar}) {
+  MyPage({required this.route, required this.title}) {
+    appBar = AppBar(title: Text(title));
     onMounted();
   }
 
   Widget body();
   void onMounted();
-  FloatingActionButton? floatingActionButton() => null;
+  FloatingActionButton? floatingActionButton(BuildContext context) => null;
+  void dispose() {}
 }

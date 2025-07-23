@@ -1,0 +1,114 @@
+import 'package:family_financial_app/models/drawer_item.dart';
+import 'package:family_financial_app/drawer.dart';
+import 'package:family_financial_app/models/mypage.dart';
+import 'package:family_financial_app/pages/accounts_page.dart';
+// import 'package:family_financial_app/pages/categories_page.dart';
+// import 'package:family_financial_app/pages/overview_page.dart';
+import 'package:family_financial_app/pages/transactions_page.dart';
+import 'package:flutter/material.dart';
+
+class App extends StatefulWidget {
+  static const currentKey = 'Homepage';
+  final String title = 'Home';
+
+  const App() : super(key: const Key(currentKey));
+
+  @override
+  State<App> createState() => _AppState();
+}
+
+class _AppState extends State<App> {
+  List<ListTile> drawerWidgets = [];
+  List<DrawerItem> drawerItems = [];
+
+  final ValueNotifier<String> _currentPageRoute = ValueNotifier<String>(
+    'accounts',
+  );
+  final ValueNotifier<DrawerItem?> _currentMenu = ValueNotifier<DrawerItem?>(null);
+  final ValueNotifier<MyPage?> _currentPage = ValueNotifier<MyPage?>(null);
+
+  _AppState() {
+    // Initialize any necessary data or state here
+
+    drawerItems = <DrawerItem>[
+      // DrawerItem(
+        // alias: 'overview',
+        // title: 'Overview',
+        // icon: Icons.dashboard,
+        // initPage: () => OverviewPage(context),
+      // ),
+      DrawerItem(
+        route: 'transactions',
+        title: 'Transactions',
+        icon: Icons.receipt,
+        page: () => TransactionsPage(context),
+      ),
+      DrawerItem(
+        route: 'accounts',
+        title: 'Accounts',
+        icon: Icons.wallet,
+        page: () => AccountsPage(context),
+      ),
+      // DrawerItem(
+        // alias: 'categories',
+        // title: 'Categories',
+        // icon: Icons.category,
+        // initPage: () => CategoriesPage(context),
+      // ),
+    ];
+
+    _currentPageRoute.addListener(() {
+      setState(setPageState);
+    });
+    // _currentPageRoute.value = 'accounts';
+  }
+
+  void setPageState() {
+    _currentMenu.value = drawerItems.firstWhere(
+      (item) => item.route == _currentPageRoute.value,
+      orElse: () => drawerItems.first,
+    );
+    _currentPage.value?.dispose();
+    _currentPage.value = _currentMenu.value?.page();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_currentMenu.value == null) setPageState(); // Ensure the current menu is set
+    return Scaffold(
+      appBar: AppBar(
+        title: ValueListenableBuilder(
+          valueListenable: _currentMenu,
+          builder: (context, value, child) {
+            return Text(value?.title ?? widget.title);
+          },
+        ),
+      ),
+      body: ValueListenableBuilder(
+        valueListenable: _currentPage,
+        builder: (context, value, child) {
+          return value?.body() ?? Center(child: Text('Not found'));
+        },
+      ),
+      floatingActionButton: ValueListenableBuilder(
+        valueListenable: _currentPage,
+        builder: (context, value, child) {
+          return value?.floatingActionButton(context) ?? SizedBox.shrink();
+        },
+      ),
+      drawer: MyDrawer(
+        drawerItems: drawerItems,
+        currentPageRoute: _currentPageRoute,
+        key: const Key('AppDrawer'),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _currentPageRoute.dispose();
+    _currentMenu.dispose();
+    _currentPage.dispose();
+    super.dispose();
+  }
+}
