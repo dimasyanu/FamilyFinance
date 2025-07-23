@@ -77,6 +77,15 @@ class _HomepageState extends State<Homepage> {
               .body();
         },
       ),
+      floatingActionButton: ValueListenableBuilder(
+        valueListenable: _currentPageAlias,
+        builder: (context, value, child) {
+          return drawerItems
+              .firstWhere((item) => item.alias == value)
+              .initPage()
+              .floatingActionButton() ?? SizedBox.shrink();
+        },
+      ),
       drawer: MyDrawer(
         drawerItems: drawerItems,
         currentPageAlias: _currentPageAlias,

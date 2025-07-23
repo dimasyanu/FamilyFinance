@@ -73,6 +73,8 @@ class _LoginState extends State<Login> {
     final navigator = Navigator.of(context);
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     final store = context.read<Store>();
+    final loader = context.loaderOverlay;
+    loader.show();
 
     store
         .login(widget.username.value, widget.password.value)
@@ -100,7 +102,8 @@ class _LoginState extends State<Login> {
             success: false,
             message: error.toString(),
           );
-        });
+        })
+        .whenComplete(() => loader.hide());
   }
 
   @override

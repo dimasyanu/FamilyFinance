@@ -9,4 +9,5 @@ abstract class MyPage {
 
   Widget body();
   void onMounted();
+  FloatingActionButton? floatingActionButton() => null;
 }
