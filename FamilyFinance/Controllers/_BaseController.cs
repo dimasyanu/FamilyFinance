@@ -14,7 +14,8 @@ public abstract class BaseController : ControllerBase
     internal virtual void CheckCurrentUser()
     {
         CurrentUser = GetCurrentUser().GetAwaiter().GetResult();
-        if (CurrentUser == null || CurrentUser.Id == Guid.Empty || CurrentUser.Username.IsNullOrEmpty()){
+        if (CurrentUser == null || CurrentUser.Id == Guid.Empty || CurrentUser.Username.IsNullOrEmpty())
+        {
             throw new UnauthorizedAccessException();
         }
     }
@@ -33,7 +34,16 @@ public abstract class BaseController : ControllerBase
     }
 
     public OkObjectResult Ok<T>(T? value, string message = "Success") where T : class
-        => base.Ok(new Response<object> {
+        => base.Ok(new Response<object>
+        {
+            Success = true,
+            Message = message,
+            Data = value
+        });
+
+    public CreatedResult Created<T>(T? value, string message = "Created") where T : class
+        => base.Created("", new Response<object>
+        {
             Success = true,
             Message = message,
             Data = value

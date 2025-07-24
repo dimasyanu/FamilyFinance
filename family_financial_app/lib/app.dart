@@ -70,6 +70,7 @@ class _AppState extends State<App> {
     );
     _currentPage.value?.dispose();
     _currentPage.value = _currentMenu.value?.page();
+    _currentPage.value?.initState(setState);
   }
 
   @override

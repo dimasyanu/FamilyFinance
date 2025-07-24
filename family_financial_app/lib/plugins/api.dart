@@ -74,10 +74,10 @@ class Api {
       throw Exception(body.message ?? 'Failed to fetch accounts');
     }
 
-    final result = Response<Paginated<ItemAccount>>.fromJson(
-      jsonDecode(response.body),
-      (data) => Paginated<ItemAccount>.fromJson(
-        data,
+    final body = jsonDecode(response.body) as Map<String, dynamic>;
+
+    final result = Response<Paginated<ItemAccount>>.fromJson(body,
+      (data) => Paginated<ItemAccount>.fromJson(data,
         (item) => ItemAccount.fromJson(item),
       ),
     );

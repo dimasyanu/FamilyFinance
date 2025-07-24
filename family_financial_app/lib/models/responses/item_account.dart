@@ -2,6 +2,7 @@ class ItemAccount {
   final String id;
   final String name;
   final String? description;
+  final String color;
   final double balance;
   final DateTime createdAt;
   final String createdBy;
@@ -12,6 +13,7 @@ class ItemAccount {
   ItemAccount({
     required this.id,
     required this.name,
+    required this.color,
     this.description,
     required this.balance,
     required this.createdAt,
@@ -22,9 +24,11 @@ class ItemAccount {
   });
 
   factory ItemAccount.fromJson(Map<String, dynamic> json) {
+    try {
     return ItemAccount(
       id: json['id'] as String,
       name: json['name'] as String,
+      color: json['color'] ?? '#000',
       description: json['description'] as String?,
       balance: (json['balance'] as num).toDouble(),
       createdAt: DateTime.parse(json['createdAt'] as String),
@@ -33,5 +37,8 @@ class ItemAccount {
       updatedBy: json['updatedBy'] as String?,
       isActive: json['isActive'] as bool? ?? true,
     );
+    } catch (e) {
+      throw FormatException('Error parsing ItemAccount: $e', json);
+    }
   }
 }

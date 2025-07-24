@@ -17,4 +17,20 @@ class Utils {
   }
 
   static String _padRadix(int value) => value.toRadixString(16).padLeft(2, '0');
+
+  static Color hexStringToColor(String hexString) {
+    // Remove any leading '#' if it exists
+    hexString = hexString.replaceAll("#", "");
+
+    // If the hex string is 6 characters long, assume full opacity (FF)
+    if (hexString.length == 6) {
+      hexString = "FF$hexString";
+    }
+
+    // Parse the hex string to an integer
+    int hexValue = int.parse(hexString, radix: 16);
+
+    // Return a Color object
+    return Color(hexValue);
+  }
 }
