@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:family_financial_app/abstractions/store.dart';
 import 'package:family_financial_app/models/requests/login_request.dart';
+import 'package:family_financial_app/models/requests/save_account.dart';
+import 'package:family_financial_app/models/responses/creation_response.dart';
 import 'package:family_financial_app/models/responses/item_account.dart';
 import 'package:family_financial_app/models/responses/login_response.dart';
 import 'package:family_financial_app/models/responses/paginated.dart';
@@ -82,6 +84,38 @@ class Api {
 
     if (result.hasError) {
       throw Exception('Failed to fetch accounts: ${result.errors?.join(', ')}');
+    }
+
+    return result;
+  }
+
+  Future<Response<CreationResponse>> saveAccount({required String userId, required SaveAccount payload}) async {
+    final url = Uri.parse('$baseUrl/api/users/$userId/accounts');
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        if (accessToken.isNotEmpty) 'Authorization': 'Bearer $accessToken',
+      },
+      body: jsonEncode(payload.toJson()),
+    );
+
+    if (response.statusCode != 201) {
+      final body = Response.fromJson(
+        jsonDecode(response.body),
+        (data) => data,
+      );
+      throw Exception(body.message ?? 'Failed to save account');
+    }
+
+    final result = Response<CreationResponse>.fromJson(
+      jsonDecode(response.body),
+      (data) => CreationResponse.fromJson(data),
+    );
+
+    if (result.hasError) {
+      throw Exception('Failed to save account: ${result.errors?.join(', ')}');
     }
 
     return result;

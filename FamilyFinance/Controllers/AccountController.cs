@@ -42,7 +42,7 @@ public class AccountController(AccountService service) : BaseController
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
         var account = await _service.CreateAsync(userId, request, CurrentUser.Id);
-        return Ok(account, "Account created successfully");
+        return Created(account, "Account created successfully");
     }
 
     [HttpPut]

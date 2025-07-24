@@ -1,7 +1,12 @@
+import 'package:family_financial_app/abstractions/store.dart';
+import 'package:family_financial_app/models/requests/save_account.dart';
+import 'package:family_financial_app/plugins/api.dart';
 import 'package:family_financial_app/plugins/size_util.dart';
 import 'package:family_financial_app/plugins/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:loader_overlay/loader_overlay.dart';
+import 'package:provider/provider.dart';
 
 class AccountsDetailPage extends StatefulWidget {
   final bool isNew;
@@ -26,6 +31,8 @@ class _AccountsDetailPageState extends State<AccountsDetailPage> {
   @override
   Widget build(BuildContext context) {
     final sizeUtil = SizeUtil(context);
+    final messager = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.isNew ? 'New Account' : 'Account Detail'),
@@ -84,16 +91,34 @@ class _AccountsDetailPageState extends State<AccountsDetailPage> {
                     minimumSize: Size(double.infinity, 48),
                   ),
                   onPressed: () {
+                    final loaderOverlay = context.loaderOverlay;
                     if (_formKey.currentState!.validate()) {
-                      // Handle save logic here
-                      debugPrint('Account Name: ${_accountName.value}');
-                      debugPrint('Description: ${_description.value}');
-                      debugPrint('Color: ${_color.value}');
-                      // Navigate back or show success message
+                      loaderOverlay.show();
+                      save(context)
+                          .then((_) {
+                            messager.showSnackBar(
+                              SnackBar(
+                                content: Text('Account saved successfully!'),
+                                backgroundColor: Colors.green.shade400,
+                              ),
+                            );
+
+                            navigator.pop();
+                          })
+                          .catchError((error) {
+                            messager.showSnackBar(
+                              SnackBar(
+                                content: Text('Error saving account: $error'),
+                                backgroundColor: Colors.red.shade400,
+                              ),
+                            );
+                          })
+                          .whenComplete(() => loaderOverlay.hide());
+
                       return;
                     }
 
-                    ScaffoldMessenger.of(context).showSnackBar(
+                    messager.showSnackBar(
                       SnackBar(
                         content: Text('Please fill in all fields'),
                         backgroundColor: Colors.red.shade400,
@@ -109,6 +134,17 @@ class _AccountsDetailPageState extends State<AccountsDetailPage> {
         ),
       ),
     );
+  }
+
+  Future<void> save(BuildContext context) async {
+    final api = Api(context);
+    final store = context.read<Store>();
+    final payload = SaveAccount(
+      name: _accountName.value,
+      description: _description.value,
+      color: _color.value,
+    );
+    await api.saveAccount(userId: store.getUser()?.userId ?? '', payload: payload);
   }
 
   void changeColor(Color color) {
