@@ -1,4 +1,6 @@
 import 'package:family_financial_app/abstractions/store.dart';
+import 'package:family_financial_app/components/bottom_menu.dart';
+import 'package:family_financial_app/components/row_action.dart';
 import 'package:family_financial_app/pages/accounts_detail_page.dart';
 import 'package:family_financial_app/plugins/api.dart';
 import 'package:family_financial_app/models/mypage.dart';
@@ -52,6 +54,36 @@ class AccountsPage extends MyPage {
       rows.addAll(
         accounts.value.map((account) {
           return DataRow(
+            onLongPress: () => showModalBottomSheet(
+              context: context,
+              builder: (context) {
+                return BottomMenu(
+                  items: [
+                    RowAction(
+                      icon: Icon(Icons.cancel, color: Colors.grey),
+                      label: 'Cancel',
+                      onPressed: () {
+                        // Handle cancel action
+                      },
+                    ),
+                    RowAction(
+                      icon: Icon(Icons.edit),
+                      label: 'Edit',
+                      onPressed: () {
+                        // Handle edit action
+                      },
+                    ),
+                    RowAction(
+                      icon: Icon(Icons.delete, color: Colors.red.shade300),
+                      label: 'Delete',
+                      onPressed: () {
+                        // Handle delete action
+                      },
+                    ),
+                  ],
+                ); // Placeholder for context menu
+              },
+            ),
             cells: [
               DataCell(Text(account.name)),
               DataCell(Text(account.description ?? '')),
@@ -129,9 +161,12 @@ class AccountsPage extends MyPage {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => AccountsDetailPage(isNew: true, onClosed:() {
-              loadTable();
-            }),
+            builder: (context) => AccountsDetailPage(
+              isNew: true,
+              onClosed: () {
+                loadTable();
+              },
+            ),
           ),
         );
       },
