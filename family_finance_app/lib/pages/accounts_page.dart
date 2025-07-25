@@ -15,36 +15,27 @@ class AccountsPage extends MyPage {
   final Store store;
   final ScaffoldMessengerState messenger;
 
-  final ValueNotifier<List<ItemAccount>> accounts =
-      ValueNotifier<List<ItemAccount>>([]);
-  final ValueNotifier<int> totalCount = ValueNotifier<int>(0);
-  final ValueNotifier<int> pageSize = ValueNotifier<int>(10);
-  final ValueNotifier<int> page = ValueNotifier<int>(1);
-  final ValueNotifier<bool> isLoading = ValueNotifier<bool>(false);
-  final ValueNotifier<bool> isError = ValueNotifier<bool>(false);
+  final accounts = ValueNotifier<List<ItemAccount>>([]);
+  final totalCount = ValueNotifier<int>(0);
+  final pageSize = ValueNotifier<int>(10);
+  final page = ValueNotifier<int>(1);
+  final isLoading = ValueNotifier<bool>(false);
+  final isError = ValueNotifier<bool>(false);
+
+  static const headerStyle = TextStyle(fontWeight: FontWeight.bold);
 
   final List<DataColumn> columns = const [
+    DataColumn(label: Text('Name', style: headerStyle)),
+    DataColumn(label: Text('Description', style: headerStyle)),
+    DataColumn(label: Text('Color', style: headerStyle)),
     DataColumn(
-      label: Text('Name', style: TextStyle(fontWeight: FontWeight.bold)),
+      label: Text('Balance', style: headerStyle),
+      headingRowAlignment: MainAxisAlignment.end,
     ),
+    DataColumn(label: Text('Created At', style: headerStyle)),
+    DataColumn(label: Text('Updated At', style: headerStyle)),
     DataColumn(
-      label: Text('Description', style: TextStyle(fontWeight: FontWeight.bold)),
-    ),
-    DataColumn(
-      label: Text('Color', style: TextStyle(fontWeight: FontWeight.bold)),
-    ),
-    DataColumn(
-      label: Text('Balance', style: TextStyle(fontWeight: FontWeight.bold)),
-      headingRowAlignment: MainAxisAlignment.end
-    ),
-    DataColumn(
-      label: Text('Created At', style: TextStyle(fontWeight: FontWeight.bold)),
-    ),
-    DataColumn(
-      label: Text('Updated At', style: TextStyle(fontWeight: FontWeight.bold)),
-    ),
-    DataColumn(
-      label: Text('Actions', style: TextStyle(fontWeight: FontWeight.bold)),
+      label: Text('Actions', style: headerStyle),
       headingRowAlignment: MainAxisAlignment.center,
     ),
   ];
@@ -64,8 +55,20 @@ class AccountsPage extends MyPage {
             cells: [
               DataCell(Text(account.name)),
               DataCell(Text(account.description ?? '')),
-              DataCell(Container(color: Utils.hexStringToColor(account.color))),
-              DataCell(Align(alignment: Alignment.centerRight,child: Text(account.balance.toString()),)),
+              DataCell(
+                Center(
+                  child: Icon(
+                    Icons.circle,
+                    color: Utils.hexStringToColor(account.color),
+                  ),
+                ),
+              ),
+              DataCell(
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Text(account.balance.toString()),
+                ),
+              ),
               DataCell(Text(account.createdAt.toString())),
               DataCell(Text(account.updatedAt.toString())),
               DataCell(
