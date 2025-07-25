@@ -40,7 +40,7 @@ class AccountsPage extends MyPage {
     ),
   ];
 
-  List<DataRow> rows = [];
+  final List<DataRow> rows = [];
 
   AccountsPage(BuildContext context)
     : store = context.read<Store>(),
@@ -103,7 +103,11 @@ class AccountsPage extends MyPage {
         children: <Widget>[
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            child: DataTable(columns: columns, rows: rows),
+            child: DataTable(
+              headingRowColor: WidgetStateProperty.all(Colors.grey.shade200),
+              columns: columns,
+              rows: rows,
+            ),
           ),
         ],
       ),
@@ -125,7 +129,9 @@ class AccountsPage extends MyPage {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => AccountsDetailPage(isNew: true),
+            builder: (context) => AccountsDetailPage(isNew: true, onClosed:() {
+              loadTable();
+            }),
           ),
         );
       },

@@ -5,7 +5,9 @@ import 'package:family_financial_app/pages/accounts_page.dart';
 // import 'package:family_financial_app/pages/categories_page.dart';
 // import 'package:family_financial_app/pages/overview_page.dart';
 import 'package:family_financial_app/pages/transactions_page.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class App extends StatefulWidget {
   static const currentKey = 'Homepage';
@@ -21,11 +23,9 @@ class _AppState extends State<App> {
   List<ListTile> drawerWidgets = [];
   List<DrawerItem> drawerItems = [];
 
-  final ValueNotifier<String> _currentPageRoute = ValueNotifier<String>(
-    'accounts',
-  );
-  final ValueNotifier<DrawerItem?> _currentMenu = ValueNotifier<DrawerItem?>(null);
-  final ValueNotifier<MyPage?> _currentPage = ValueNotifier<MyPage?>(null);
+  final _currentPageRoute = ValueNotifier<String>('accounts');
+  final _currentMenu = ValueNotifier<DrawerItem?>(null);
+  final _currentPage = ValueNotifier<MyPage?>(null);
 
   _AppState() {
     // Initialize any necessary data or state here
@@ -106,7 +106,18 @@ class _AppState extends State<App> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    if (kIsWeb) {
+      BrowserContextMenu.disableContextMenu();
+    }
+  }
+
+  @override
   void dispose() {
+    if (kIsWeb) {
+      BrowserContextMenu.enableContextMenu();
+    }
     _currentPageRoute.dispose();
     _currentMenu.dispose();
     _currentPage.dispose();

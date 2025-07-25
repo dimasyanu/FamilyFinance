@@ -10,8 +10,9 @@ import 'package:provider/provider.dart';
 
 class AccountsDetailPage extends StatefulWidget {
   final bool isNew;
+  final VoidCallback? onClosed;
 
-  const AccountsDetailPage({this.isNew = false, super.key});
+  const AccountsDetailPage({this.isNew = false, this.onClosed, super.key});
 
   @override
   State<AccountsDetailPage> createState() => _AccountsDetailPageState();
@@ -104,6 +105,7 @@ class _AccountsDetailPageState extends State<AccountsDetailPage> {
                             );
 
                             navigator.pop();
+                            onClosed();
                           })
                           .catchError((error) {
                             messager.showSnackBar(
@@ -144,6 +146,7 @@ class _AccountsDetailPageState extends State<AccountsDetailPage> {
       description: _description.value,
       color: _color.value,
     );
+
     await api.saveAccount(userId: store.getUser()?.userId ?? '', payload: payload);
   }
 
@@ -188,6 +191,11 @@ class _AccountsDetailPageState extends State<AccountsDetailPage> {
         );
       },
     );
+  }
+
+  void onClosed() {
+    if (widget.onClosed == null) return;
+    widget.onClosed!.call();
   }
 
   @override

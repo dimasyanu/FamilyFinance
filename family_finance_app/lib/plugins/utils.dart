@@ -1,5 +1,7 @@
 import 'dart:ui';
 
+import 'package:flutter/material.dart';
+
 class Utils {
   static String colorToHex(
     Color color, {
@@ -19,6 +21,11 @@ class Utils {
   static String _padRadix(int value) => value.toRadixString(16).padLeft(2, '0');
 
   static Color hexStringToColor(String hexString) {
+
+    if (hexString.isEmpty) {
+      return Colors.grey; // Return transparent color for empty string
+    }
+
     // Remove any leading '#' if it exists
     hexString = hexString.replaceAll("#", "");
 
