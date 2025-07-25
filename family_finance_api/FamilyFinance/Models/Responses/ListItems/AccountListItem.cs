@@ -6,6 +6,7 @@ public class AccountListItem
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
+    public string Color { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public decimal Balance { get; set; }
     public DateTime CreatedAt { get; set; }
@@ -22,12 +23,13 @@ public class AccountListItem
     {
         Id = account.Id;
         Name = account.Name;
+        Color = account.Color;
         Description = account.Description;
         Balance = account.Balance;
         CreatedAt = account.CreatedAt;
         CreatedBy = account.CreatedBy;
         UpdatedAt = account.UpdatedAt;
         UpdatedBy = account.UpdatedBy;
-        IsActive = account.DeletedAt != null;
+        IsActive = account.DeletedAt == null;
     }
 }

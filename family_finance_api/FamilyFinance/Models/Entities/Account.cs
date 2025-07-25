@@ -14,6 +14,10 @@ public class Account : BaseModel
     [MaxLength(256)]
     public string Description { get; set; } = string.Empty;
 
+    [Column("color")]
+    [MaxLength(7)]
+    public string Color { get; set; } = string.Empty;
+
     [Column("balance")]
     public decimal Balance { get; set; }
 

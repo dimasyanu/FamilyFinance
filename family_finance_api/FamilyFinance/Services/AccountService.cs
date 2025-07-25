@@ -69,6 +69,7 @@ public class AccountService(AppDbContext dbContext) : BaseService(dbContext)
         var now = DateTime.Now;
         var account = new Account {
             Name = request.Name,
+            Color = request.Color,
             Description = request.Description,
             UserId = userId,
             CreatedAt = now,
