@@ -120,4 +120,26 @@ class Api {
 
     return result;
   }
+
+  Future<Response<void>> deleteAccount({required String userId, required String accountId}) async {
+    final url = Uri.parse('$baseUrl/api/users/$userId/accounts/$accountId');
+
+    final response = await http.delete(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        if (accessToken.isNotEmpty) 'Authorization': 'Bearer $accessToken',
+      },
+    );
+
+    if (response.statusCode != 200) {
+      final body = Response.fromJson(
+        jsonDecode(response.body),
+        (data) => data,
+      );
+      throw Exception(body.message ?? 'Failed to delete account');
+    }
+
+    return Response<void>(success: true);
+  }
 }

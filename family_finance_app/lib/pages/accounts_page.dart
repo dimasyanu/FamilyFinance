@@ -36,10 +36,6 @@ class AccountsPage extends MyPage {
     ),
     DataColumn(label: Text('Created At', style: headerStyle)),
     DataColumn(label: Text('Updated At', style: headerStyle)),
-    DataColumn(
-      label: Text('Actions', style: headerStyle),
-      headingRowAlignment: MainAxisAlignment.center,
-    ),
   ];
 
   final List<DataRow> rows = [];
@@ -49,6 +45,7 @@ class AccountsPage extends MyPage {
       api = Api(context),
       messenger = ScaffoldMessenger.of(context),
       super(route: 'AccountsPage', title: 'Accounts') {
+    final navigator = Navigator.of(context);
     accounts.addListener(() {
       rows.clear();
       rows.addAll(
@@ -56,14 +53,16 @@ class AccountsPage extends MyPage {
           return DataRow(
             onLongPress: () => showModalBottomSheet(
               context: context,
+              isScrollControlled: true,
               builder: (context) {
                 return BottomMenu(
-                  items: [
+                  itemDetail: itemDetail(context, account),
+                  actions: [
                     RowAction(
-                      icon: Icon(Icons.cancel, color: Colors.grey),
+                      icon: Icon(Icons.close, color: Colors.grey),
                       label: 'Cancel',
                       onPressed: () {
-                        // Handle cancel action
+                        navigator.pop(); // Close the bottom sheet
                       },
                     ),
                     RowAction(
@@ -77,7 +76,7 @@ class AccountsPage extends MyPage {
                       icon: Icon(Icons.delete, color: Colors.red.shade300),
                       label: 'Delete',
                       onPressed: () {
-                        // Handle delete action
+                        showDeleteConfirmationDialog(context, account);
                       },
                     ),
                   ],
@@ -103,29 +102,83 @@ class AccountsPage extends MyPage {
               ),
               DataCell(Text(account.createdAt.toString())),
               DataCell(Text(account.updatedAt.toString())),
-              DataCell(
-                Row(
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.edit),
-                      onPressed: () {
-                        // Handle edit action
-                      },
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.delete),
-                      onPressed: () {
-                        // Handle delete action
-                      },
-                    ),
-                  ],
-                ),
-              ),
             ],
           );
         }).toList(),
       );
     });
+  }
+
+  Widget itemDetail(BuildContext context, ItemAccount account) {
+    return Column(
+      children: [
+        Center(child:
+          Text(account.name, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+        ),
+        Text(account.description ?? ''),
+        Padding(padding: EdgeInsets.fromLTRB(16, 8, 16, 8), child:
+          Text('Balance: ${account.balance}', style: TextStyle(fontSize: 16)),
+        ),
+        Text('Created: ${account.createdAt}'),
+        Text('Updated: ${account.updatedAt}'),
+      ],
+    );
+  }
+
+  void showDeleteConfirmationDialog(BuildContext context, ItemAccount account) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        final navigator = Navigator.of(context);
+        return AlertDialog(
+          title: Text('Delete Account'),
+          content: Text('Are you sure you want to delete this account?\n${account.name}'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                navigator.pop();
+              },
+            ),
+            TextButton(
+              child: Text('Delete'),
+              onPressed: () {
+                api.deleteAccount(
+                  userId: store.getUser()?.userId ?? '',
+                  accountId: account.id,
+                ).then((response) {
+                  if (response.success) {
+                    messenger.showSnackBar(
+                      SnackBar(
+                        content: Text('Account deleted successfully'),
+                        backgroundColor: Colors.green.shade400,
+                      ),
+                    );
+                    navigator.pop(); // Close the dialog
+                    loadTable(); // Refresh the table after deletion
+                  } else {
+                    messenger.showSnackBar(
+                      SnackBar(
+                        content: Text('Failed to delete account'),
+                        backgroundColor: Colors.red.shade400,
+                      ),
+                    );
+                  }
+                }).catchError((error) {
+                  messenger.showSnackBar(
+                    SnackBar(
+                      content: Text('Failed to delete account'),
+                      backgroundColor: Colors.red.shade400,
+                    ),
+                  );
+                });
+                navigator.pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override

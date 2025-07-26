@@ -9,9 +9,9 @@ public class AccountListItem
     public string Color { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public decimal Balance { get; set; }
-    public DateTime CreatedAt { get; set; }
+    public String CreatedAt { get; set; }
     public Guid CreatedBy { get; set; }
-    public DateTime? UpdatedAt { get; set; }
+    public String? UpdatedAt { get; set; }
     public Guid? UpdatedBy { get; set; }
     public bool IsActive { get; set; }
 
@@ -26,9 +26,9 @@ public class AccountListItem
         Color = account.Color;
         Description = account.Description;
         Balance = account.Balance;
-        CreatedAt = account.CreatedAt;
+        CreatedAt = account.CreatedAt.ToString("dd-MMM-yyyy HH:mm");
         CreatedBy = account.CreatedBy;
-        UpdatedAt = account.UpdatedAt;
+        UpdatedAt = account.UpdatedAt.ToString("dd-MMM-yyyy HH:mm");
         UpdatedBy = account.UpdatedBy;
         IsActive = account.DeletedAt == null;
     }
