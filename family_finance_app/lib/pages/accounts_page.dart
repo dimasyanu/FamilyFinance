@@ -1,5 +1,5 @@
 import 'package:family_financial_app/abstractions/store.dart';
-import 'package:family_financial_app/components/bottom_menu.dart';
+import 'package:family_financial_app/components/bottom_action_menu.dart';
 import 'package:family_financial_app/components/row_action.dart';
 import 'package:family_financial_app/pages/accounts_detail_page.dart';
 import 'package:family_financial_app/plugins/api.dart';
@@ -53,9 +53,8 @@ class AccountsPage extends MyPage {
           return DataRow(
             onLongPress: () => showModalBottomSheet(
               context: context,
-              isScrollControlled: true,
               builder: (context) {
-                return BottomMenu(
+                return BottomActionMenu(
                   itemDetail: itemDetail(context, account),
                   actions: [
                     RowAction(
@@ -68,6 +67,7 @@ class AccountsPage extends MyPage {
                     RowAction(
                       icon: Icon(Icons.edit),
                       label: 'Edit',
+                      backgroundColor: Colors.blue.shade50,
                       onPressed: () {
                         // Handle edit action
                       },
@@ -75,6 +75,7 @@ class AccountsPage extends MyPage {
                     RowAction(
                       icon: Icon(Icons.delete, color: Colors.red.shade300),
                       label: 'Delete',
+                      backgroundColor: Colors.red.shade50,
                       onPressed: () {
                         showDeleteConfirmationDialog(context, account);
                       },
@@ -112,12 +113,19 @@ class AccountsPage extends MyPage {
   Widget itemDetail(BuildContext context, ItemAccount account) {
     return Column(
       children: [
-        Center(child:
-          Text(account.name, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+        Center(
+          child: Text(
+            account.name,
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
         ),
         Text(account.description ?? ''),
-        Padding(padding: EdgeInsets.fromLTRB(16, 8, 16, 8), child:
-          Text('Balance: ${account.balance}', style: TextStyle(fontSize: 16)),
+        Padding(
+          padding: EdgeInsets.fromLTRB(16, 8, 16, 8),
+          child: Text(
+            'Balance: ${account.balance}',
+            style: TextStyle(fontSize: 16),
+          ),
         ),
         Text('Created: ${account.createdAt}'),
         Text('Updated: ${account.updatedAt}'),
@@ -132,7 +140,9 @@ class AccountsPage extends MyPage {
         final navigator = Navigator.of(context);
         return AlertDialog(
           title: Text('Delete Account'),
-          content: Text('Are you sure you want to delete this account?\n${account.name}'),
+          content: Text(
+            'Are you sure you want to delete this account?\n${account.name}',
+          ),
           actions: <Widget>[
             TextButton(
               child: Text('Cancel'),
@@ -143,35 +153,38 @@ class AccountsPage extends MyPage {
             TextButton(
               child: Text('Delete'),
               onPressed: () {
-                api.deleteAccount(
-                  userId: store.getUser()?.userId ?? '',
-                  accountId: account.id,
-                ).then((response) {
-                  if (response.success) {
-                    messenger.showSnackBar(
-                      SnackBar(
-                        content: Text('Account deleted successfully'),
-                        backgroundColor: Colors.green.shade400,
-                      ),
-                    );
-                    navigator.pop(); // Close the dialog
-                    loadTable(); // Refresh the table after deletion
-                  } else {
-                    messenger.showSnackBar(
-                      SnackBar(
-                        content: Text('Failed to delete account'),
-                        backgroundColor: Colors.red.shade400,
-                      ),
-                    );
-                  }
-                }).catchError((error) {
-                  messenger.showSnackBar(
-                    SnackBar(
-                      content: Text('Failed to delete account'),
-                      backgroundColor: Colors.red.shade400,
-                    ),
-                  );
-                });
+                api
+                    .deleteAccount(
+                      userId: store.getUser()?.userId ?? '',
+                      accountId: account.id,
+                    )
+                    .then((response) {
+                      if (response.success) {
+                        messenger.showSnackBar(
+                          SnackBar(
+                            content: Text('Account deleted successfully'),
+                            backgroundColor: Colors.green.shade400,
+                          ),
+                        );
+                        navigator.pop(); // Close the dialog
+                        loadTable(); // Refresh the table after deletion
+                      } else {
+                        messenger.showSnackBar(
+                          SnackBar(
+                            content: Text('Failed to delete account'),
+                            backgroundColor: Colors.red.shade400,
+                          ),
+                        );
+                      }
+                    })
+                    .catchError((error) {
+                      messenger.showSnackBar(
+                        SnackBar(
+                          content: Text('Failed to delete account'),
+                          backgroundColor: Colors.red.shade400,
+                        ),
+                      );
+                    });
                 navigator.pop();
               },
             ),
