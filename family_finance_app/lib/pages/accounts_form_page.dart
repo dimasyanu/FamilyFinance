@@ -8,17 +8,18 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
 
-class AccountsDetailPage extends StatefulWidget {
-  final bool isNew;
+class AccountsFormPage extends StatefulWidget {
+  final String? itemId;
   final VoidCallback? onClosed;
+  get isNew => itemId == null || itemId!.isEmpty;
 
-  const AccountsDetailPage({this.isNew = false, this.onClosed, super.key});
+  const AccountsFormPage({this.itemId, this.onClosed, super.key});
 
   @override
-  State<AccountsDetailPage> createState() => _AccountsDetailPageState();
+  State<AccountsFormPage> createState() => _AccountsFormPageState();
 }
 
-class _AccountsDetailPageState extends State<AccountsDetailPage> {
+class _AccountsFormPageState extends State<AccountsFormPage> {
   Color pickerColor = Color(0xff443a49);
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -28,6 +29,39 @@ class _AccountsDetailPageState extends State<AccountsDetailPage> {
   final ValueNotifier<String> _color = ValueNotifier<String>('');
 
   final TextEditingController _colorController = TextEditingController();
+
+  @override
+  void loadAccountData(BuildContext context) {
+    final api = Api(context);
+    final store = context.read<Store>();
+    final loaderOverlay = context.loaderOverlay;
+    final messager = ScaffoldMessenger.of(context);
+    loaderOverlay.show();
+    api
+        .getAccountById(
+          userId: store.getUser()?.userId ?? '',
+          accountId: widget.itemId!,
+        )
+        .then((response) {
+          if (response.hasError) {
+            throw Exception('Failed to load account: ${response.message}');
+          }
+          _accountName.value = response.data?.name ?? '';
+          _description.value = response.data?.description ?? '';
+          _color.value = response.data?.color ?? '';
+          pickerColor = Utils.hexStringToColor(_color.value);
+          _colorController.text = _color.value;
+        })
+        .catchError((error) {
+          messager.showSnackBar(
+            SnackBar(
+              content: Text('Error loading account: $error'),
+              backgroundColor: Colors.red.shade400,
+            ),
+          );
+        })
+        .whenComplete(() => loaderOverlay.hide());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -147,7 +181,10 @@ class _AccountsDetailPageState extends State<AccountsDetailPage> {
       color: _color.value,
     );
 
-    await api.saveAccount(userId: store.getUser()?.userId ?? '', payload: payload);
+    await api.saveAccount(
+      userId: store.getUser()?.userId ?? '',
+      payload: payload,
+    );
   }
 
   void changeColor(Color color) {

@@ -1,7 +1,7 @@
 import 'package:family_financial_app/abstractions/store.dart';
 import 'package:family_financial_app/components/bottom_action_menu.dart';
 import 'package:family_financial_app/components/row_action.dart';
-import 'package:family_financial_app/pages/accounts_detail_page.dart';
+import 'package:family_financial_app/pages/accounts_form_page.dart';
 import 'package:family_financial_app/plugins/api.dart';
 import 'package:family_financial_app/models/mypage.dart';
 import 'package:family_financial_app/models/responses/item_account.dart';
@@ -70,6 +70,17 @@ class AccountsPage extends MyPage {
                       backgroundColor: Colors.blue.shade50,
                       onPressed: () {
                         // Handle edit action
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AccountsFormPage(
+                              itemId: account.id,
+                              onClosed: () {
+                                loadTable();
+                              },
+                            ),
+                          ),
+                        );
                       },
                     ),
                     RowAction(
@@ -227,8 +238,7 @@ class AccountsPage extends MyPage {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => AccountsDetailPage(
-              isNew: true,
+            builder: (context) => AccountsFormPage(
               onClosed: () {
                 loadTable();
               },

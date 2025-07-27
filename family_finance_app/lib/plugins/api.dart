@@ -4,6 +4,7 @@ import 'package:family_financial_app/abstractions/store.dart';
 import 'package:family_financial_app/models/requests/login_request.dart';
 import 'package:family_financial_app/models/requests/save_account.dart';
 import 'package:family_financial_app/models/responses/creation_response.dart';
+import 'package:family_financial_app/models/responses/dto_account.dart';
 import 'package:family_financial_app/models/responses/item_account.dart';
 import 'package:family_financial_app/models/responses/login_response.dart';
 import 'package:family_financial_app/models/responses/paginated.dart';
@@ -18,9 +19,13 @@ class Api {
   final BuildContext? context;
   final String accessToken; // You can set this from your authentication flow
 
-  Api(this.context) : accessToken = context?.read<Store>().getUser()?.accessToken ?? '';
+  Api(this.context)
+    : accessToken = context?.read<Store>().getUser()?.accessToken ?? '';
 
-  Future<Response<LoginResponse>> login(String username, String password) async {
+  Future<Response<LoginResponse>> login(
+    String username,
+    String password,
+  ) async {
     final url = Uri.parse('$baseUrl/api/auth/login');
     final requestBody = LoginRequest(username, password);
 
@@ -31,10 +36,7 @@ class Api {
     );
 
     if (response.statusCode != 200) {
-      final body = Response.fromJson(
-        jsonDecode(response.body),
-        (data) => data,
-      );
+      final body = Response.fromJson(jsonDecode(response.body), (data) => data);
       throw Exception(body.message ?? 'Login failed');
     }
 
@@ -59,25 +61,29 @@ class Api {
     int page = 1,
     int pageSize = 25,
   }) async {
-    final url = Uri.parse('$baseUrl/api/users/$userId/accounts?page=$page&pageSize=$pageSize');
+    final url = Uri.parse(
+      '$baseUrl/api/users/$userId/accounts?page=$page&pageSize=$pageSize',
+    );
 
-    final response = await http.get(url, headers: {
-      'Content-Type': 'application/json',
-      if (accessToken.isNotEmpty) 'Authorization': 'Bearer $accessToken',
-    });
+    final response = await http.get(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        if (accessToken.isNotEmpty) 'Authorization': 'Bearer $accessToken',
+      },
+    );
 
     if (response.statusCode != 200) {
-      final body = Response.fromJson(
-        jsonDecode(response.body),
-        (data) => data,
-      );
+      final body = Response.fromJson(jsonDecode(response.body), (data) => data);
       throw Exception(body.message ?? 'Failed to fetch accounts');
     }
 
     final body = jsonDecode(response.body) as Map<String, dynamic>;
 
-    final result = Response<Paginated<ItemAccount>>.fromJson(body,
-      (data) => Paginated<ItemAccount>.fromJson(data,
+    final result = Response<Paginated<ItemAccount>>.fromJson(
+      body,
+      (data) => Paginated<ItemAccount>.fromJson(
+        data,
         (item) => ItemAccount.fromJson(item),
       ),
     );
@@ -89,7 +95,41 @@ class Api {
     return result;
   }
 
-  Future<Response<CreationResponse>> saveAccount({required String userId, required SaveAccount payload}) async {
+  Future<Response<DtoAccount>> getAccountById({
+    required String userId,
+    required String accountId,
+  }) async {
+    final url = Uri.parse('$baseUrl/api/users/$userId/accounts/$accountId');
+
+    final response = await http.get(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        if (accessToken.isNotEmpty) 'Authorization': 'Bearer $accessToken',
+      },
+    );
+
+    if (response.statusCode != 200) {
+      final body = Response.fromJson(jsonDecode(response.body), (data) => data);
+      throw Exception(body.message ?? 'Failed to fetch account');
+    }
+
+    final result = Response<DtoAccount>.fromJson(
+      jsonDecode(response.body),
+      (data) => DtoAccount.fromJson(data),
+    );
+
+    if (result.hasError) {
+      throw Exception('Failed to fetch account: ${result.errors?.join(', ')}');
+    }
+
+    return result;
+  }
+
+  Future<Response<CreationResponse>> saveAccount({
+    required String userId,
+    required SaveAccount payload,
+  }) async {
     final url = Uri.parse('$baseUrl/api/users/$userId/accounts');
 
     final response = await http.post(
@@ -102,10 +142,7 @@ class Api {
     );
 
     if (response.statusCode != 201) {
-      final body = Response.fromJson(
-        jsonDecode(response.body),
-        (data) => data,
-      );
+      final body = Response.fromJson(jsonDecode(response.body), (data) => data);
       throw Exception(body.message ?? 'Failed to save account');
     }
 
@@ -121,7 +158,10 @@ class Api {
     return result;
   }
 
-  Future<Response<void>> deleteAccount({required String userId, required String accountId}) async {
+  Future<Response<void>> deleteAccount({
+    required String userId,
+    required String accountId,
+  }) async {
     final url = Uri.parse('$baseUrl/api/users/$userId/accounts/$accountId');
 
     final response = await http.delete(
@@ -133,10 +173,7 @@ class Api {
     );
 
     if (response.statusCode != 200) {
-      final body = Response.fromJson(
-        jsonDecode(response.body),
-        (data) => data,
-      );
+      final body = Response.fromJson(jsonDecode(response.body), (data) => data);
       throw Exception(body.message ?? 'Failed to delete account');
     }
 
