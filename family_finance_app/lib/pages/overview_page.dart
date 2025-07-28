@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 class OverviewPage extends MyPage {
   ValueNotifier<int> counter = ValueNotifier<int>(0);
 
-  OverviewPage(BuildContext context) : super(route: 'OverviewPage', title: 'Overview');
+  OverviewPage(super.context) : super(route: 'OverviewPage', title: 'Overview');
 
   @override
-  Widget body() {
+  Widget body(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -32,7 +32,7 @@ class OverviewPage extends MyPage {
   }
 
   @override
-  void onMounted() {
+  void onMounted(BuildContext context) {
     // Perform any additional setup or state initialization here
     debugPrint('OverviewPage mounted');
   }

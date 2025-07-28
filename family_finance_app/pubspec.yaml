@@ -41,6 +41,7 @@ dependencies:
   loader_overlay: ^5.0.0
   localstorage: ^6.0.0
   flutter_colorpicker: ^1.1.0
+  pull_to_refresh_flutter3: ^2.0.2
 
 dev_dependencies:
   flutter_test:

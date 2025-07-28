@@ -6,13 +6,13 @@ abstract class MyPage {
   final String title;
   late void Function(VoidCallback) _setState;
 
-  MyPage({required this.route, required this.title}) {
+  MyPage(BuildContext context, {required this.route, required this.title}) {
     appBar = AppBar(title: Text(title));
-    onMounted();
+    onMounted(context);
   }
 
-  Widget body();
-  void onMounted();
+  Widget body(BuildContext context);
+  void onMounted(BuildContext context);
   FloatingActionButton? floatingActionButton(BuildContext context) => null;
   void dispose() {}
 

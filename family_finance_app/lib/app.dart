@@ -1,7 +1,7 @@
 import 'package:family_financial_app/models/drawer_item.dart';
 import 'package:family_financial_app/drawer.dart';
 import 'package:family_financial_app/models/mypage.dart';
-import 'package:family_financial_app/pages/accounts_page.dart';
+import 'package:family_financial_app/pages/account_page/accounts_page.dart';
 // import 'package:family_financial_app/pages/categories_page.dart';
 // import 'package:family_financial_app/pages/overview_page.dart';
 import 'package:family_financial_app/pages/transactions_page.dart';
@@ -32,10 +32,10 @@ class _AppState extends State<App> {
 
     drawerItems = <DrawerItem>[
       // DrawerItem(
-        // alias: 'overview',
-        // title: 'Overview',
-        // icon: Icons.dashboard,
-        // initPage: () => OverviewPage(context),
+      // alias: 'overview',
+      // title: 'Overview',
+      // icon: Icons.dashboard,
+      // initPage: () => OverviewPage(context),
       // ),
       DrawerItem(
         route: 'transactions',
@@ -50,10 +50,10 @@ class _AppState extends State<App> {
         page: () => AccountsPage(context),
       ),
       // DrawerItem(
-        // alias: 'categories',
-        // title: 'Categories',
-        // icon: Icons.category,
-        // initPage: () => CategoriesPage(context),
+      // alias: 'categories',
+      // title: 'Categories',
+      // icon: Icons.category,
+      // initPage: () => CategoriesPage(context),
       // ),
     ];
 
@@ -75,7 +75,9 @@ class _AppState extends State<App> {
 
   @override
   Widget build(BuildContext context) {
-    if (_currentMenu.value == null) setPageState(); // Ensure the current menu is set
+    if (_currentMenu.value == null) {
+      setPageState(); // Ensure the current menu is set
+    }
     return Scaffold(
       appBar: AppBar(
         title: ValueListenableBuilder(
@@ -88,7 +90,7 @@ class _AppState extends State<App> {
       body: ValueListenableBuilder(
         valueListenable: _currentPage,
         builder: (context, value, child) {
-          return value?.body() ?? Center(child: Text('Not found'));
+          return value?.body(context) ?? Center(child: Text('Not found'));
         },
       ),
       floatingActionButton: ValueListenableBuilder(

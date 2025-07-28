@@ -2,10 +2,11 @@ import 'package:family_financial_app/models/mypage.dart';
 import 'package:flutter/material.dart';
 
 class CategoriesPage extends MyPage {
-  CategoriesPage(BuildContext context) : super(route: 'CategoriesPage', title: 'Categories');
+  CategoriesPage(super.context)
+    : super(route: 'CategoriesPage', title: 'Categories');
 
   @override
-  Widget body() {
+  Widget body(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -23,7 +24,7 @@ class CategoriesPage extends MyPage {
   }
 
   @override
-  void onMounted() {
+  void onMounted(BuildContext context) {
     // Perform any additional setup or state initialization here
     debugPrint('CategoriesPage mounted');
   }

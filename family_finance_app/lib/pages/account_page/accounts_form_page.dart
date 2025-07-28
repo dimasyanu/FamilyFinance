@@ -31,6 +31,16 @@ class _AccountsFormPageState extends State<AccountsFormPage> {
   final TextEditingController _colorController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.isNew) {
+      _color.value = '#000000'; // Default color for new accounts
+      pickerColor = Utils.hexStringToColor(_color.value);
+    } else {
+      loadAccountData(context);
+    }
+  }
+
   void loadAccountData(BuildContext context) {
     final api = Api(context);
     final store = context.read<Store>();
