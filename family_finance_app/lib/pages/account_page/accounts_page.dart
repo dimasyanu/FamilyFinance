@@ -58,7 +58,7 @@ class AccountsPage extends MyPage {
       child: RefreshIndicator(
         key: _refreshKey,
         onRefresh: () async {
-          loadTable(context);
+          // loadTable(context);
         },
         child: SingleChildScrollView(
           scrollDirection: Axis.vertical,
