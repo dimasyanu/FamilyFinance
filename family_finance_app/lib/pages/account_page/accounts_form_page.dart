@@ -20,57 +20,66 @@ class AccountsFormPage extends StatefulWidget {
 }
 
 class _AccountsFormPageState extends State<AccountsFormPage> {
-  Color pickerColor = Color(0xff443a49);
+  Color pickerColor = Color.fromARGB(255, 255, 255, 255);
 
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormState>();
 
-  final ValueNotifier<String> _accountName = ValueNotifier<String>('');
-  final ValueNotifier<String> _description = ValueNotifier<String>('');
-  final ValueNotifier<String> _color = ValueNotifier<String>('');
+  final _accountName = ValueNotifier<String>('');
+  final _description = ValueNotifier<String>('');
+  final _color = ValueNotifier<String>('');
 
-  final TextEditingController _colorController = TextEditingController();
+  final _colorController = TextEditingController();
+  final _accountNameController = TextEditingController();
+  final _descriptionController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
+
     if (widget.isNew) {
       _color.value = '#000000'; // Default color for new accounts
       pickerColor = Utils.hexStringToColor(_color.value);
     } else {
-      loadAccountData(context);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        loadAccountData(context);
+      });
     }
   }
 
-  void loadAccountData(BuildContext context) {
+  Future<void> loadAccountData(BuildContext context) async {
     final api = Api(context);
     final store = context.read<Store>();
     final loaderOverlay = context.loaderOverlay;
     final messager = ScaffoldMessenger.of(context);
     loaderOverlay.show();
-    api
-        .getAccountById(
-          userId: store.getUser()?.userId ?? '',
-          accountId: widget.itemId!,
-        )
-        .then((response) {
-          if (response.hasError) {
-            throw Exception('Failed to load account: ${response.message}');
-          }
-          _accountName.value = response.data?.name ?? '';
-          _description.value = response.data?.description ?? '';
-          _color.value = response.data?.color ?? '';
-          pickerColor = Utils.hexStringToColor(_color.value);
-          _colorController.text = _color.value;
-        })
-        .catchError((error) {
-          messager.showSnackBar(
-            SnackBar(
-              content: Text('Error loading account: $error'),
-              backgroundColor: Colors.red.shade400,
-            ),
-          );
-        })
-        .whenComplete(() => loaderOverlay.hide());
+    try {
+      final response = await api.getAccountById(
+        userId: store.getUser()?.userId ?? '',
+        accountId: widget.itemId!,
+      );
+
+      if (response.hasError) {
+        throw Exception('Failed to load account: ${response.message}');
+      }
+      setState(() {
+        _accountName.value = response.data?.name ?? '';
+        _description.value = response.data?.description ?? '';
+        _color.value = response.data?.color ?? '';
+        _accountNameController.text = _accountName.value;
+        _descriptionController.text = _description.value;
+        pickerColor = Utils.hexStringToColor(_color.value);
+        _colorController.text = _color.value;
+      });
+    } catch (error) {
+      messager.showSnackBar(
+        SnackBar(
+          content: Text('Error loading account: $error'),
+          backgroundColor: Colors.red.shade400,
+        ),
+      );
+    } finally {
+      loaderOverlay.hide();
+    }
   }
 
   @override
@@ -97,6 +106,7 @@ class _AccountsFormPageState extends State<AccountsFormPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     TextFormField(
+                      controller: _accountNameController,
                       decoration: InputDecoration(labelText: 'Account Name'),
                       onChanged: (value) => _accountName.value = value,
                       validator: (value) => value == null || value.isEmpty
@@ -104,6 +114,7 @@ class _AccountsFormPageState extends State<AccountsFormPage> {
                           : null,
                     ),
                     TextFormField(
+                      controller: _descriptionController,
                       decoration: InputDecoration(labelText: 'Description'),
                       maxLines: null,
                       keyboardType: TextInputType.multiline,
@@ -186,6 +197,7 @@ class _AccountsFormPageState extends State<AccountsFormPage> {
     final api = Api(context);
     final store = context.read<Store>();
     final payload = SaveAccount(
+      id: widget.itemId,
       name: _accountName.value,
       description: _description.value,
       color: _color.value,

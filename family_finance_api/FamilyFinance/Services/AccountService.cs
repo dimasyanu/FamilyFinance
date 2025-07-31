@@ -99,6 +99,7 @@ public class AccountService(AppDbContext dbContext) : BaseService(dbContext)
 
         account.Name = request.Name;
         account.Description = request.Description;
+        account.Color = request.Color;
         account.UpdatedAt = DateTime.Now;
         account.UpdatedBy = currentUserId;
         DbContext.Accounts.Update(account);

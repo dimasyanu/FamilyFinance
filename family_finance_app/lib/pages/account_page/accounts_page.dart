@@ -10,6 +10,8 @@ import 'package:family_financial_app/models/responses/item_account.dart';
 import 'package:flutter/material.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
+import 'package:pull_to_refresh_flutter3/pull_to_refresh_flutter3.dart'
+    hide RefreshIndicatorState;
 
 class AccountsPage extends MyPage {
   static const currentKey = 'AccountsPage';
@@ -25,6 +27,7 @@ class AccountsPage extends MyPage {
   final pageSize = ValueNotifier<int>(10);
   final page = ValueNotifier<int>(1);
   final isError = ValueNotifier<bool>(false);
+  final refreshController = RefreshController(initialRefresh: false);
 
   static const headerStyle = TextStyle(fontWeight: FontWeight.bold);
 
@@ -49,19 +52,48 @@ class AccountsPage extends MyPage {
       super(route: 'AccountsPage', title: 'Accounts');
 
   @override
+  Color? appBarForegroundColor(BuildContext context) {
+    return Colors.white;
+  }
+
+  @override
+  Text? appBarTitle(BuildContext context) {
+    return Text(
+      title,
+      style: TextStyle(color: appBarForegroundColor(context), fontSize: 18),
+    );
+  }
+
+  @override
+  Color? appBarBackgroundColor(BuildContext context) {
+    return Colors.blue;
+  }
+
+  @override
   Widget body(BuildContext context) {
     // loadTable(context);
     _refreshKey.currentState?.show();
     final navigator = Navigator.of(context);
-    return Container(
-      padding: const EdgeInsets.all(8.0),
-      child: RefreshIndicator(
-        key: _refreshKey,
-        onRefresh: () async {
-          // loadTable(context);
-        },
-        child: SingleChildScrollView(
-          scrollDirection: Axis.vertical,
+    return SmartRefresher(
+      key: _refreshKey,
+      controller: refreshController,
+      enablePullDown: true,
+      header: const WaterDropMaterialHeader(
+        backgroundColor: Colors.blue,
+        color: Colors.white,
+        distance: 80.0,
+      ),
+      onRefresh: () async {
+        await Future.sync(() {
+          loadTable(context);
+        }).whenComplete(() {
+          refreshController.refreshCompleted();
+        });
+      },
+      child: SingleChildScrollView(
+        scrollDirection: Axis.vertical,
+        child: Container(
+          padding: const EdgeInsets.all(8.0),
           child: PaginatedDataTable(
             headingRowColor: WidgetStateProperty.all(Colors.grey.shade200),
             columns: columns,
@@ -88,8 +120,8 @@ class AccountsPage extends MyPage {
                         label: 'Edit',
                         backgroundColor: Colors.blue.shade50,
                         onPressed: () {
-                          Navigator.push(
-                            context,
+                          navigator.pop();
+                          navigator.push(
                             MaterialPageRoute(
                               builder: (context) => AccountsFormPage(
                                 itemId: account.id,
@@ -169,11 +201,57 @@ class AccountsPage extends MyPage {
         });
   }
 
+  Future<void> deleteItem(
+    String userId,
+    String accountId,
+    OverlayExtensionHelper loaderOverlay,
+    ScaffoldMessengerState messenger,
+    NavigatorState navigator,
+    VoidCallback loadTable,
+  ) async {
+    loaderOverlay.show();
+    try {
+      final response = await api.deleteAccount(
+        userId: store.getUser()?.userId ?? '',
+        accountId: accountId,
+      );
+      if (response.success) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text('Account deleted successfully'),
+            backgroundColor: Colors.green.shade400,
+          ),
+        );
+        navigator.pop(); // Close the dialog
+        () => loadTable(); // Refresh the table after deletion
+      } else {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text('Failed to delete account'),
+            backgroundColor: Colors.red.shade400,
+          ),
+        );
+      }
+    } catch (error) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Failed to delete account'),
+          backgroundColor: Colors.red.shade400,
+        ),
+      );
+    } finally {
+      loaderOverlay.hide();
+      loadTable();
+      navigator.pop();
+    }
+  }
+
   void showDeleteConfirmationDialog(BuildContext context, ItemAccount account) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         final navigator = Navigator.of(context);
+        final loaderOverlay = context.loaderOverlay;
         return AlertDialog(
           title: Text('Delete Account'),
           content: Text(
@@ -188,42 +266,15 @@ class AccountsPage extends MyPage {
             ),
             TextButton(
               child: Text('Delete'),
-              onPressed: () {
-                api
-                    .deleteAccount(
-                      userId: store.getUser()?.userId ?? '',
-                      accountId: account.id,
-                    )
-                    .then((response) {
-                      if (response.success) {
-                        messenger.showSnackBar(
-                          SnackBar(
-                            content: Text('Account deleted successfully'),
-                            backgroundColor: Colors.green.shade400,
-                          ),
-                        );
-                        navigator.pop(); // Close the dialog
-                        () => loadTable(
-                          context,
-                        ); // Refresh the table after deletion
-                      } else {
-                        messenger.showSnackBar(
-                          SnackBar(
-                            content: Text('Failed to delete account'),
-                            backgroundColor: Colors.red.shade400,
-                          ),
-                        );
-                      }
-                    })
-                    .catchError((error) {
-                      messenger.showSnackBar(
-                        SnackBar(
-                          content: Text('Failed to delete account'),
-                          backgroundColor: Colors.red.shade400,
-                        ),
-                      );
-                    });
-                navigator.pop();
+              onPressed: () async {
+                await deleteItem(
+                  store.getUser()?.userId ?? '',
+                  account.id,
+                  loaderOverlay,
+                  messenger,
+                  navigator,
+                  () => loadTable(context),
+                );
               },
             ),
           ],
@@ -250,6 +301,8 @@ class AccountsPage extends MyPage {
         );
       },
       shape: CircleBorder(),
+      backgroundColor: Colors.blue,
+      foregroundColor: Colors.white,
       child: const Icon(Icons.add),
     );
   }

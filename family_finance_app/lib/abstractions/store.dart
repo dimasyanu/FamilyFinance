@@ -2,7 +2,7 @@ import 'package:family_financial_app/abstractions/serializable.dart';
 import 'package:family_financial_app/plugins/api.dart';
 import 'package:family_financial_app/constants/storage_key.dart';
 import 'package:family_financial_app/models/responses/login_response.dart';
-import 'package:family_financial_app/models/responses/response.dart';
+import 'package:family_financial_app/models/responses/res.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -11,7 +11,8 @@ abstract class Store with ChangeNotifier, DiagnosticableTreeMixin {
 
   Store(BuildContext? context) : api = Api(context);
 
-  String get loginTitle => throw UnimplementedError('loginTitle must be implemented in subclasses');
+  String get loginTitle =>
+      throw UnimplementedError('loginTitle must be implemented in subclasses');
 
   LoginResponse? user;
 
@@ -23,7 +24,7 @@ abstract class Store with ChangeNotifier, DiagnosticableTreeMixin {
     return user;
   }
 
-  Future<Response<LoginResponse>> login(String username, String password) async {
+  Future<Res<LoginResponse>> login(String username, String password) async {
     // Implement login logic here
     final response = await api.login(username, password);
     if (response.data == null) {

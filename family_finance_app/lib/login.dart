@@ -1,7 +1,7 @@
 import 'package:family_financial_app/abstractions/store.dart';
 import 'package:family_financial_app/constants/storage_key.dart';
 import 'package:family_financial_app/models/responses/login_response.dart';
-import 'package:family_financial_app/models/responses/response.dart';
+import 'package:family_financial_app/models/responses/res.dart';
 import 'package:family_financial_app/app.dart';
 import 'package:flutter/material.dart';
 import 'package:loader_overlay/loader_overlay.dart';
@@ -33,8 +33,7 @@ class _LoginState extends State<Login> {
   }
 
   void _updateFormValid() {
-    isFormValid.value =
-        username.value.isNotEmpty && password.value.isNotEmpty;
+    isFormValid.value = username.value.isNotEmpty && password.value.isNotEmpty;
   }
 
   @override
@@ -54,7 +53,9 @@ class _LoginState extends State<Login> {
     final navigator = Navigator.of(context);
 
     try {
-      final loginResponse = LoginResponse.fromJson(await store.get(StorageKey.user));
+      final loginResponse = LoginResponse.fromJson(
+        await store.get(StorageKey.user),
+      );
       final now = DateTime.now();
       if (loginResponse.username.isNotEmpty &&
           loginResponse.accessToken.isNotEmpty &&
@@ -101,10 +102,7 @@ class _LoginState extends State<Login> {
               content: Text(error.message ?? 'An error occurred during login'),
             ),
           );
-          return Response<LoginResponse>(
-            success: false,
-            message: error.toString(),
-          );
+          return Res<LoginResponse>(success: false, message: error.toString());
         })
         .whenComplete(() => loader.hide());
   }
@@ -137,8 +135,8 @@ class _LoginState extends State<Login> {
                       spacing: 20,
                       children: [
                         // Text(
-                          // context.read<Store>().loginTitle,
-                          // style: theme.textTheme.headlineLarge,
+                        // context.read<Store>().loginTitle,
+                        // style: theme.textTheme.headlineLarge,
                         // ),
                         Text(
                           'Login to your account',

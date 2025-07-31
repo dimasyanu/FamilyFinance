@@ -80,12 +80,11 @@ class _AppState extends State<App> {
     }
     return Scaffold(
       appBar: AppBar(
-        title: ValueListenableBuilder(
-          valueListenable: _currentMenu,
-          builder: (context, value, child) {
-            return Text(value?.title ?? widget.title);
-          },
-        ),
+        title: _currentPage.value?.appBarTitle(context) ?? Text(widget.title),
+        backgroundColor:
+            _currentPage.value?.appBarBackgroundColor(context) ?? Colors.white,
+        foregroundColor:
+            _currentPage.value?.appBarForegroundColor(context) ?? Colors.black,
       ),
       body: ValueListenableBuilder(
         valueListenable: _currentPage,
