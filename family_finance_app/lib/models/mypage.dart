@@ -15,7 +15,7 @@ abstract class MyPage {
   }
 
   Widget body(BuildContext context);
-  Text? appBarTitle(BuildContext context) => null;
+  Widget? appBarTitle(BuildContext context) => null;
   Color? appBarBackgroundColor(BuildContext context) => null;
   Color? appBarForegroundColor(BuildContext context) => null;
   void onMounted(BuildContext context);

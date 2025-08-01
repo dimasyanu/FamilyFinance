@@ -140,7 +140,7 @@ class _AccountsFormPageState extends State<AccountsFormPage> {
                   key: const Key('saveAccountButton'),
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.white,
-                    backgroundColor: Colors.green,
+                    backgroundColor: Colors.blueAccent,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8.0),
                     ),
@@ -229,6 +229,12 @@ class _AccountsFormPageState extends State<AccountsFormPage> {
             ),
           ),
           actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
             TextButton(
               child: Text('Confirm'),
               onPressed: () {

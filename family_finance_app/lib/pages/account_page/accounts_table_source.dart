@@ -24,16 +24,16 @@ class AccountsTableSource extends DataTableSource {
       index: index,
       onLongPress: () => onRowLongPressed(account),
       cells: [
-        DataCell(Text(account.name)),
-        DataCell(Text(account.description ?? '')),
         DataCell(
-          Center(
-            child: Icon(
-              Icons.circle,
-              color: Utils.hexStringToColor(account.color),
-            ),
+          Row(
+            children: [
+              Icon(Icons.circle, color: Utils.hexStringToColor(account.color)),
+              const SizedBox(width: 8.0),
+              Text(account.name),
+            ],
           ),
         ),
+        DataCell(Text(account.description ?? '')),
         DataCell(
           Align(
             alignment: Alignment.centerRight,

@@ -32,9 +32,15 @@ class AccountsPage extends MyPage {
   static const headerStyle = TextStyle(fontWeight: FontWeight.bold);
 
   final List<DataColumn> columns = const [
-    DataColumn(label: Text('Name', style: headerStyle)),
+    DataColumn(
+      label: Row(
+        children: [
+          SizedBox(width: 16.0),
+          Text('Name', style: headerStyle),
+        ],
+      ),
+    ),
     DataColumn(label: Text('Description', style: headerStyle)),
-    DataColumn(label: Text('Color', style: headerStyle)),
     DataColumn(
       label: Text('Balance', style: headerStyle),
       headingRowAlignment: MainAxisAlignment.end,
@@ -57,10 +63,22 @@ class AccountsPage extends MyPage {
   }
 
   @override
-  Text? appBarTitle(BuildContext context) {
-    return Text(
-      title,
-      style: TextStyle(color: appBarForegroundColor(context), fontSize: 18),
+  Widget? appBarTitle(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      key: const Key('appBarTitle'),
+      children: [
+        Icon(
+          Icons.account_balance_wallet,
+          color: appBarForegroundColor(context),
+        ),
+        const SizedBox(width: 10.0),
+        Text(
+          title,
+          style: TextStyle(color: appBarForegroundColor(context), fontSize: 18),
+        ),
+      ],
     );
   }
 

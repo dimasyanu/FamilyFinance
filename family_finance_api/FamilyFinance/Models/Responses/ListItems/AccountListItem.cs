@@ -26,9 +26,9 @@ public class AccountListItem
         Color = account.Color;
         Description = account.Description;
         Balance = account.Balance;
-        CreatedAt = account.CreatedAt.ToString("dd-MMM-yyyy HH:mm");
+        CreatedAt = account.CreatedAt.ToString("dd MMM yyyy HH:mm");
         CreatedBy = account.CreatedBy;
-        UpdatedAt = account.UpdatedAt.ToString("dd-MMM-yyyy HH:mm");
+        UpdatedAt = account.UpdatedAt.ToString("dd MMM yyyy HH:mm");
         UpdatedBy = account.UpdatedBy;
         IsActive = account.DeletedAt == null;
     }
