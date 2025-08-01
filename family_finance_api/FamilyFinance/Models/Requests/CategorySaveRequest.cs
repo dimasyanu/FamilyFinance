@@ -10,5 +10,8 @@ public class CategorySaveRequest
     public string Description { get; set; } = string.Empty;
 
     [Required]
+    public int Icon { get; set; } = 0;
+
+    [Required]
     public string Color { get; set; } = string.Empty;
 }

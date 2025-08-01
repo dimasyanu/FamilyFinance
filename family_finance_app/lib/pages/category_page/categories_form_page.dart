@@ -1,71 +1,77 @@
-import 'package:family_financial_app/abstractions/store.dart';
-import 'package:family_financial_app/models/requests/save_account.dart';
-import 'package:family_financial_app/plugins/api_accounts.dart';
+import 'package:family_financial_app/models/requests/save_category.dart';
+import 'package:family_financial_app/plugins/api_category.dart';
 import 'package:family_financial_app/plugins/size_util.dart';
 import 'package:family_financial_app/plugins/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:flutter_iconpicker/Models/configuration.dart';
+import 'package:flutter_iconpicker/flutter_iconpicker.dart';
 import 'package:loader_overlay/loader_overlay.dart';
-import 'package:provider/provider.dart';
 
-class AccountsFormPage extends StatefulWidget {
+class CategoriesFormPage extends StatefulWidget {
   final String? itemId;
   final VoidCallback? onClosed;
+  final Color backgroundColor;
+  final Color foregroundColor;
   get isNew => itemId == null || itemId!.isEmpty;
 
-  const AccountsFormPage({this.itemId, this.onClosed, super.key});
+  const CategoriesFormPage({
+    this.itemId,
+    this.onClosed,
+    this.backgroundColor = Colors.grey,
+    this.foregroundColor = Colors.white,
+    super.key,
+  });
 
   @override
-  State<AccountsFormPage> createState() => _AccountsFormPageState();
+  State<CategoriesFormPage> createState() => _CategoriesFormPageState();
 }
 
-class _AccountsFormPageState extends State<AccountsFormPage> {
+class _CategoriesFormPageState extends State<CategoriesFormPage> {
   Color pickerColor = Color.fromARGB(255, 255, 255, 255);
 
   final _formKey = GlobalKey<FormState>();
 
-  final _accountName = ValueNotifier<String>('');
+  final _categotyName = ValueNotifier<String>('');
   final _description = ValueNotifier<String>('');
   final _color = ValueNotifier<String>('');
+  final _icon = ValueNotifier<int>(0);
 
   final _colorController = TextEditingController();
-  final _accountNameController = TextEditingController();
+  final _categoryNameController = TextEditingController();
   final _descriptionController = TextEditingController();
+  final _iconController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
 
     if (widget.isNew) {
-      _color.value = '#000000'; // Default color for new accounts
+      _color.value = '#000000'; // Default color for new category
       pickerColor = Utils.hexStringToColor(_color.value);
     } else {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        loadAccountData(context);
+        loadCategoryData(context);
       });
     }
   }
 
-  Future<void> loadAccountData(BuildContext context) async {
-    final api = ApiAccounts(context);
-    final store = context.read<Store>();
+  Future<void> loadCategoryData(BuildContext context) async {
+    final api = ApiCategory(context);
     final loaderOverlay = context.loaderOverlay;
     final messager = ScaffoldMessenger.of(context);
     loaderOverlay.show();
     try {
-      final response = await api.getAccountById(
-        userId: store.getUser()?.userId ?? '',
-        accountId: widget.itemId!,
-      );
+      final response = await api.getCategoryById(categoryId: widget.itemId!);
 
       if (response.hasError) {
-        throw Exception('Failed to load account: ${response.message}');
+        throw Exception('Failed to load category: ${response.message}');
       }
       setState(() {
-        _accountName.value = response.data?.name ?? '';
+        _categotyName.value = response.data?.name ?? '';
         _description.value = response.data?.description ?? '';
         _color.value = response.data?.color ?? '';
-        _accountNameController.text = _accountName.value;
+        _categoryNameController.text = _categotyName.value;
         _descriptionController.text = _description.value;
         pickerColor = Utils.hexStringToColor(_color.value);
         _colorController.text = _color.value;
@@ -73,7 +79,7 @@ class _AccountsFormPageState extends State<AccountsFormPage> {
     } catch (error) {
       messager.showSnackBar(
         SnackBar(
-          content: Text('Error loading account: $error'),
+          content: Text('Error loading category: $error'),
           backgroundColor: Colors.red.shade400,
         ),
       );
@@ -89,7 +95,7 @@ class _AccountsFormPageState extends State<AccountsFormPage> {
     final navigator = Navigator.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.isNew ? 'New Account' : 'Account Detail'),
+        title: Text(widget.isNew ? 'New Category' : 'Category Detail'),
       ),
       body: Container(
         padding: sizeUtil.dynamicPadding(
@@ -106,11 +112,11 @@ class _AccountsFormPageState extends State<AccountsFormPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     TextFormField(
-                      controller: _accountNameController,
-                      decoration: InputDecoration(labelText: 'Account Name'),
-                      onChanged: (value) => _accountName.value = value,
+                      controller: _categoryNameController,
+                      decoration: InputDecoration(labelText: 'Category Name'),
+                      onChanged: (value) => _categotyName.value = value,
                       validator: (value) => value == null || value.isEmpty
-                          ? 'Please enter an account name'
+                          ? 'Please enter a category name'
                           : null,
                     ),
                     TextFormField(
@@ -121,13 +127,46 @@ class _AccountsFormPageState extends State<AccountsFormPage> {
                       onChanged: (value) => _description.value = value,
                     ),
                     TextFormField(
+                      controller: _iconController,
+                      decoration: InputDecoration(
+                        labelText: 'Icon',
+                        hint: Text('Icon'),
+                        prefixIcon: ValueListenableBuilder(
+                          valueListenable: _icon,
+                          builder: (context, value, child) {
+                            return Icon(
+                              IconData(
+                                value,
+                                fontFamily: Icons.category.fontFamily,
+                              ),
+                              color: pickerColor,
+                            );
+                          },
+                        ),
+                      ),
+                      readOnly: true,
+                      onTap: () async {
+                        final pickedIcon = await showIconPicker(
+                          context,
+                          configuration: SinglePickerConfiguration(
+                            iconColor: pickerColor,
+                            iconPackModes: [IconPack.material],
+                          ),
+                        );
+                        setState(() {
+                          if (pickedIcon == null) return;
+                          _icon.value = pickedIcon.data.codePoint;
+                        });
+                      },
+                    ),
+                    TextFormField(
                       controller: _colorController,
                       decoration: InputDecoration(
                         labelText: 'Color',
                         prefixIcon: Icon(Icons.circle, color: pickerColor),
                       ),
                       readOnly: true,
-                      onTap: () => _dialogBuilder(context),
+                      onTap: () => showColorPicker(context),
                     ),
                   ],
                 ),
@@ -137,10 +176,10 @@ class _AccountsFormPageState extends State<AccountsFormPage> {
               child: Align(
                 alignment: FractionalOffset.bottomCenter,
                 child: ElevatedButton.icon(
-                  key: const Key('saveAccountButton'),
+                  key: const Key('saveCategoryButton'),
                   style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    backgroundColor: Colors.blueAccent,
+                    foregroundColor: widget.foregroundColor,
+                    backgroundColor: widget.backgroundColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8.0),
                     ),
@@ -154,7 +193,7 @@ class _AccountsFormPageState extends State<AccountsFormPage> {
                           .then((_) {
                             messager.showSnackBar(
                               SnackBar(
-                                content: Text('Account saved successfully!'),
+                                content: Text('Category saved successfully!'),
                                 backgroundColor: Colors.green.shade400,
                               ),
                             );
@@ -165,7 +204,7 @@ class _AccountsFormPageState extends State<AccountsFormPage> {
                           .catchError((error) {
                             messager.showSnackBar(
                               SnackBar(
-                                content: Text('Error saving account: $error'),
+                                content: Text('Error saving category: $error'),
                                 backgroundColor: Colors.red.shade400,
                               ),
                             );
@@ -194,19 +233,15 @@ class _AccountsFormPageState extends State<AccountsFormPage> {
   }
 
   Future<void> save(BuildContext context) async {
-    final api = ApiAccounts(context);
-    final store = context.read<Store>();
-    final payload = SaveAccount(
+    final api = ApiCategory(context);
+    final payload = SaveCategory(
       id: widget.itemId,
-      name: _accountName.value,
+      name: _categotyName.value,
       description: _description.value,
       color: _color.value,
     );
 
-    await api.saveAccount(
-      userId: store.getUser()?.userId ?? '',
-      payload: payload,
-    );
+    await api.saveCategory(payload: payload);
   }
 
   void changeColor(Color color) {
@@ -215,7 +250,7 @@ class _AccountsFormPageState extends State<AccountsFormPage> {
     });
   }
 
-  Future<void> _dialogBuilder(BuildContext context) async {
+  Future<void> showColorPicker(BuildContext context) async {
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
@@ -265,7 +300,7 @@ class _AccountsFormPageState extends State<AccountsFormPage> {
 
   @override
   void dispose() {
-    _accountName.dispose();
+    _categotyName.dispose();
     _description.dispose();
     _color.dispose();
     _colorController.dispose();

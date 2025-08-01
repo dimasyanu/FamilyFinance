@@ -8,8 +8,8 @@ public class TransactionListItem
     public string Description { get; set; } = string.Empty;
     public decimal Amount { get; set; }
     public DateTime TransactionDate { get; set; }
-    public CategoryListItem Category { get; set; }
-    public AccountListItem Account { get; set; }
+    public CategoryListItem Category { get; set; } = null!;
+    public AccountListItem Account { get; set; } = null!;
     public string? Notes { get; set; }
 
     public TransactionListItem()

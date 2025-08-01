@@ -1,28 +1,25 @@
 import 'package:family_financial_app/abstractions/store.dart';
 import 'package:family_financial_app/components/bottom_action_menu.dart';
 import 'package:family_financial_app/components/row_action.dart';
-import 'package:family_financial_app/pages/account_page/accounts_detail.dart';
-import 'package:family_financial_app/pages/account_page/accounts_table_source.dart';
-import 'package:family_financial_app/pages/account_page/accounts_form_page.dart';
 import 'package:family_financial_app/models/mypage.dart';
-import 'package:family_financial_app/models/responses/item_account.dart';
-import 'package:family_financial_app/plugins/api_accounts.dart';
+import 'package:family_financial_app/models/responses/item_category.dart';
+import 'package:family_financial_app/pages/category_page/categories_detail.dart';
+import 'package:family_financial_app/pages/category_page/categories_form_page.dart';
+import 'package:family_financial_app/pages/category_page/categories_table_source.dart';
+import 'package:family_financial_app/plugins/api_category.dart';
 import 'package:flutter/material.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh_flutter3/pull_to_refresh_flutter3.dart'
     hide RefreshIndicatorState;
 
-class AccountsPage extends MyPage {
-  static const currentKey = 'AccountsPage';
-  @override
-  String get title => 'Accounts';
-  final ApiAccounts api;
+class CategoriesPage extends MyPage {
+  final ApiCategory api;
   final Store store;
   final ScaffoldMessengerState messenger;
   final _refreshKey = GlobalKey<RefreshIndicatorState>();
 
-  final accounts = ValueNotifier<List<ItemAccount>>([]);
+  final categories = ValueNotifier<List<ItemCategory>>([]);
   final totalCount = ValueNotifier<int>(0);
   final pageSize = ValueNotifier<int>(10);
   final page = ValueNotifier<int>(1);
@@ -41,22 +38,15 @@ class AccountsPage extends MyPage {
       ),
     ),
     DataColumn(label: Text('Description', style: headerStyle)),
-    DataColumn(
-      label: Text('Balance', style: headerStyle),
-      headingRowAlignment: MainAxisAlignment.end,
-    ),
     DataColumn(label: Text('Created At', style: headerStyle)),
     DataColumn(label: Text('Updated At', style: headerStyle)),
   ];
 
-  final List<DataRow> rows = [];
-
-  // Constructor
-  AccountsPage(super.context)
+  CategoriesPage(super.context)
     : store = context.read<Store>(),
       messenger = ScaffoldMessenger.of(context),
-      api = ApiAccounts(context),
-      super(route: 'AccountsPage', title: 'Accounts');
+      api = ApiCategory(context),
+      super(route: 'CategoriesPage', title: 'Categories');
 
   @override
   Color? appBarForegroundColor() {
@@ -65,7 +55,7 @@ class AccountsPage extends MyPage {
 
   @override
   Color? appBarBackgroundColor() {
-    return Colors.blue;
+    return Colors.orange;
   }
 
   @override
@@ -75,7 +65,7 @@ class AccountsPage extends MyPage {
       mainAxisSize: MainAxisSize.min,
       key: const Key('appBarTitle'),
       children: [
-        Icon(Icons.account_balance_wallet, color: appBarForegroundColor()),
+        Icon(Icons.category, color: appBarForegroundColor()),
         const SizedBox(width: 10.0),
         Text(
           title,
@@ -94,8 +84,8 @@ class AccountsPage extends MyPage {
       key: _refreshKey,
       controller: refreshController,
       enablePullDown: true,
-      header: const WaterDropMaterialHeader(
-        backgroundColor: Colors.blue,
+      header: WaterDropMaterialHeader(
+        backgroundColor: appBarBackgroundColor(),
         color: Colors.white,
         distance: 80.0,
       ),
@@ -114,15 +104,15 @@ class AccountsPage extends MyPage {
             headingRowColor: WidgetStateProperty.all(Colors.grey.shade200),
             columns: columns,
             showEmptyRows: false,
-            source: AccountsTableSource(
+            source: CategoriesTableSource(
               context: context,
-              accounts: accounts.value,
+              categories: categories.value,
               loadTable: () => loadTable(context),
-              onRowLongPressed: (account) => showModalBottomSheet(
+              onRowLongPressed: (category) => showModalBottomSheet(
                 context: context,
                 builder: (context) {
                   return BottomActionMenu(
-                    itemDetail: AccountDetail(account: account),
+                    itemDetail: CategoriesDetail(category: category),
                     actions: [
                       RowAction(
                         icon: Icon(Icons.close, color: Colors.grey),
@@ -139,11 +129,15 @@ class AccountsPage extends MyPage {
                           navigator.pop();
                           navigator.push(
                             MaterialPageRoute(
-                              builder: (context) => AccountsFormPage(
-                                itemId: account.id,
+                              builder: (context) => CategoriesFormPage(
+                                itemId: category.id,
                                 onClosed: () {
                                   loadTable(context);
                                 },
+                                backgroundColor:
+                                    appBarBackgroundColor() ?? Colors.grey,
+                                foregroundColor:
+                                    appBarForegroundColor() ?? Colors.white,
                               ),
                             ),
                           );
@@ -154,7 +148,7 @@ class AccountsPage extends MyPage {
                         label: 'Delete',
                         backgroundColor: Colors.red.shade50,
                         onPressed: () {
-                          showDeleteConfirmationDialog(context, account);
+                          showDeleteConfirmationDialog(context, category);
                         },
                       ),
                     ],
@@ -170,34 +164,29 @@ class AccountsPage extends MyPage {
 
   @override
   void onMounted(BuildContext context) {
-    // Perform any additional setup or state initialization here
     loadTable(context);
   }
 
-  /// Load the accounts table or any necessary data.
+  /// Load the categories table or any necessary data.
   void loadTable(BuildContext context) {
     final user = store.getUser();
     final loaderOverlay = context.loaderOverlay;
     loaderOverlay.show();
     if (user == null) throw Exception('User not logged in');
     api
-        .getAccounts(
-          userId: user.userId,
-          page: page.value,
-          pageSize: pageSize.value,
-        )
+        .getCategories(page: page.value, pageSize: pageSize.value)
         .then((response) {
           if (response.success) {
             setState(() {
               isError.value = false;
-              accounts.value = response.data?.items ?? [];
+              categories.value = response.data?.items ?? [];
               totalCount.value = response.data?.totalCount ?? 0;
             });
           } else {
             isError.value = true;
             messenger.showSnackBar(
               SnackBar(
-                content: Text('Failed to load accounts'),
+                content: Text('Failed to load categories'),
                 backgroundColor: Colors.red.shade400,
               ),
             );
@@ -207,7 +196,7 @@ class AccountsPage extends MyPage {
           isError.value = true;
           messenger.showSnackBar(
             SnackBar(
-              content: Text('Failed to load accounts'),
+              content: Text('Failed to load categories'),
               backgroundColor: Colors.red.shade400,
             ),
           );
@@ -219,7 +208,7 @@ class AccountsPage extends MyPage {
 
   Future<void> deleteItem(
     String userId,
-    String accountId,
+    String categoryId,
     OverlayExtensionHelper loaderOverlay,
     ScaffoldMessengerState messenger,
     NavigatorState navigator,
@@ -227,14 +216,11 @@ class AccountsPage extends MyPage {
   ) async {
     loaderOverlay.show();
     try {
-      final response = await api.deleteAccount(
-        userId: store.getUser()?.userId ?? '',
-        accountId: accountId,
-      );
+      final response = await api.deleteCategory(categoryId: categoryId);
       if (response.success) {
         messenger.showSnackBar(
           SnackBar(
-            content: Text('Account deleted successfully'),
+            content: Text('Category deleted successfully'),
             backgroundColor: Colors.green.shade400,
           ),
         );
@@ -243,7 +229,7 @@ class AccountsPage extends MyPage {
       } else {
         messenger.showSnackBar(
           SnackBar(
-            content: Text('Failed to delete account'),
+            content: Text('Failed to delete category'),
             backgroundColor: Colors.red.shade400,
           ),
         );
@@ -251,7 +237,7 @@ class AccountsPage extends MyPage {
     } catch (error) {
       messenger.showSnackBar(
         SnackBar(
-          content: Text('Failed to delete account'),
+          content: Text('Failed to delete category'),
           backgroundColor: Colors.red.shade400,
         ),
       );
@@ -262,16 +248,19 @@ class AccountsPage extends MyPage {
     }
   }
 
-  void showDeleteConfirmationDialog(BuildContext context, ItemAccount account) {
+  void showDeleteConfirmationDialog(
+    BuildContext context,
+    ItemCategory category,
+  ) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         final navigator = Navigator.of(context);
         final loaderOverlay = context.loaderOverlay;
         return AlertDialog(
-          title: Text('Delete Account'),
+          title: Text('Delete Category'),
           content: Text(
-            'Are you sure you want to delete this account?\n${account.name}',
+            'Are you sure you want to delete this category?\n${category.name}',
           ),
           actions: <Widget>[
             TextButton(
@@ -285,7 +274,7 @@ class AccountsPage extends MyPage {
               onPressed: () async {
                 await deleteItem(
                   store.getUser()?.userId ?? '',
-                  account.id,
+                  category.id,
                   loaderOverlay,
                   messenger,
                   navigator,
@@ -302,13 +291,13 @@ class AccountsPage extends MyPage {
   @override
   FloatingActionButton? floatingActionButton(BuildContext context) {
     return FloatingActionButton(
-      key: const Key('addAccountButton'),
+      key: const Key('addCategoryButton'),
       onPressed: () {
-        // Navigate to the add account page
+        // Navigate to the add category page
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => AccountsFormPage(
+            builder: (context) => CategoriesFormPage(
               onClosed: () {
                 loadTable(context);
               },
@@ -317,7 +306,7 @@ class AccountsPage extends MyPage {
         );
       },
       shape: CircleBorder(),
-      backgroundColor: Colors.blue,
+      backgroundColor: appBarBackgroundColor(),
       foregroundColor: Colors.white,
       child: const Icon(Icons.add),
     );
@@ -325,7 +314,7 @@ class AccountsPage extends MyPage {
 
   @override
   void dispose() {
-    accounts.dispose();
+    categories.dispose();
     totalCount.dispose();
     pageSize.dispose();
     page.dispose();

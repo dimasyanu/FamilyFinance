@@ -1,5 +1,4 @@
 import 'package:family_financial_app/models/responses/item_account.dart';
-import 'package:family_financial_app/plugins/api.dart';
 import 'package:family_financial_app/plugins/utils.dart';
 import 'package:flutter/material.dart';
 
@@ -8,14 +7,13 @@ class AccountsTableSource extends DataTableSource {
   final List<ItemAccount> accounts;
   final Function onRowLongPressed;
   final VoidCallback loadTable;
-  late final Api api;
 
   AccountsTableSource({
     required this.context,
     required this.accounts,
     required this.onRowLongPressed,
     required this.loadTable,
-  }) : api = Api(context);
+  });
 
   @override
   DataRow getRow(int index) {

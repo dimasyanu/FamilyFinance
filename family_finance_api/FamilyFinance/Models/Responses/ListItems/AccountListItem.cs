@@ -9,8 +9,8 @@ public class AccountListItem
     public string Color { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public decimal Balance { get; set; }
-    public String CreatedAt { get; set; }
-    public Guid CreatedBy { get; set; }
+    public String CreatedAt { get; set; } = string.Empty;
+    public Guid CreatedBy { get; set; } = Guid.Empty;
     public String? UpdatedAt { get; set; }
     public Guid? UpdatedBy { get; set; }
     public bool IsActive { get; set; }

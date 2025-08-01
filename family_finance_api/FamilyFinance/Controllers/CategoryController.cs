@@ -43,7 +43,7 @@ public class CategoryController(CategoryService service) : BaseController
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
         var category = await _service.CreateAsync(request, CurrentUser.Id);
-        return Ok(category, "Category created successfully");
+        return Created(category, "Category created successfully");
     }
 
     [HttpPut]

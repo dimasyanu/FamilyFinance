@@ -15,14 +15,14 @@ public class Category : BasicModel
     [MaxLength(500)]
     public string Description { get; set; } = string.Empty;
 
+    [Column("icon")]
+    [Required]
+    public int Icon { get; set; } = 0;
+
     [Column("color")]
     [MaxLength(10)]
     [Required]
     public string Color { get; set; } = string.Empty;
-
-    [Column("icon")]
-    [MaxLength(50)]
-    public string Icon { get; set; } = string.Empty;
 
     public virtual ICollection<Transaction> Transactions { get; set; } = [];
 }

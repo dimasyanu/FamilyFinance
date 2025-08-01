@@ -2,8 +2,8 @@ import 'package:family_financial_app/models/drawer_item.dart';
 import 'package:family_financial_app/drawer.dart';
 import 'package:family_financial_app/models/mypage.dart';
 import 'package:family_financial_app/pages/account_page/accounts_page.dart';
-// import 'package:family_financial_app/pages/categories_page.dart';
-// import 'package:family_financial_app/pages/overview_page.dart';
+import 'package:family_financial_app/pages/category_page/categories_page.dart';
+import 'package:family_financial_app/pages/overview_page/overview_page.dart';
 import 'package:family_financial_app/pages/transactions_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -23,7 +23,7 @@ class _AppState extends State<App> {
   List<ListTile> drawerWidgets = [];
   List<DrawerItem> drawerItems = [];
 
-  final _currentPageRoute = ValueNotifier<String>('accounts');
+  final _currentPageRoute = ValueNotifier<String>('categories');
   final _currentMenu = ValueNotifier<DrawerItem?>(null);
   final _currentPage = ValueNotifier<MyPage?>(null);
 
@@ -31,12 +31,12 @@ class _AppState extends State<App> {
     // Initialize any necessary data or state here
 
     drawerItems = <DrawerItem>[
-      // DrawerItem(
-      // alias: 'overview',
-      // title: 'Overview',
-      // icon: Icons.dashboard,
-      // initPage: () => OverviewPage(context),
-      // ),
+      DrawerItem(
+        route: 'overview',
+        title: 'Overview',
+        icon: Icons.dashboard,
+        page: () => OverviewPage(context),
+      ),
       DrawerItem(
         route: 'transactions',
         title: 'Transactions',
@@ -49,12 +49,12 @@ class _AppState extends State<App> {
         icon: Icons.wallet,
         page: () => AccountsPage(context),
       ),
-      // DrawerItem(
-      // alias: 'categories',
-      // title: 'Categories',
-      // icon: Icons.category,
-      // initPage: () => CategoriesPage(context),
-      // ),
+      DrawerItem(
+        route: 'categories',
+        title: 'Categories',
+        icon: Icons.category,
+        page: () => CategoriesPage(context),
+      ),
     ];
 
     _currentPageRoute.addListener(() {
@@ -82,9 +82,9 @@ class _AppState extends State<App> {
       appBar: AppBar(
         title: _currentPage.value?.appBarTitle(context) ?? Text(widget.title),
         backgroundColor:
-            _currentPage.value?.appBarBackgroundColor(context) ?? Colors.white,
+            _currentPage.value?.appBarBackgroundColor() ?? Colors.white,
         foregroundColor:
-            _currentPage.value?.appBarForegroundColor(context) ?? Colors.black,
+            _currentPage.value?.appBarForegroundColor() ?? Colors.black,
       ),
       body: ValueListenableBuilder(
         valueListenable: _currentPage,
