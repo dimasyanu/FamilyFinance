@@ -39,7 +39,7 @@ class CategoriesPage extends MyPage {
     ),
     DataColumn(label: Text('Description', style: headerStyle)),
     DataColumn(label: Text('Created At', style: headerStyle)),
-    DataColumn(label: Text('Updated At', style: headerStyle)),
+    DataColumn(label: Text('Created by', style: headerStyle)),
   ];
 
   CategoriesPage(super.context)
@@ -92,9 +92,8 @@ class CategoriesPage extends MyPage {
       onRefresh: () async {
         await Future.sync(() {
           loadTable(context);
-        }).whenComplete(() {
-          refreshController.refreshCompleted();
         });
+        refreshController.refreshCompleted();
       },
       child: SingleChildScrollView(
         scrollDirection: Axis.vertical,
@@ -194,6 +193,7 @@ class CategoriesPage extends MyPage {
         })
         .catchError((error) {
           isError.value = true;
+          debugPrint('Error loading categories: $error');
           messenger.showSnackBar(
             SnackBar(
               content: Text('Failed to load categories'),

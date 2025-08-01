@@ -9,8 +9,8 @@ public class CategoryListItem
     public string Description { get; set; } = string.Empty;
     public int Icon { get; set; } = 0;
     public string Color { get; set; } = string.Empty;
-    public DateTime CreatedAt { get; set; }
-    public Guid CreatedBy { get; set; }
+    public string CreatedAt { get; set; } = string.Empty;
+    public string CreatedBy { get; set; } = string.Empty;
 
     public CategoryListItem()
     {
@@ -23,7 +23,7 @@ public class CategoryListItem
         Description = category.Description;
         Icon = category.Icon;
         Color = category.Color;
-        CreatedAt = category.CreatedAt;
-        CreatedBy = category.CreatedBy;
+        CreatedAt = category.CreatedAt.ToString("dd MMM yyyy HH:mm");
+        CreatedBy = category.CreatedBy.ToString();
     }
 }

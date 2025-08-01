@@ -71,6 +71,8 @@ class _CategoriesFormPageState extends State<CategoriesFormPage> {
         _categotyName.value = response.data?.name ?? '';
         _description.value = response.data?.description ?? '';
         _color.value = response.data?.color ?? '';
+        _icon.value = response.data?.icon ?? 0;
+
         _categoryNameController.text = _categotyName.value;
         _descriptionController.text = _description.value;
         pickerColor = Utils.hexStringToColor(_color.value);
@@ -238,6 +240,7 @@ class _CategoriesFormPageState extends State<CategoriesFormPage> {
       id: widget.itemId,
       name: _categotyName.value,
       description: _description.value,
+      icon: _icon.value,
       color: _color.value,
     );
 

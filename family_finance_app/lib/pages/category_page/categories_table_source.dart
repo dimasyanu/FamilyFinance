@@ -27,7 +27,7 @@ class CategoriesTableSource extends DataTableSource {
           Row(
             children: [
               Icon(
-                IconData(Icons.category.codePoint, fontFamily: fontFamily),
+                IconData(category.icon, fontFamily: fontFamily),
                 color: Utils.hexStringToColor(category.color),
               ),
               const SizedBox(width: 8.0),

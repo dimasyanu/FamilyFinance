@@ -33,6 +33,12 @@ public class CategoryService(AppDbContext dbContext) : BaseService(dbContext)
             .Take(filter.PageSize)
             .Select(c => new CategoryListItem(c))
             .ToListAsync();
+        
+        var creatorIds = items.Select(x => Guid.Parse(x.CreatedBy)).ToList();
+        var users = await DbContext.Users.Where(x => creatorIds.Contains(x.Id)).ToListAsync();
+        foreach (var item in items) {
+            item.CreatedBy = users.FirstOrDefault(x => x.Id == Guid.Parse(item.CreatedBy))?.Username ?? "";
+        }
 
         return new Paginated<CategoryListItem> {
             Items = items,
@@ -65,6 +71,7 @@ public class CategoryService(AppDbContext dbContext) : BaseService(dbContext)
         var newCategory = new Category {
             Name = request.Name,
             Description = request.Description,
+            Icon = request.Icon,
             Color = request.Color,
             CreatedAt = now,
             CreatedBy = currentUserId,
@@ -88,6 +95,7 @@ public class CategoryService(AppDbContext dbContext) : BaseService(dbContext)
 
         category.Name = request.Name;
         category.Description = request.Description;
+        category.Icon = request.Icon;
         category.Color = request.Color;
         DbContext.Categories.Update(category);
         await DbContext.SaveChangesAsync();

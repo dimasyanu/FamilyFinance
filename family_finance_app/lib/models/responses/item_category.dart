@@ -4,7 +4,7 @@ class ItemCategory {
   final String? description;
   final String color;
   final int icon;
-  final DateTime createdAt;
+  final String createdAt;
   final String createdBy;
 
   ItemCategory({
@@ -24,7 +24,7 @@ class ItemCategory {
       description: json['description'] as String?,
       color: json['color'] as String,
       icon: json['icon'] as int,
-      createdAt: DateTime.parse(json['createdAt'] as String),
+      createdAt: json['createdAt'] as String,
       createdBy: json['createdBy'] as String,
     );
   }
@@ -36,7 +36,7 @@ class ItemCategory {
       'description': description,
       'color': color,
       'icon': icon,
-      'createdAt': createdAt.toIso8601String(),
+      'createdAt': createdAt,
       'createdBy': createdBy,
     };
   }
