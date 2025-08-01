@@ -90,9 +90,7 @@ class CategoriesPage extends MyPage {
         distance: 80.0,
       ),
       onRefresh: () async {
-        await Future.sync(() {
-          loadTable(context);
-        });
+        await loadTable(context);
         refreshController.refreshCompleted();
       },
       child: SingleChildScrollView(
@@ -131,7 +129,7 @@ class CategoriesPage extends MyPage {
                               builder: (context) => CategoriesFormPage(
                                 itemId: category.id,
                                 onClosed: () {
-                                  loadTable(context);
+                                  refreshController.requestRefresh();
                                 },
                                 backgroundColor:
                                     appBarBackgroundColor() ?? Colors.grey,
@@ -163,47 +161,48 @@ class CategoriesPage extends MyPage {
 
   @override
   void onMounted(BuildContext context) {
-    loadTable(context);
+    loadTable(context).then((_) {
+      refreshController.refreshCompleted();
+    });
   }
 
   /// Load the categories table or any necessary data.
-  void loadTable(BuildContext context) {
+  Future<void> loadTable(BuildContext context) async {
     final user = store.getUser();
     final loaderOverlay = context.loaderOverlay;
     loaderOverlay.show();
     if (user == null) throw Exception('User not logged in');
-    api
-        .getCategories(page: page.value, pageSize: pageSize.value)
-        .then((response) {
-          if (response.success) {
-            setState(() {
-              isError.value = false;
-              categories.value = response.data?.items ?? [];
-              totalCount.value = response.data?.totalCount ?? 0;
-            });
-          } else {
-            isError.value = true;
-            messenger.showSnackBar(
-              SnackBar(
-                content: Text('Failed to load categories'),
-                backgroundColor: Colors.red.shade400,
-              ),
-            );
-          }
-        })
-        .catchError((error) {
-          isError.value = true;
-          debugPrint('Error loading categories: $error');
-          messenger.showSnackBar(
-            SnackBar(
-              content: Text('Failed to load categories'),
-              backgroundColor: Colors.red.shade400,
-            ),
-          );
-        })
-        .whenComplete(() {
-          loaderOverlay.hide();
+    try {
+      final response = await api.getCategories(
+        page: page.value,
+        pageSize: pageSize.value,
+      );
+      if (response.success) {
+        setState(() {
+          isError.value = false;
+          categories.value = response.data?.items ?? [];
+          totalCount.value = response.data?.totalCount ?? 0;
         });
+      } else {
+        isError.value = true;
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text('Failed to load categories'),
+            backgroundColor: Colors.red.shade400,
+          ),
+        );
+      }
+    } catch (error) {
+      isError.value = true;
+      debugPrint('Error loading categories: $error');
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Failed to load categories'),
+          backgroundColor: Colors.red.shade400,
+        ),
+      );
+    }
+    loaderOverlay.hide();
   }
 
   Future<void> deleteItem(
