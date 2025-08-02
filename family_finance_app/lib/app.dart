@@ -2,6 +2,7 @@ import 'package:family_financial_app/models/drawer_item.dart';
 import 'package:family_financial_app/drawer.dart';
 import 'package:family_financial_app/models/mypage.dart';
 import 'package:family_financial_app/pages/account_page/accounts_page.dart';
+import 'package:family_financial_app/pages/budgeting_page/budgeting_page.dart';
 import 'package:family_financial_app/pages/category_page/categories_page.dart';
 import 'package:family_financial_app/pages/overview_page/overview_page.dart';
 import 'package:family_financial_app/pages/transactions_page.dart';
@@ -21,9 +22,9 @@ class App extends StatefulWidget {
 
 class _AppState extends State<App> {
   List<ListTile> drawerWidgets = [];
-  List<DrawerItem> drawerItems = [];
+  late final List<DrawerItem> drawerItems;
 
-  final _currentPageRoute = ValueNotifier<String>('categories');
+  final _currentPageRoute = ValueNotifier<String>('budgeting');
   final _currentMenu = ValueNotifier<DrawerItem?>(null);
   final _currentPage = ValueNotifier<MyPage?>(null);
 
@@ -54,6 +55,12 @@ class _AppState extends State<App> {
         title: 'Categories',
         icon: Icons.category,
         page: () => CategoriesPage(context),
+      ),
+      DrawerItem(
+        route: 'budgeting',
+        title: 'Budgeting',
+        icon: Icons.attach_money,
+        page: () => BudgetingPage(context),
       ),
     ];
 

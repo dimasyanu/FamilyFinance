@@ -50,12 +50,10 @@ class MyDrawer extends Drawer {
             title: const Text('Settings'),
             leading: const Icon(Icons.settings, color: Colors.grey),
             onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const SettingsPage(),
-                  ),
-                );
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsPage()),
+              );
             },
           ),
 
@@ -70,9 +68,10 @@ class MyDrawer extends Drawer {
                 textColor: Colors.red,
                 onTap: () {
                   context.read<Store>().logout();
-                  Navigator.pushReplacement(context, MaterialPageRoute(
-                    builder: (context) => Login(),
-                  ));
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => Login()),
+                  );
                 },
               ),
             ),

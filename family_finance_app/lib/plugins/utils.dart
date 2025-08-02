@@ -2,6 +2,36 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
+const List<String> monthNames = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
+
+const List<String> shortMonthNames = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+];
+
 class Utils {
   static String colorToHex(
     Color color, {
@@ -21,7 +51,6 @@ class Utils {
   static String _padRadix(int value) => value.toRadixString(16).padLeft(2, '0');
 
   static Color hexStringToColor(String hexString) {
-
     if (hexString.isEmpty) {
       return Colors.grey; // Return transparent color for empty string
     }
@@ -39,5 +68,25 @@ class Utils {
 
     // Return a Color object
     return Color(hexValue);
+  }
+
+  static String formatCurrency(double amount) {
+    // Format the amount as a currency string
+    return amount
+        .toStringAsFixed(2)
+        .replaceAllMapped(
+          RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
+          (Match m) => '${m[1]},',
+        );
+  }
+
+  static String formatDate(DateTime date) {
+    // Format the date as a string in 'dd MMM yyyy HH:mm' format
+    return '${date.day.toString().padLeft(2, '0')} ${getMonthName(date.month)} ${date.year} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+  }
+
+  static String getMonthName(int month) {
+    // Return the month name based on the month number
+    return shortMonthNames[month - 1];
   }
 }

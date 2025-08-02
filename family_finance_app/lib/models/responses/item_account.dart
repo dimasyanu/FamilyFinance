@@ -25,18 +25,18 @@ class ItemAccount {
 
   factory ItemAccount.fromJson(Map<String, dynamic> json) {
     try {
-    return ItemAccount(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      color: json['color'] ?? '#000',
-      description: json['description'] as String?,
-      balance: (json['balance'] as num).toDouble(),
-      createdAt: json['createdAt'],
-      createdBy: json['createdBy'] as String,
-      updatedAt: json['updatedAt'] ?? '',
-      updatedBy: json['updatedBy'] as String?,
-      isActive: json['isActive'] as bool? ?? true,
-    );
+      return ItemAccount(
+        id: json['id'] as String,
+        name: json['name'] as String,
+        color: json['color'] ?? '#000',
+        description: json['description'] as String?,
+        balance: (json['balance'] as num).toDouble(),
+        createdAt: json['createdAt'],
+        createdBy: json['createdBy'] as String,
+        updatedAt: json['updatedAt'] ?? '',
+        updatedBy: json['updatedBy'] as String?,
+        isActive: json['isActive'] as bool? ?? true,
+      );
     } catch (e) {
       throw FormatException('Error parsing ItemAccount: $e', json);
     }

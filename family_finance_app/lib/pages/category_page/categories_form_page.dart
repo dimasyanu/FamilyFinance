@@ -18,8 +18,8 @@ class CategoriesFormPage extends StatefulWidget {
   const CategoriesFormPage({
     this.itemId,
     this.onClosed,
-    this.backgroundColor = Colors.grey,
-    this.foregroundColor = Colors.white,
+    required this.backgroundColor,
+    required this.foregroundColor,
     super.key,
   });
 
@@ -189,39 +189,40 @@ class _CategoriesFormPageState extends State<CategoriesFormPage> {
                   ),
                   onPressed: () {
                     final loaderOverlay = context.loaderOverlay;
-                    if (_formKey.currentState!.validate()) {
-                      loaderOverlay.show();
-                      save(context)
-                          .then((_) {
-                            messager.showSnackBar(
-                              SnackBar(
-                                content: Text('Category saved successfully!'),
-                                backgroundColor: Colors.green.shade400,
-                              ),
-                            );
 
-                            navigator.pop();
-                            onClosed();
-                          })
-                          .catchError((error) {
-                            messager.showSnackBar(
-                              SnackBar(
-                                content: Text('Error saving category: $error'),
-                                backgroundColor: Colors.red.shade400,
-                              ),
-                            );
-                          })
-                          .whenComplete(() => loaderOverlay.hide());
-
-                      return;
+                    if (!_formKey.currentState!.validate()) {
+                      messager.showSnackBar(
+                        SnackBar(
+                          content: Text('Please fill in all fields'),
+                          backgroundColor: Colors.red.shade400,
+                        ),
+                      );
                     }
 
-                    messager.showSnackBar(
-                      SnackBar(
-                        content: Text('Please fill in all fields'),
-                        backgroundColor: Colors.red.shade400,
-                      ),
-                    );
+                    loaderOverlay.show();
+                    save(context)
+                        .then((_) {
+                          messager.showSnackBar(
+                            SnackBar(
+                              content: Text('Category saved successfully!'),
+                              backgroundColor: Colors.green.shade400,
+                            ),
+                          );
+
+                          navigator.pop();
+                          onClosed();
+                        })
+                        .catchError((error) {
+                          messager.showSnackBar(
+                            SnackBar(
+                              content: Text('Error saving category: $error'),
+                              backgroundColor: Colors.red.shade400,
+                            ),
+                          );
+                        })
+                        .whenComplete(() => loaderOverlay.hide());
+
+                    return;
                   },
                   icon: const Icon(Icons.save),
                   label: Text('Save'),
@@ -306,7 +307,11 @@ class _CategoriesFormPageState extends State<CategoriesFormPage> {
     _categotyName.dispose();
     _description.dispose();
     _color.dispose();
+    _icon.dispose();
+    _categoryNameController.dispose();
+    _descriptionController.dispose();
     _colorController.dispose();
+    _iconController.dispose();
     _formKey.currentState?.dispose();
     super.dispose();
   }

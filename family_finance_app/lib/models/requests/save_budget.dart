@@ -12,4 +12,24 @@ class SaveBudget {
     required this.year,
     required this.amount,
   });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'categoryId': categoryId,
+      'month': month,
+      'year': year,
+      'amount': amount,
+    };
+  }
+
+  factory SaveBudget.fromJson(Map<String, dynamic> json) {
+    return SaveBudget(
+      id: json['id'] as String?,
+      categoryId: json['categoryId'] as String,
+      month: json['month'] as int,
+      year: json['year'] as int,
+      amount: (json['amount'] as num).toDouble(),
+    );
+  }
 }

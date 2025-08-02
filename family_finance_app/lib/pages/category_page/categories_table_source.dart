@@ -6,14 +6,12 @@ class CategoriesTableSource extends DataTableSource {
   final BuildContext context;
   final List<ItemCategory> categories;
   final Function onRowLongPressed;
-  final VoidCallback loadTable;
   final fontFamily = Icons.home.fontFamily;
 
   CategoriesTableSource({
     required this.context,
     required this.categories,
     required this.onRowLongPressed,
-    required this.loadTable,
   });
 
   @override

@@ -2,24 +2,25 @@ import 'package:family_financial_app/abstractions/store.dart';
 import 'package:family_financial_app/components/bottom_action_menu.dart';
 import 'package:family_financial_app/components/row_action.dart';
 import 'package:family_financial_app/models/mypage.dart';
-import 'package:family_financial_app/models/responses/item_category.dart';
-import 'package:family_financial_app/pages/category_page/categories_detail.dart';
-import 'package:family_financial_app/pages/category_page/categories_form_page.dart';
-import 'package:family_financial_app/pages/category_page/categories_table_source.dart';
-import 'package:family_financial_app/plugins/api_category.dart';
+import 'package:family_financial_app/models/responses/item_budget.dart';
+import 'package:family_financial_app/pages/budgeting_page/budgeting_detail.dart';
+import 'package:family_financial_app/pages/budgeting_page/budgeting_form_page.dart';
+import 'package:family_financial_app/pages/budgeting_page/budgeting_table_source.dart';
+import 'package:family_financial_app/plugins/api_budgeting.dart';
+import 'package:family_financial_app/plugins/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh_flutter3/pull_to_refresh_flutter3.dart'
     hide RefreshIndicatorState;
 
-class CategoriesPage extends MyPage {
-  final ApiCategory api;
+class BudgetingPage extends MyPage {
+  final ApiBudgeting api;
   final Store store;
   final ScaffoldMessengerState messenger;
   final _refreshKey = GlobalKey<RefreshIndicatorState>();
 
-  final categories = ValueNotifier<List<ItemCategory>>([]);
+  final budgets = ValueNotifier<List<ItemBudget>>([]);
   final totalCount = ValueNotifier<int>(0);
   final pageSize = ValueNotifier<int>(10);
   final page = ValueNotifier<int>(1);
@@ -42,11 +43,11 @@ class CategoriesPage extends MyPage {
     DataColumn(label: Text('Created by', style: headerStyle)),
   ];
 
-  CategoriesPage(super.context)
+  BudgetingPage(super.context)
     : store = context.read<Store>(),
       messenger = ScaffoldMessenger.of(context),
-      api = ApiCategory(context),
-      super(route: 'CategoriesPage', title: 'Categories');
+      api = ApiBudgeting(context),
+      super(route: 'BudgetingPage', title: 'Budgeting');
 
   @override
   Color? appBarForegroundColor() {
@@ -55,7 +56,7 @@ class CategoriesPage extends MyPage {
 
   @override
   Color? appBarBackgroundColor() {
-    return Colors.orange;
+    return Colors.cyan;
   }
 
   @override
@@ -65,7 +66,7 @@ class CategoriesPage extends MyPage {
       mainAxisSize: MainAxisSize.min,
       key: const Key('appBarTitle'),
       children: [
-        Icon(Icons.category, color: appBarForegroundColor()),
+        Icon(Icons.attach_money, color: appBarForegroundColor()),
         const SizedBox(width: 10.0),
         Text(
           title,
@@ -101,14 +102,14 @@ class CategoriesPage extends MyPage {
             headingRowColor: WidgetStateProperty.all(Colors.grey.shade200),
             columns: columns,
             showEmptyRows: false,
-            source: CategoriesTableSource(
+            source: BudgetingTableSource(
               context: context,
-              categories: categories.value,
-              onRowLongPressed: (category) => showModalBottomSheet(
+              budgets: budgets.value,
+              onRowLongPressed: (budget) => showModalBottomSheet(
                 context: context,
                 builder: (context) {
                   return BottomActionMenu(
-                    itemDetail: CategoriesDetail(category: category),
+                    itemDetail: BudgetingDetail(budget: budget),
                     actions: [
                       RowAction(
                         icon: Icon(Icons.close, color: Colors.grey),
@@ -125,8 +126,8 @@ class CategoriesPage extends MyPage {
                           navigator.pop();
                           navigator.push(
                             MaterialPageRoute(
-                              builder: (context) => CategoriesFormPage(
-                                itemId: category.id,
+                              builder: (context) => BudgetingFormPage(
+                                itemId: budget.id,
                                 onClosed: () {
                                   refreshController.requestRefresh();
                                 },
@@ -142,7 +143,7 @@ class CategoriesPage extends MyPage {
                         label: 'Delete',
                         backgroundColor: Colors.red.shade50,
                         onPressed: () {
-                          showDeleteConfirmationDialog(context, category);
+                          showDeleteConfirmationDialog(context, budget);
                         },
                       ),
                     ],
@@ -163,38 +164,38 @@ class CategoriesPage extends MyPage {
     });
   }
 
-  /// Load the categories table or any necessary data.
+  /// Load the budgeting table or any necessary data.
   Future<void> loadTable(BuildContext context) async {
     final user = store.getUser();
     final loaderOverlay = context.loaderOverlay;
     loaderOverlay.show();
     if (user == null) throw Exception('User not logged in');
     try {
-      final response = await api.getCategories(
+      final response = await api.getBudgets(
         page: page.value,
         pageSize: pageSize.value,
       );
       if (response.success) {
         setState(() {
           isError.value = false;
-          categories.value = response.data?.items ?? [];
+          budgets.value = response.data?.items ?? [];
           totalCount.value = response.data?.totalCount ?? 0;
         });
       } else {
         isError.value = true;
         messenger.showSnackBar(
           SnackBar(
-            content: Text('Failed to load categories'),
+            content: Text('Failed to load budgets'),
             backgroundColor: Colors.red.shade400,
           ),
         );
       }
     } catch (error) {
       isError.value = true;
-      debugPrint('Error loading categories: $error');
+      debugPrint('Error loading budgets: $error');
       messenger.showSnackBar(
         SnackBar(
-          content: Text('Failed to load categories'),
+          content: Text('Failed to load budgets'),
           backgroundColor: Colors.red.shade400,
         ),
       );
@@ -204,7 +205,7 @@ class CategoriesPage extends MyPage {
 
   Future<void> deleteItem(
     String userId,
-    String categoryId,
+    String budgetId,
     OverlayExtensionHelper loaderOverlay,
     ScaffoldMessengerState messenger,
     NavigatorState navigator,
@@ -212,11 +213,11 @@ class CategoriesPage extends MyPage {
   ) async {
     loaderOverlay.show();
     try {
-      final response = await api.deleteCategory(categoryId: categoryId);
+      final response = await api.deleteBudget(budgetId: budgetId);
       if (response.success) {
         messenger.showSnackBar(
           SnackBar(
-            content: Text('Category deleted successfully'),
+            content: Text('Budget deleted successfully'),
             backgroundColor: Colors.green.shade400,
           ),
         );
@@ -225,7 +226,7 @@ class CategoriesPage extends MyPage {
       } else {
         messenger.showSnackBar(
           SnackBar(
-            content: Text('Failed to delete category'),
+            content: Text('Failed to delete budget'),
             backgroundColor: Colors.red.shade400,
           ),
         );
@@ -233,7 +234,7 @@ class CategoriesPage extends MyPage {
     } catch (error) {
       messenger.showSnackBar(
         SnackBar(
-          content: Text('Failed to delete category'),
+          content: Text('Failed to delete budget'),
           backgroundColor: Colors.red.shade400,
         ),
       );
@@ -244,19 +245,16 @@ class CategoriesPage extends MyPage {
     }
   }
 
-  void showDeleteConfirmationDialog(
-    BuildContext context,
-    ItemCategory category,
-  ) {
+  void showDeleteConfirmationDialog(BuildContext context, ItemBudget budget) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         final navigator = Navigator.of(context);
         final loaderOverlay = context.loaderOverlay;
         return AlertDialog(
-          title: Text('Delete Category'),
+          title: Text('Delete Budget'),
           content: Text(
-            'Are you sure you want to delete this category?\n${category.name}',
+            'Are you sure you want to delete this budget?\n${Utils.getMonthName(budget.month)} ${budget.year} - ${budget.category.name}',
           ),
           actions: <Widget>[
             TextButton(
@@ -270,7 +268,7 @@ class CategoriesPage extends MyPage {
               onPressed: () async {
                 await deleteItem(
                   store.getUser()?.userId ?? '',
-                  category.id,
+                  budget.id,
                   loaderOverlay,
                   messenger,
                   navigator,
@@ -287,13 +285,13 @@ class CategoriesPage extends MyPage {
   @override
   FloatingActionButton? floatingActionButton(BuildContext context) {
     return FloatingActionButton(
-      key: const Key('addCategoryButton'),
+      key: const Key('addBudgetButton'),
       onPressed: () {
-        // Navigate to the add category page
+        // Navigate to the add budget page
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => CategoriesFormPage(
+            builder: (context) => BudgetingFormPage(
               backgroundColor: appBarBackgroundColor()!,
               foregroundColor: appBarForegroundColor()!,
               onClosed: () {
@@ -312,7 +310,8 @@ class CategoriesPage extends MyPage {
 
   @override
   void dispose() {
-    categories.dispose();
+    budgets.dispose();
+    refreshController.dispose();
     totalCount.dispose();
     pageSize.dispose();
     page.dispose();
