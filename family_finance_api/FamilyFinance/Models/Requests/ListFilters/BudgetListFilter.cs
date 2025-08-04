@@ -5,4 +5,5 @@ public class BudgetListFilter : BaseListFilter
     public int? Month { get; set; } = null;
     public int? Year { get; set; } = null;
     public Guid? CategoryId { get; set; }
+    public bool? Active { get; set; }
 }

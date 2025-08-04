@@ -23,3 +23,4 @@ public class CategoryDto
         Color = category.Color;
     }
 }
+

@@ -32,6 +32,10 @@ public class BudgetService(AppDbContext dbContext) : BaseService(dbContext)
             query = query.Where(b => b.CategoryId == filter.CategoryId);
         }
 
+        if (filter.Active ?? true) {
+            query = query.Where(b => b.DeletedAt == null);
+        }
+
         var totalCount = await query.CountAsync();
         var items = await query
             .OrderBy(c => c.StartDate)
@@ -56,8 +60,9 @@ public class BudgetService(AppDbContext dbContext) : BaseService(dbContext)
     /// <returns></returns>
     public async Task<BudgetDto?> GetByIdAsync(Guid id)
     {
-        var budget = await DbContext.Budgets
-            .FirstOrDefaultAsync(c => c.Id == id);
+        var budget = await DbContext.Budgets.Where(c => c.Id == id)
+            .Include(x => x.Category)
+            .FirstOrDefaultAsync();
         return budget != null ? new BudgetDto(budget) : null;
     }
 
@@ -83,7 +88,8 @@ public class BudgetService(AppDbContext dbContext) : BaseService(dbContext)
         };
         await DbContext.Budgets.AddAsync(newBudget);
         await DbContext.SaveChangesAsync();
-        return new BudgetDto(newBudget);
+        return await GetByIdAsync(newBudget.Id) 
+               ?? throw new InvalidOperationException("Failed to retrieve the newly created budget.");
     }
 
     /// <summary>

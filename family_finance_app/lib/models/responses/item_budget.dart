@@ -1,26 +1,25 @@
 import 'package:family_financial_app/models/responses/item_category.dart';
+import 'package:family_financial_app/plugins/utils.dart';
 
 class ItemBudget {
   final String id;
-  final String period;
   final int month;
   final int year;
   final double amount;
   final ItemCategory category;
+  late final String period;
 
   ItemBudget({
     required this.id,
-    required this.period,
     required this.month,
     required this.year,
     required this.amount,
     required this.category,
-  });
+  }) : period = '${Utils.getMonthName(month)} $year';
 
   factory ItemBudget.fromJson(Map<String, dynamic> json) {
     return ItemBudget(
       id: json['id'] as String,
-      period: json['period'] as String,
       month: json['month'] as int,
       year: json['year'] as int,
       amount: (json['amount'] as num).toDouble(),
@@ -31,7 +30,6 @@ class ItemBudget {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'period': period,
       'month': month,
       'year': year,
       'amount': amount,

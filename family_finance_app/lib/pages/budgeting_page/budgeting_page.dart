@@ -30,17 +30,9 @@ class BudgetingPage extends MyPage {
   static const headerStyle = TextStyle(fontWeight: FontWeight.bold);
 
   final List<DataColumn> columns = const [
-    DataColumn(
-      label: Row(
-        children: [
-          SizedBox(width: 16.0),
-          Text('Period', style: headerStyle),
-        ],
-      ),
-    ),
+    DataColumn(label: Text('Period', style: headerStyle)),
     DataColumn(label: Text('Category', style: headerStyle)),
-    DataColumn(label: Text('Created At', style: headerStyle)),
-    DataColumn(label: Text('Created by', style: headerStyle)),
+    DataColumn(label: Text('Amount', style: headerStyle)),
   ];
 
   BudgetingPage(super.context)
@@ -175,7 +167,6 @@ class BudgetingPage extends MyPage {
         page: page.value,
         pageSize: pageSize.value,
       );
-      debugPrint(response.success.toString());
       if (response.success) {
         setState(() {
           isError.value = false;
@@ -193,7 +184,6 @@ class BudgetingPage extends MyPage {
       }
     } catch (error) {
       isError.value = true;
-      debugPrint('Error loading budgets: $error');
       messenger.showSnackBar(
         SnackBar(
           content: Text('Failed to load budgets'),

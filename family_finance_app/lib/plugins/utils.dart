@@ -72,12 +72,7 @@ class Utils {
 
   static String formatCurrency(double amount) {
     // Format the amount as a currency string
-    return amount
-        .toStringAsFixed(2)
-        .replaceAllMapped(
-          RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
-          (Match m) => '${m[1]},',
-        );
+    return 'Rp. ${amount.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d)(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}';
   }
 
   static String formatDate(DateTime date) {

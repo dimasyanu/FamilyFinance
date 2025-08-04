@@ -32,10 +32,10 @@ class _BudgetingFormPageState extends State<BudgetingFormPage> {
 
   final _formKey = GlobalKey<FormState>();
 
-  final _category = ValueNotifier<String>('');
-  final _month = ValueNotifier<int>(DateTime.now().month);
-  final _year = ValueNotifier<int>(DateTime.now().year);
-  final _amount = ValueNotifier<double>(0.0);
+  bool _isLoaded = false;
+  String? _category;
+  int? _month = DateTime.now().month;
+  int? _year = DateTime.now().year;
 
   final _amountController = CurrencyTextFieldController(
     currencySymbol: 'Rp. ',
@@ -43,38 +43,22 @@ class _BudgetingFormPageState extends State<BudgetingFormPage> {
     thousandSymbol: '.',
   );
 
-  final _itemCategories = List<ItemCategory>.empty(growable: true);
-
-  @override
-  void initState() {
-    super.initState();
-
-    if (widget.isNew) return;
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      loadCategoryData(context);
-    });
-  }
-
   Future<void> loadCategoryData(BuildContext context) async {
     final api = ApiBudgeting(context);
-    final loaderOverlay = context.loaderOverlay;
     final messager = ScaffoldMessenger.of(context);
-    loaderOverlay.show();
     try {
       final response = await api.getBudgetById(budgetId: widget.itemId!);
 
       if (response.hasError) {
         throw Exception('Failed to load budget: ${response.message}');
       }
-      setState(() {
-        _category.value = response.data?.category.id ?? '';
-        _month.value = response.data?.month ?? DateTime.now().month;
-        _year.value = response.data?.year ?? DateTime.now().year;
-        _amount.value = response.data?.amount ?? 0.0;
+      _category = response.data?.category?.id ?? '';
+      _month = response.data?.month ?? DateTime.now().month;
+      _year = response.data?.year ?? DateTime.now().year;
 
-        _amountController.text = _amount.value.toStringAsFixed(2);
-      });
+      _amountController.forceValue(
+        initDoubleValue: response.data?.amount ?? 0.0,
+      );
     } catch (error) {
       messager.showSnackBar(
         SnackBar(
@@ -82,8 +66,6 @@ class _BudgetingFormPageState extends State<BudgetingFormPage> {
           backgroundColor: Colors.red.shade400,
         ),
       );
-    } finally {
-      loaderOverlay.hide();
     }
   }
 
@@ -105,7 +87,7 @@ class _BudgetingFormPageState extends State<BudgetingFormPage> {
           child: Column(
             children: <Widget>[
               FutureBuilder<List<ItemCategory>>(
-                future: getDropdownItems(context),
+                future: loadFormData(context),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Center(child: CircularProgressIndicator());
@@ -125,6 +107,10 @@ class _BudgetingFormPageState extends State<BudgetingFormPage> {
                     );
                   }
 
+                  debugPrint(
+                    '${snapshot.data!.map((x) => x.id).toList()} categories loaded',
+                  );
+                  debugPrint('Selected category: $_category');
                   return Form(
                     key: _formKey,
                     child: Column(
@@ -132,9 +118,7 @@ class _BudgetingFormPageState extends State<BudgetingFormPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
                         DropdownButtonFormField<String>(
-                          value: _category.value.isEmpty
-                              ? null
-                              : _category.value,
+                          value: _category,
                           hint: Text('Select a Category'),
                           items: snapshot.data!.map((category) {
                             return DropdownMenuItem<String>(
@@ -155,7 +139,7 @@ class _BudgetingFormPageState extends State<BudgetingFormPage> {
                                     category.name,
                                     style: TextStyle(
                                       fontSize: 16,
-                                      color: category.id == _category.value
+                                      color: category.id == _category
                                           ? Colors.black
                                           : Colors.blueGrey.shade300,
                                     ),
@@ -167,7 +151,7 @@ class _BudgetingFormPageState extends State<BudgetingFormPage> {
                           onChanged: (value) {
                             if (value == null) return;
                             setState(() {
-                              _category.value = value;
+                              _category = value;
                             });
                           },
                           decoration: InputDecoration(labelText: 'Category'),
@@ -178,26 +162,22 @@ class _BudgetingFormPageState extends State<BudgetingFormPage> {
                           keyboardType: TextInputType.numberWithOptions(
                             decimal: true,
                           ),
-                          onChanged: (value) => setState(() {
-                            debugPrint('Amount changed: $value');
-                            _amount.value = double.tryParse(value) ?? 0.0;
-                          }),
                           validator: (value) => value == null || value.isEmpty
                               ? 'Please enter an amount'
                               : null,
                         ),
-                        DropdownButtonFormField<String>(
-                          value: utils.monthNames[_month.value - 1],
+                        DropdownButtonFormField<int>(
+                          value: _month,
                           menuMaxHeight: 270,
                           items: utils.monthNames.map((month) {
                             final i = utils.monthNames.indexOf(month) + 1;
-                            return DropdownMenuItem<String>(
-                              value: month,
+                            return DropdownMenuItem<int>(
+                              value: i,
                               child: Text(
                                 month,
                                 style: TextStyle(
                                   fontSize: 16,
-                                  color: i == _month.value
+                                  color: i == _month
                                       ? Colors.black
                                       : Colors.blueGrey.shade300,
                                 ),
@@ -207,14 +187,13 @@ class _BudgetingFormPageState extends State<BudgetingFormPage> {
                           onChanged: (value) {
                             if (value == null) return;
                             setState(() {
-                              _month.value =
-                                  utils.monthNames.indexOf(value) + 1;
+                              _month = value; // Update the month value
                             });
                           },
                           decoration: InputDecoration(labelText: 'Month'),
                         ),
                         DropdownButtonFormField<int>(
-                          value: _year.value,
+                          value: _year,
                           items: List.generate(5, (index) {
                             int year = DateTime.now().year - 2 + index;
                             return DropdownMenuItem<int>(
@@ -223,7 +202,7 @@ class _BudgetingFormPageState extends State<BudgetingFormPage> {
                                 year.toString(),
                                 style: TextStyle(
                                   fontSize: 16,
-                                  color: year == _year.value
+                                  color: year == _year
                                       ? Colors.black
                                       : Colors.blueGrey.shade300,
                                 ),
@@ -233,7 +212,7 @@ class _BudgetingFormPageState extends State<BudgetingFormPage> {
                           onChanged: (value) {
                             if (value == null) return;
                             setState(() {
-                              _year.value = value;
+                              _year = value;
                             });
                           },
                           decoration: InputDecoration(labelText: 'Year'),
@@ -305,34 +284,38 @@ class _BudgetingFormPageState extends State<BudgetingFormPage> {
     );
   }
 
-  Future<List<ItemCategory>> getDropdownItems(BuildContext context) async {
-    final api = ApiCategory(context);
+  Future<List<ItemCategory>> loadFormData(BuildContext context) async {
     final loaderOverlay = context.loaderOverlay;
+    final api = ApiCategory(context);
 
     loaderOverlay.show();
+
+    if (!widget.isNew && !_isLoaded) {
+      await loadCategoryData(context);
+      _isLoaded = true;
+    }
+
     final response = await api.getCategories();
     loaderOverlay.hide();
     if (response.hasError) {
       throw Exception('Failed to load categories: ${response.message}');
     }
 
-    _itemCategories.clear();
-    _itemCategories.addAll(response.data?.items ?? []);
     if (response.data?.items.isEmpty ?? true) {
       throw Exception('No categories available');
     }
 
-    return _itemCategories;
+    return response.data?.items ?? [];
   }
 
   Future<void> save(BuildContext context) async {
     final api = ApiBudgeting(context);
     final payload = SaveBudget(
       id: widget.itemId,
-      amount: _amount.value,
-      categoryId: _category.value,
-      month: _month.value,
-      year: _year.value,
+      amount: _amountController.doubleValue,
+      categoryId: _category!,
+      month: _month!,
+      year: _year!,
     );
 
     await api.saveBudget(payload: payload);
@@ -351,11 +334,6 @@ class _BudgetingFormPageState extends State<BudgetingFormPage> {
 
   @override
   void dispose() {
-    _category.dispose();
-    _month.dispose();
-    _year.dispose();
-    _amount.dispose();
-
     _amountController.dispose();
 
     _formKey.currentState?.dispose();

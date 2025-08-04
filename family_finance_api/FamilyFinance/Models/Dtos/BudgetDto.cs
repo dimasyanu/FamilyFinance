@@ -5,8 +5,8 @@ namespace FamilyFinance.Models.Dtos;
 public class BudgetDto
 {
     public Guid Id { get; set; }
-    public DateTime StartDate { get; set; }
-    public DateTime EndDate { get; set; }
+    public int Month { get; set; }
+    public int Year { get; set; }
     public decimal Amount { get; set; }
     public CategoryDto Category { get; set; } = null!;
 
@@ -14,8 +14,8 @@ public class BudgetDto
     public BudgetDto(Budget budget)
     {
         Id = budget.Id;
-        StartDate = budget.StartDate;
-        EndDate = budget.EndDate;
+        Month = budget.StartDate.Month;
+        Year = budget.StartDate.Year;
         Amount = budget.Amount;
         Category = new CategoryDto(budget.Category);
     }

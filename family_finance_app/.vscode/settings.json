@@ -1,5 +1,5 @@
 {
-  "cmake.sourceDirectory": "C:/Users/Yanoo/source/repos/personal/FamilyFinancial/family_financial_app/windows",
+  "cmake.sourceDirectory": "/home/yanoo/projects/personal/family-finance/family_finance_app/linux",
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "Dart-Code.flutter",
 }

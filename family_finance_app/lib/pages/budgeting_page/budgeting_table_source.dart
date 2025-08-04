@@ -22,7 +22,19 @@ class BudgetingTableSource extends DataTableSource {
       onLongPress: () => onRowLongPressed(budget),
       cells: [
         DataCell(Text('${Utils.getMonthName(budget.month)} ${budget.year}')),
-        DataCell(Text(budget.category.name)),
+        DataCell(
+          Row(
+            children: [
+              Icon(
+                IconData(budget.category.icon, fontFamily: fontFamily),
+                color: Utils.hexStringToColor(budget.category.color),
+              ),
+              SizedBox(width: 4.0),
+              Text(budget.category.name),
+            ],
+          ),
+        ),
+        DataCell(Text(Utils.formatCurrency(budget.amount))),
       ],
     );
   }

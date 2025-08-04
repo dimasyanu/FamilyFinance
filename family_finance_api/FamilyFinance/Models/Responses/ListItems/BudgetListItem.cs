@@ -5,8 +5,8 @@ namespace FamilyFinance.Models.Responses.ListItems;
 public class BudgetListItem
 {
     public Guid Id { get; set; }
-    public DateTime StartDate { get; set; }
-    public DateTime EndDate { get; set; }
+    public int Month { get; set; }
+    public int Year { get; set; }
     public decimal Amount { get; set; }
     public CategoryListItem Category { get; set; } = null!;
     public BudgetListItem()
@@ -15,8 +15,8 @@ public class BudgetListItem
     public BudgetListItem(Budget budget)
     {
         Id = budget.Id;
-        StartDate = budget.StartDate;
-        EndDate = budget.EndDate;
+        Month = budget.StartDate.Month;
+        Year = budget.EndDate.Year;
         Amount = budget.Amount;
         Category = new CategoryListItem(budget.Category);
     }

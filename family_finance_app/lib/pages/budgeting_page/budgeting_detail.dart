@@ -15,18 +15,21 @@ class BudgetingDetail extends StatelessWidget {
           budget.period,
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
-        Text('Rp. ${Utils.formatCurrency(budget.amount)}'),
-        Row(
-          children: [
-            Icon(
-              IconData(budget.category.icon, fontFamily: 'MaterialIcons'),
-              color: Utils.hexStringToColor(budget.category.color),
-            ),
-            const SizedBox(width: 8.0),
-            Text(budget.category.name),
-          ],
+        Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                IconData(budget.category.icon, fontFamily: 'MaterialIcons'),
+                color: Utils.hexStringToColor(budget.category.color),
+              ),
+              const SizedBox(width: 8.0),
+              Text(budget.category.name),
+            ],
+          ),
         ),
-        Text('${Utils.getMonthName(budget.month)} ${budget.year}'),
+        SizedBox(height: 10.0),
+        Text(Utils.formatCurrency(budget.amount)),
       ],
     );
   }
