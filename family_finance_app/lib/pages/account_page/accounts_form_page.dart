@@ -1,0 +1,275 @@
+import 'package:family_financial_app/abstractions/store.dart';
+import 'package:family_financial_app/models/requests/save_account.dart';
+import 'package:family_financial_app/plugins/api_accounts.dart';
+import 'package:family_financial_app/plugins/size_util.dart';
+import 'package:family_financial_app/plugins/utils.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:loader_overlay/loader_overlay.dart';
+import 'package:provider/provider.dart';
+
+class AccountsFormPage extends StatefulWidget {
+  final String? itemId;
+  final VoidCallback? onClosed;
+  get isNew => itemId == null || itemId!.isEmpty;
+
+  const AccountsFormPage({this.itemId, this.onClosed, super.key});
+
+  @override
+  State<AccountsFormPage> createState() => _AccountsFormPageState();
+}
+
+class _AccountsFormPageState extends State<AccountsFormPage> {
+  Color pickerColor = Color.fromARGB(255, 255, 255, 255);
+
+  final _formKey = GlobalKey<FormState>();
+
+  final _accountName = ValueNotifier<String>('');
+  final _description = ValueNotifier<String>('');
+  final _color = ValueNotifier<String>('');
+
+  final _colorController = TextEditingController();
+  final _accountNameController = TextEditingController();
+  final _descriptionController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.isNew) {
+      _color.value = '#000000'; // Default color for new accounts
+      pickerColor = Utils.hexStringToColor(_color.value);
+    } else {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        loadAccountData(context);
+      });
+    }
+  }
+
+  Future<void> loadAccountData(BuildContext context) async {
+    final api = ApiAccounts(context);
+    final store = context.read<Store>();
+    final loaderOverlay = context.loaderOverlay;
+    final messager = ScaffoldMessenger.of(context);
+    loaderOverlay.show();
+    try {
+      final response = await api.getAccountById(
+        userId: store.getUser()?.userId ?? '',
+        accountId: widget.itemId!,
+      );
+
+      if (response.hasError) {
+        throw Exception('Failed to load account: ${response.message}');
+      }
+      setState(() {
+        _accountName.value = response.data?.name ?? '';
+        _description.value = response.data?.description ?? '';
+        _color.value = response.data?.color ?? '';
+        _accountNameController.text = _accountName.value;
+        _descriptionController.text = _description.value;
+        pickerColor = Utils.hexStringToColor(_color.value);
+        _colorController.text = _color.value;
+      });
+    } catch (error) {
+      messager.showSnackBar(
+        SnackBar(
+          content: Text('Error loading account: $error'),
+          backgroundColor: Colors.red.shade400,
+        ),
+      );
+    } finally {
+      loaderOverlay.hide();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final sizeUtil = SizeUtil(context);
+    final messager = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.isNew ? 'New Account' : 'Account Detail'),
+      ),
+      body: Container(
+        padding: sizeUtil.dynamicPadding(
+          maxXPercentage: .1,
+          maxYPercentage: .04,
+        ),
+        child: Column(
+          children: <Widget>[
+            Center(
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  spacing: 10,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    TextFormField(
+                      controller: _accountNameController,
+                      decoration: InputDecoration(labelText: 'Account Name'),
+                      onChanged: (value) => _accountName.value = value,
+                      validator: (value) => value == null || value.isEmpty
+                          ? 'Please enter an account name'
+                          : null,
+                    ),
+                    TextFormField(
+                      controller: _descriptionController,
+                      decoration: InputDecoration(labelText: 'Description'),
+                      maxLines: null,
+                      keyboardType: TextInputType.multiline,
+                      onChanged: (value) => _description.value = value,
+                    ),
+                    TextFormField(
+                      controller: _colorController,
+                      decoration: InputDecoration(
+                        labelText: 'Color',
+                        prefixIcon: Icon(Icons.circle, color: pickerColor),
+                      ),
+                      readOnly: true,
+                      onTap: () => _dialogBuilder(context),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Expanded(
+              child: Align(
+                alignment: FractionalOffset.bottomCenter,
+                child: ElevatedButton.icon(
+                  key: const Key('saveAccountButton'),
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: Colors.blueAccent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    minimumSize: Size(double.infinity, 48),
+                  ),
+                  onPressed: () {
+                    final loaderOverlay = context.loaderOverlay;
+                    if (_formKey.currentState!.validate()) {
+                      loaderOverlay.show();
+                      save(context)
+                          .then((_) {
+                            messager.showSnackBar(
+                              SnackBar(
+                                content: Text('Account saved successfully!'),
+                                backgroundColor: Colors.green.shade400,
+                              ),
+                            );
+
+                            navigator.pop();
+                            onClosed();
+                          })
+                          .catchError((error) {
+                            messager.showSnackBar(
+                              SnackBar(
+                                content: Text('Error saving account: $error'),
+                                backgroundColor: Colors.red.shade400,
+                              ),
+                            );
+                          })
+                          .whenComplete(() => loaderOverlay.hide());
+
+                      return;
+                    }
+
+                    messager.showSnackBar(
+                      SnackBar(
+                        content: Text('Please fill in all fields'),
+                        backgroundColor: Colors.red.shade400,
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.save),
+                  label: Text('Save'),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> save(BuildContext context) async {
+    final api = ApiAccounts(context);
+    final store = context.read<Store>();
+    final payload = SaveAccount(
+      id: widget.itemId,
+      name: _accountName.value,
+      description: _description.value,
+      color: _color.value,
+    );
+
+    await api.saveAccount(
+      userId: store.getUser()?.userId ?? '',
+      payload: payload,
+    );
+  }
+
+  void changeColor(Color color) {
+    setState(() {
+      pickerColor = color;
+    });
+  }
+
+  Future<void> _dialogBuilder(BuildContext context) async {
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Select Color'),
+          content: SingleChildScrollView(
+            child: ColorPicker(
+              enableAlpha: false,
+              pickerColor: pickerColor,
+              onColorChanged: changeColor,
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              child: Text('Confirm'),
+              onPressed: () {
+                setState(() {
+                  final hex = Utils.colorToHex(
+                    pickerColor,
+                    includeHashSign: true,
+                    enableAlpha: false,
+                    toUpperCase: false,
+                  );
+                  _color.value = hex;
+                  debugPrint('Selected hex color: $hex');
+                  _colorController.text = _color.value;
+                });
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void onClosed() {
+    if (widget.onClosed == null) return;
+    widget.onClosed!.call();
+  }
+
+  @override
+  void dispose() {
+    _accountName.dispose();
+    _description.dispose();
+    _color.dispose();
+    _colorController.dispose();
+    _formKey.currentState?.dispose();
+    super.dispose();
+  }
+}
