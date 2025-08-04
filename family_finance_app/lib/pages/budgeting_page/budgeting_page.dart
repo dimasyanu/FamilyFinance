@@ -34,11 +34,11 @@ class BudgetingPage extends MyPage {
       label: Row(
         children: [
           SizedBox(width: 16.0),
-          Text('Name', style: headerStyle),
+          Text('Period', style: headerStyle),
         ],
       ),
     ),
-    DataColumn(label: Text('Description', style: headerStyle)),
+    DataColumn(label: Text('Category', style: headerStyle)),
     DataColumn(label: Text('Created At', style: headerStyle)),
     DataColumn(label: Text('Created by', style: headerStyle)),
   ];
@@ -175,6 +175,7 @@ class BudgetingPage extends MyPage {
         page: page.value,
         pageSize: pageSize.value,
       );
+      debugPrint(response.success.toString());
       if (response.success) {
         setState(() {
           isError.value = false;

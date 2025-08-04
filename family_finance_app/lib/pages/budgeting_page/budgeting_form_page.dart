@@ -1,7 +1,10 @@
+import 'package:currency_textfield/currency_textfield.dart';
 import 'package:family_financial_app/models/requests/save_budget.dart';
+import 'package:family_financial_app/models/responses/item_category.dart';
 import 'package:family_financial_app/plugins/api_budgeting.dart';
+import 'package:family_financial_app/plugins/api_category.dart';
 import 'package:family_financial_app/plugins/size_util.dart';
-import 'package:family_financial_app/plugins/utils.dart' as Utils;
+import 'package:family_financial_app/plugins/utils.dart' as utils;
 import 'package:flutter/material.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 
@@ -34,10 +37,13 @@ class _BudgetingFormPageState extends State<BudgetingFormPage> {
   final _year = ValueNotifier<int>(DateTime.now().year);
   final _amount = ValueNotifier<double>(0.0);
 
-  final _categoryController = TextEditingController();
-  final _monthController = TextEditingController();
-  final _yearController = TextEditingController();
-  final _amountController = TextEditingController();
+  final _amountController = CurrencyTextFieldController(
+    currencySymbol: 'Rp. ',
+    numberOfDecimals: 0,
+    thousandSymbol: '.',
+  );
+
+  final _itemCategories = List<ItemCategory>.empty(growable: true);
 
   @override
   void initState() {
@@ -67,9 +73,6 @@ class _BudgetingFormPageState extends State<BudgetingFormPage> {
         _year.value = response.data?.year ?? DateTime.now().year;
         _amount.value = response.data?.amount ?? 0.0;
 
-        _categoryController.text = _category.value;
-        _monthController.text = _month.value.toString();
-        _yearController.text = _year.value.toString();
         _amountController.text = _amount.value.toStringAsFixed(2);
       });
     } catch (error) {
@@ -93,152 +96,233 @@ class _BudgetingFormPageState extends State<BudgetingFormPage> {
       appBar: AppBar(
         title: Text(widget.isNew ? 'New Category' : 'Category Detail'),
       ),
-      body: Container(
-        padding: sizeUtil.dynamicPadding(
-          maxXPercentage: .1,
-          maxYPercentage: .04,
-        ),
-        child: Column(
-          children: <Widget>[
-            Center(
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  spacing: 10,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    TextFormField(
-                      controller: _categoryController,
-                      decoration: InputDecoration(labelText: 'Category Name'),
-                      onChanged: (value) => _category.value = value,
-                      validator: (value) => value == null || value.isEmpty
-                          ? 'Please enter a category'
-                          : null,
-                    ),
-                    TextFormField(
-                      controller: _amountController,
-                      decoration: InputDecoration(
-                        labelText: 'Amount',
-                        prefixIcon: Icon(Icons.attach_money),
+      body: LoaderOverlay(
+        child: Container(
+          padding: sizeUtil.dynamicPadding(
+            maxXPercentage: .1,
+            maxYPercentage: .04,
+          ),
+          child: Column(
+            children: <Widget>[
+              FutureBuilder<List<ItemCategory>>(
+                future: getDropdownItems(context),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(
+                      child: Text(
+                        'Error loading categories: ${snapshot.error}',
+                        style: TextStyle(color: Colors.red),
                       ),
-                      keyboardType: TextInputType.numberWithOptions(
-                        decimal: true,
+                    );
+                  } else if (snapshot.data?.isEmpty ?? true) {
+                    return Center(
+                      child: Text(
+                        'No categories available',
+                        style: TextStyle(color: Colors.grey),
                       ),
-                      onChanged: (value) =>
-                          _amount.value = double.tryParse(value) ?? 0.0,
-                      validator: (value) => value == null || value.isEmpty
-                          ? 'Please enter an amount'
-                          : null,
-                    ),
-                    DropdownButtonFormField<String>(
-                      value: _month.value.toString(),
-                      items: Utils.shortMonthNames.map((month) {
-                        return DropdownMenuItem<String>(
-                          value: month,
-                          child: Text(month),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        if (value != null) {
-                          _month.value = Utils.monthNames.indexOf(value) + 1;
-                          _monthController.text = value;
-                        }
-                      },
-                      decoration: InputDecoration(labelText: 'Month'),
-                      validator: (value) => value == null || value.isEmpty
-                          ? 'Please select a month'
-                          : null,
-                    ),
-                    TextFormField(
-                      controller: _yearController,
-                      keyboardType: TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      decoration: InputDecoration(labelText: 'Year'),
-                      readOnly: true,
-                      onTap: showMonthPicker,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Expanded(
-              child: Align(
-                alignment: FractionalOffset.bottomCenter,
-                child: ElevatedButton.icon(
-                  key: const Key('saveCategoryButton'),
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: widget.foregroundColor,
-                    backgroundColor: widget.backgroundColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    minimumSize: Size(double.infinity, 48),
-                  ),
-                  onPressed: () {
-                    final loaderOverlay = context.loaderOverlay;
+                    );
+                  }
 
-                    if (!_formKey.currentState!.validate()) {
-                      messager.showSnackBar(
-                        SnackBar(
-                          content: Text('Please fill in all fields'),
-                          backgroundColor: Colors.red.shade400,
+                  return Form(
+                    key: _formKey,
+                    child: Column(
+                      spacing: 10,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        DropdownButtonFormField<String>(
+                          value: _category.value.isEmpty
+                              ? null
+                              : _category.value,
+                          hint: Text('Select a Category'),
+                          items: snapshot.data!.map((category) {
+                            return DropdownMenuItem<String>(
+                              value: category.id,
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    IconData(
+                                      category.icon,
+                                      fontFamily: 'MaterialIcons',
+                                    ),
+                                    color: utils.Utils.hexStringToColor(
+                                      category.color,
+                                    ),
+                                  ),
+                                  SizedBox(width: 10),
+                                  Text(
+                                    category.name,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: category.id == _category.value
+                                          ? Colors.black
+                                          : Colors.blueGrey.shade300,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            if (value == null) return;
+                            setState(() {
+                              _category.value = value;
+                            });
+                          },
+                          decoration: InputDecoration(labelText: 'Category'),
                         ),
-                      );
-                    }
+                        TextFormField(
+                          controller: _amountController,
+                          decoration: InputDecoration(labelText: 'Amount'),
+                          keyboardType: TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          onChanged: (value) => setState(() {
+                            debugPrint('Amount changed: $value');
+                            _amount.value = double.tryParse(value) ?? 0.0;
+                          }),
+                          validator: (value) => value == null || value.isEmpty
+                              ? 'Please enter an amount'
+                              : null,
+                        ),
+                        DropdownButtonFormField<String>(
+                          value: utils.monthNames[_month.value - 1],
+                          menuMaxHeight: 270,
+                          items: utils.monthNames.map((month) {
+                            final i = utils.monthNames.indexOf(month) + 1;
+                            return DropdownMenuItem<String>(
+                              value: month,
+                              child: Text(
+                                month,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: i == _month.value
+                                      ? Colors.black
+                                      : Colors.blueGrey.shade300,
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            if (value == null) return;
+                            setState(() {
+                              _month.value =
+                                  utils.monthNames.indexOf(value) + 1;
+                            });
+                          },
+                          decoration: InputDecoration(labelText: 'Month'),
+                        ),
+                        DropdownButtonFormField<int>(
+                          value: _year.value,
+                          items: List.generate(5, (index) {
+                            int year = DateTime.now().year - 2 + index;
+                            return DropdownMenuItem<int>(
+                              value: year,
+                              child: Text(
+                                year.toString(),
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: year == _year.value
+                                      ? Colors.black
+                                      : Colors.blueGrey.shade300,
+                                ),
+                              ),
+                            );
+                          }),
+                          onChanged: (value) {
+                            if (value == null) return;
+                            setState(() {
+                              _year.value = value;
+                            });
+                          },
+                          decoration: InputDecoration(labelText: 'Year'),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+              Expanded(
+                child: Align(
+                  alignment: FractionalOffset.bottomCenter,
+                  child: ElevatedButton.icon(
+                    key: const Key('saveCategoryButton'),
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: widget.foregroundColor,
+                      backgroundColor: widget.backgroundColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      minimumSize: Size(double.infinity, 48),
+                    ),
+                    onPressed: () {
+                      final loaderOverlay = context.loaderOverlay;
 
-                    loaderOverlay.show();
-                    save(context)
-                        .then((_) {
-                          messager.showSnackBar(
-                            SnackBar(
-                              content: Text('Category saved successfully!'),
-                              backgroundColor: Colors.green.shade400,
-                            ),
-                          );
+                      if (!_formKey.currentState!.validate()) {
+                        messager.showSnackBar(
+                          SnackBar(
+                            content: Text('Please fill in all fields'),
+                            backgroundColor: Colors.red.shade400,
+                          ),
+                        );
+                      }
 
-                          navigator.pop();
-                          onClosed();
-                        })
-                        .catchError((error) {
-                          messager.showSnackBar(
-                            SnackBar(
-                              content: Text('Error saving category: $error'),
-                              backgroundColor: Colors.red.shade400,
-                            ),
-                          );
-                        })
-                        .whenComplete(() => loaderOverlay.hide());
+                      loaderOverlay.show();
+                      save(context)
+                          .then((_) {
+                            messager.showSnackBar(
+                              SnackBar(
+                                content: Text('Category saved successfully!'),
+                                backgroundColor: Colors.green.shade400,
+                              ),
+                            );
 
-                    return;
-                  },
-                  icon: const Icon(Icons.save),
-                  label: Text('Save'),
+                            navigator.pop();
+                            onClosed();
+                          })
+                          .catchError((error) {
+                            messager.showSnackBar(
+                              SnackBar(
+                                content: Text('Error saving category: $error'),
+                                backgroundColor: Colors.red.shade400,
+                              ),
+                            );
+                          })
+                          .whenComplete(() => loaderOverlay.hide());
+
+                      return;
+                    },
+                    icon: const Icon(Icons.save),
+                    label: Text('Save'),
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Future<void> showMonthPicker() async {
-    final date = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-      initialEntryMode: DatePickerEntryMode.calendar,
-    );
-    if (date != null) {
-      setState(() {
-        _year.value = date.year;
-        _yearController.text = date.year.toString();
-        _month.value = date.month;
-        _monthController.text = date.month.toString();
-      });
+  Future<List<ItemCategory>> getDropdownItems(BuildContext context) async {
+    final api = ApiCategory(context);
+    final loaderOverlay = context.loaderOverlay;
+
+    loaderOverlay.show();
+    final response = await api.getCategories();
+    loaderOverlay.hide();
+    if (response.hasError) {
+      throw Exception('Failed to load categories: ${response.message}');
     }
+
+    _itemCategories.clear();
+    _itemCategories.addAll(response.data?.items ?? []);
+    if (response.data?.items.isEmpty ?? true) {
+      throw Exception('No categories available');
+    }
+
+    return _itemCategories;
   }
 
   Future<void> save(BuildContext context) async {
@@ -272,9 +356,6 @@ class _BudgetingFormPageState extends State<BudgetingFormPage> {
     _year.dispose();
     _amount.dispose();
 
-    _categoryController.dispose();
-    _monthController.dispose();
-    _yearController.dispose();
     _amountController.dispose();
 
     _formKey.currentState?.dispose();
