@@ -74,11 +74,21 @@ class _BudgetingFormPageState extends State<BudgetingFormPage> {
     final sizeUtil = SizeUtil(context);
     final messager = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.isNew ? 'New Category' : 'Category Detail'),
+        title: Text(widget.isNew ? 'New Budgeting' : 'Budgeting Detail'),
       ),
       body: LoaderOverlay(
+        layoutBuilder: (w, child) {
+          return Column(
+            children: [
+              Expanded(child: w ?? SizedBox.shrink()),
+              if (context.loaderOverlay.visible)
+                Center(child: CircularProgressIndicator()),
+            ],
+          );
+        },
         child: Container(
           padding: sizeUtil.dynamicPadding(
             maxXPercentage: .1,
@@ -107,10 +117,6 @@ class _BudgetingFormPageState extends State<BudgetingFormPage> {
                     );
                   }
 
-                  debugPrint(
-                    '${snapshot.data!.map((x) => x.id).toList()} categories loaded',
-                  );
-                  debugPrint('Selected category: $_category');
                   return Form(
                     key: _formKey,
                     child: Column(
@@ -135,24 +141,13 @@ class _BudgetingFormPageState extends State<BudgetingFormPage> {
                                     ),
                                   ),
                                   SizedBox(width: 10),
-                                  Text(
-                                    category.name,
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: category.id == _category
-                                          ? Colors.black
-                                          : Colors.blueGrey.shade300,
-                                    ),
-                                  ),
+                                  Text(category.name),
                                 ],
                               ),
                             );
                           }).toList(),
                           onChanged: (value) {
-                            if (value == null) return;
-                            setState(() {
-                              _category = value;
-                            });
+                            _category = value;
                           },
                           decoration: InputDecoration(labelText: 'Category'),
                         ),
@@ -173,22 +168,11 @@ class _BudgetingFormPageState extends State<BudgetingFormPage> {
                             final i = utils.monthNames.indexOf(month) + 1;
                             return DropdownMenuItem<int>(
                               value: i,
-                              child: Text(
-                                month,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: i == _month
-                                      ? Colors.black
-                                      : Colors.blueGrey.shade300,
-                                ),
-                              ),
+                              child: Text(month),
                             );
                           }).toList(),
                           onChanged: (value) {
-                            if (value == null) return;
-                            setState(() {
-                              _month = value; // Update the month value
-                            });
+                            _month = value; // Update the month value
                           },
                           decoration: InputDecoration(labelText: 'Month'),
                         ),
@@ -198,22 +182,11 @@ class _BudgetingFormPageState extends State<BudgetingFormPage> {
                             int year = DateTime.now().year - 2 + index;
                             return DropdownMenuItem<int>(
                               value: year,
-                              child: Text(
-                                year.toString(),
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: year == _year
-                                      ? Colors.black
-                                      : Colors.blueGrey.shade300,
-                                ),
-                              ),
+                              child: Text(year.toString()),
                             );
                           }),
                           onChanged: (value) {
-                            if (value == null) return;
-                            setState(() {
-                              _year = value;
-                            });
+                            _year = value;
                           },
                           decoration: InputDecoration(labelText: 'Year'),
                         ),
@@ -285,10 +258,9 @@ class _BudgetingFormPageState extends State<BudgetingFormPage> {
   }
 
   Future<List<ItemCategory>> loadFormData(BuildContext context) async {
-    final loaderOverlay = context.loaderOverlay;
     final api = ApiCategory(context);
 
-    loaderOverlay.show();
+    // loaderOverlay.show();
 
     if (!widget.isNew && !_isLoaded) {
       await loadCategoryData(context);
@@ -296,7 +268,7 @@ class _BudgetingFormPageState extends State<BudgetingFormPage> {
     }
 
     final response = await api.getCategories();
-    loaderOverlay.hide();
+    // loaderOverlay.hide();
     if (response.hasError) {
       throw Exception('Failed to load categories: ${response.message}');
     }

@@ -22,6 +22,8 @@ builder.Services.AddScoped<BudgetService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<TransactionService>();
+builder.Services.AddScoped<DelayMiddleware>();
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(cfg => {
@@ -103,6 +105,7 @@ if (app.Environment.IsDevelopment()) {
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseExceptionHandler();
+app.UseMiddleware<DelayMiddleware>();
 
 app.MapControllers();
 app.UseCors("AllowAllOrigins");

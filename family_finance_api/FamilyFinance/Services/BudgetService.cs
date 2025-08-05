@@ -117,7 +117,9 @@ public class BudgetService(AppDbContext dbContext) : BaseService(dbContext)
 
         DbContext.Budgets.Update(budget);
         await DbContext.SaveChangesAsync();
-        return new BudgetDto(budget);
+        var budgetDto = await GetByIdAsync(budget.Id);
+        if (budgetDto == null) throw new EntityNotFoundException($"Category save failure");
+        return budgetDto;
     }
 
     /// <summary>

@@ -40,7 +40,7 @@ public class BudgetController(BudgetService service) : BaseController
         if (request == null) return BadRequest("Request cannot be null.");
         if (!ModelState.IsValid) return BadRequest(ModelState);
         var budget = await service.CreateAsync(request, CurrentUser.Id);
-        return Ok(budget, "Budget created successfully");
+        return Created(budget, "Budget created successfully");
     }
 
     [HttpPut]

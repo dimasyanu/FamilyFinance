@@ -86,7 +86,7 @@ class AccountsPage extends MyPage {
   }
 
   @override
-  Widget body(BuildContext context) {
+  Widget build(BuildContext context) {
     // loadTable(context);
     _refreshKey.currentState?.show();
     final navigator = Navigator.of(context);
@@ -169,9 +169,9 @@ class AccountsPage extends MyPage {
   }
 
   @override
-  void onMounted(BuildContext context) {
+  Future<void> onMounted(BuildContext context) async {
     // Perform any additional setup or state initialization here
-    loadTable(context);
+    await Future.sync(() => loadTable(context));
   }
 
   /// Load the accounts table or any necessary data.

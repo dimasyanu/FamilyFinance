@@ -7,7 +7,7 @@ class OverviewPage extends MyPage {
   OverviewPage(super.context) : super(route: 'OverviewPage', title: 'Overview');
 
   @override
-  Widget body(BuildContext context) {
+  Widget build(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -32,7 +32,7 @@ class OverviewPage extends MyPage {
   }
 
   @override
-  void onMounted(BuildContext context) {
+  Future<void> onMounted(BuildContext context) async {
     // Perform any additional setup or state initialization here
     debugPrint('OverviewPage mounted');
   }

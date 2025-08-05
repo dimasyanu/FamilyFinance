@@ -16,9 +16,7 @@ Future main() async {
 
   runApp(
     MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => store),
-      ],
+      providers: [ChangeNotifierProvider(create: (_) => store)],
       child: const FamilyFinancialApp(),
     ),
   );

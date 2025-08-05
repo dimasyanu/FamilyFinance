@@ -69,7 +69,7 @@ class BudgetingPage extends MyPage {
   }
 
   @override
-  Widget body(BuildContext context) {
+  Widget build(BuildContext context) {
     // loadTable(context);
     _refreshKey.currentState?.show();
     final navigator = Navigator.of(context);
@@ -90,59 +90,66 @@ class BudgetingPage extends MyPage {
         scrollDirection: Axis.vertical,
         child: Container(
           padding: const EdgeInsets.all(8.0),
-          child: PaginatedDataTable(
-            headingRowColor: WidgetStateProperty.all(Colors.grey.shade200),
-            columns: columns,
-            showEmptyRows: false,
-            source: BudgetingTableSource(
-              context: context,
-              budgets: budgets.value,
-              onRowLongPressed: (budget) => showModalBottomSheet(
-                context: context,
-                builder: (context) {
-                  return BottomActionMenu(
-                    itemDetail: BudgetingDetail(budget: budget),
-                    actions: [
-                      RowAction(
-                        icon: Icon(Icons.close, color: Colors.grey),
-                        label: 'Cancel',
-                        onPressed: () {
-                          navigator.pop(); // Close the bottom sheet
-                        },
-                      ),
-                      RowAction(
-                        icon: Icon(Icons.edit),
-                        label: 'Edit',
-                        backgroundColor: Colors.blue.shade50,
-                        onPressed: () {
-                          navigator.pop();
-                          navigator.push(
-                            MaterialPageRoute(
-                              builder: (context) => BudgetingFormPage(
-                                itemId: budget.id,
-                                onClosed: () {
-                                  refreshController.requestRefresh();
-                                },
-                                backgroundColor: appBarBackgroundColor()!,
-                                foregroundColor: appBarForegroundColor()!,
-                              ),
+          child: Builder(
+            builder: (context) {
+              return PaginatedDataTable(
+                headingRowColor: WidgetStateProperty.all(Colors.grey.shade200),
+                columns: columns,
+                showEmptyRows: false,
+                source: BudgetingTableSource(
+                  context: context,
+                  budgets: budgets.value,
+                  onRowLongPressed: (budget) => showModalBottomSheet(
+                    context: context,
+                    builder: (context) {
+                      return BottomActionMenu(
+                        itemDetail: BudgetingDetail(budget: budget),
+                        actions: [
+                          RowAction(
+                            icon: Icon(Icons.close, color: Colors.grey),
+                            label: 'Cancel',
+                            onPressed: () {
+                              navigator.pop(); // Close the bottom sheet
+                            },
+                          ),
+                          RowAction(
+                            icon: Icon(Icons.edit),
+                            label: 'Edit',
+                            backgroundColor: Colors.blue.shade50,
+                            onPressed: () {
+                              navigator.pop();
+                              navigator.push(
+                                MaterialPageRoute(
+                                  builder: (context) => BudgetingFormPage(
+                                    itemId: budget.id,
+                                    onClosed: () {
+                                      refreshController.requestRefresh();
+                                    },
+                                    backgroundColor: appBarBackgroundColor()!,
+                                    foregroundColor: appBarForegroundColor()!,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                          RowAction(
+                            icon: Icon(
+                              Icons.delete,
+                              color: Colors.red.shade300,
                             ),
-                          );
-                        },
-                      ),
-                      RowAction(
-                        icon: Icon(Icons.delete, color: Colors.red.shade300),
-                        label: 'Delete',
-                        backgroundColor: Colors.red.shade50,
-                        onPressed: () {
-                          showDeleteConfirmationDialog(context, budget);
-                        },
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ),
+                            label: 'Delete',
+                            backgroundColor: Colors.red.shade50,
+                            onPressed: () {
+                              showDeleteConfirmationDialog(context, budget);
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              );
+            },
           ),
         ),
       ),
@@ -150,17 +157,16 @@ class BudgetingPage extends MyPage {
   }
 
   @override
-  void onMounted(BuildContext context) {
-    loadTable(context).then((_) {
-      refreshController.refreshCompleted();
-    });
+  Future<void> onMounted(BuildContext context) async {
+    await refreshController.requestRefresh();
+    // loadTable(context).then((_) {
+    // refreshController.refreshCompleted();
+    // });
   }
 
   /// Load the budgeting table or any necessary data.
   Future<void> loadTable(BuildContext context) async {
     final user = store.getUser();
-    final loaderOverlay = context.loaderOverlay;
-    loaderOverlay.show();
     if (user == null) throw Exception('User not logged in');
     try {
       final response = await api.getBudgets(
@@ -190,8 +196,9 @@ class BudgetingPage extends MyPage {
           backgroundColor: Colors.red.shade400,
         ),
       );
+    } finally {
+      refreshController.refreshCompleted();
     }
-    loaderOverlay.hide();
   }
 
   Future<void> deleteItem(

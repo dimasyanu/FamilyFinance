@@ -6,12 +6,12 @@ class TransactionsPage extends MyPage {
     : super(route: 'TransactionsPage', title: 'Transactions');
 
   @override
-  Widget body(BuildContext context) {
+  Widget build(BuildContext context) {
     return Center(child: Text('This is the Transactions page.'));
   }
 
   @override
-  void onMounted(BuildContext context) {
+  Future<void> onMounted(BuildContext context) async {
     // Perform any additional setup or state initialization here
     debugPrint('TransactionsPage mounted');
   }

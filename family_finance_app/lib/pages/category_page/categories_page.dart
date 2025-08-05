@@ -76,7 +76,7 @@ class CategoriesPage extends MyPage {
   }
 
   @override
-  Widget body(BuildContext context) {
+  Widget build(BuildContext context) {
     // loadTable(context);
     _refreshKey.currentState?.show();
     final navigator = Navigator.of(context);
@@ -157,10 +157,8 @@ class CategoriesPage extends MyPage {
   }
 
   @override
-  void onMounted(BuildContext context) {
-    loadTable(context).then((_) {
-      refreshController.refreshCompleted();
-    });
+  Future<void> onMounted(BuildContext context) async {
+    await loadTable(context);
   }
 
   /// Load the categories table or any necessary data.

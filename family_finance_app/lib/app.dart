@@ -85,6 +85,7 @@ class _AppState extends State<App> {
     if (_currentMenu.value == null) {
       setPageState(); // Ensure the current menu is set
     }
+
     return Scaffold(
       appBar: AppBar(
         title: _currentPage.value?.appBarTitle(context) ?? Text(widget.title),
