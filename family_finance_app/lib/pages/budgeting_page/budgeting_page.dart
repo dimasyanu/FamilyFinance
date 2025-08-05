@@ -209,8 +209,8 @@ class BudgetingPage extends MyPage {
     NavigatorState navigator,
     VoidCallback loadTable,
   ) async {
-    loaderOverlay.show();
     try {
+      refreshController.requestLoading();
       final response = await api.deleteBudget(budgetId: budgetId);
       if (response.success) {
         messenger.showSnackBar(
@@ -237,8 +237,8 @@ class BudgetingPage extends MyPage {
         ),
       );
     } finally {
-      loaderOverlay.hide();
       loadTable();
+      refreshController.loadComplete();
       navigator.pop();
     }
   }

@@ -80,15 +80,6 @@ class _BudgetingFormPageState extends State<BudgetingFormPage> {
         title: Text(widget.isNew ? 'New Budgeting' : 'Budgeting Detail'),
       ),
       body: LoaderOverlay(
-        layoutBuilder: (w, child) {
-          return Column(
-            children: [
-              Expanded(child: w ?? SizedBox.shrink()),
-              if (context.loaderOverlay.visible)
-                Center(child: CircularProgressIndicator()),
-            ],
-          );
-        },
         child: Container(
           padding: sizeUtil.dynamicPadding(
             maxXPercentage: .1,
@@ -100,7 +91,9 @@ class _BudgetingFormPageState extends State<BudgetingFormPage> {
                 future: loadFormData(context),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
+                    // return Center(child: CircularProgressIndicator());
+                    context.loaderOverlay.show();
+                    return const SizedBox.shrink(); // Show nothing while loading)
                   } else if (snapshot.hasError) {
                     return Center(
                       child: Text(
@@ -116,6 +109,7 @@ class _BudgetingFormPageState extends State<BudgetingFormPage> {
                       ),
                     );
                   }
+                  context.loaderOverlay.hide();
 
                   return Form(
                     key: _formKey,
@@ -241,7 +235,9 @@ class _BudgetingFormPageState extends State<BudgetingFormPage> {
                               ),
                             );
                           })
-                          .whenComplete(() => loaderOverlay.hide());
+                          .whenComplete(() {
+                            loaderOverlay.hide();
+                          });
 
                       return;
                     },

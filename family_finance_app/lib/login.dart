@@ -53,17 +53,22 @@ class _LoginState extends State<Login> {
       final loginResponse = LoginResponse.fromJson(
         await store.get(StorageKey.user),
       );
+
       final now = DateTime.now();
+      debugPrint('Checking user: ${loginResponse.username}');
       if (loginResponse.username.isNotEmpty &&
           loginResponse.accessToken.isNotEmpty &&
           loginResponse.expiration.isAfter(now)) {
+        debugPrint('User is already logged in: ${loginResponse.username}');
         navigator.pushReplacement(
           MaterialPageRoute(builder: (context) => const App()),
         );
         return true;
       }
+      debugPrint('Session expired');
       return false;
     } catch (e) {
+      debugPrint('Error reading user data: $e');
       messenger.showSnackBar(
         SnackBar(content: Text('Error reading user data')),
       );
@@ -122,8 +127,7 @@ class _LoginState extends State<Login> {
       future: checkUser(context),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting ||
-            snapshot.connectionState != ConnectionState.done ||
-            (!(snapshot.data ?? true))) {
+            snapshot.connectionState != ConnectionState.done) {
           return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.data ?? false) {
@@ -145,10 +149,6 @@ class _LoginState extends State<Login> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         spacing: 20,
                         children: [
-                          // Text(
-                          // context.read<Store>().loginTitle,
-                          // style: theme.textTheme.headlineLarge,
-                          // ),
                           Text(
                             'Login to your account',
                             style: Theme.of(context).textTheme.headlineMedium,
