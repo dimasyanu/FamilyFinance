@@ -24,7 +24,7 @@ class _AppState extends State<App> {
   List<ListTile> drawerWidgets = [];
   late final List<DrawerItem> drawerItems;
 
-  final _currentPageRoute = ValueNotifier<String>('accounts');
+  final _currentPageRoute = ValueNotifier<String>('transactions');
   final _currentMenu = ValueNotifier<DrawerItem?>(null);
   final _currentPage = ValueNotifier<MyPage?>(null);
 

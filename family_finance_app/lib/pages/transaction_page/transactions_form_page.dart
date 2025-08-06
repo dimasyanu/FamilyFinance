@@ -1,8 +1,16 @@
+import 'package:family_financial_app/abstractions/store.dart';
+import 'package:family_financial_app/models/requests/save_transaction.dart';
+import 'package:family_financial_app/models/responses/item_account.dart';
+import 'package:family_financial_app/models/responses/item_category.dart';
+import 'package:family_financial_app/models/responses/paginated.dart';
+import 'package:family_financial_app/models/responses/res.dart';
+import 'package:family_financial_app/plugins/api_accounts.dart';
+import 'package:family_financial_app/plugins/api_category.dart';
 import 'package:family_financial_app/plugins/api_transactions.dart';
 import 'package:family_financial_app/plugins/size_util.dart';
-import 'package:family_financial_app/plugins/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:loader_overlay/loader_overlay.dart';
+import 'package:provider/provider.dart';
 
 class TransactionsFormPage extends StatefulWidget {
   final String? itemId;
@@ -24,18 +32,21 @@ class TransactionsFormPage extends StatefulWidget {
 }
 
 class _TransactionsFormPageState extends State<TransactionsFormPage> {
-  Color _pickerColor = Color.fromARGB(255, 255, 255, 255);
-
   final _formKey = GlobalKey<FormState>();
+  final _transactionTypes = Map<int, String>.from({
+    -1: 'Expense',
+    0: 'Transfer',
+    1: 'Income',
+  });
 
-  String? _categoryName = '';
   String? _description = '';
-  final _icon = ValueNotifier<int>(0);
+  int _transactionType = -1; // -1 for expense, 1 for income, 0 for transfer
+  String? _accountId;
+  String? _categoryId;
+  DateTime _date = DateTime.now();
+  double _amount = 0.0;
 
-  final _colorController = TextEditingController();
-  final _categoryNameController = TextEditingController();
   final _descriptionController = TextEditingController();
-  final _iconController = TextEditingController();
 
   bool _isLoaded = false;
 
@@ -43,17 +54,13 @@ class _TransactionsFormPageState extends State<TransactionsFormPage> {
   void initState() {
     super.initState();
 
-    if (widget.isNew) {
-      _colorController.text = '#000000'; // Default color for new accounts
-      _pickerColor = Utils.hexStringToColor(_colorController.text);
-    } else {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        loadCategoryData(context);
-      });
-    }
+    if (widget.isNew) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      loadTransactionData(context);
+    });
   }
 
-  Future<void> loadCategoryData(BuildContext context) async {
+  Future<void> loadTransactionData(BuildContext context) async {
     final api = ApiTransactions(context);
     final messager = ScaffoldMessenger.of(context);
     final loaderOverlay = context.loaderOverlay;
@@ -67,15 +74,15 @@ class _TransactionsFormPageState extends State<TransactionsFormPage> {
         throw Exception('Failed to load transaction: ${response.message}');
       }
 
-      final color = response.data?.color ?? '#000000';
       setState(() {
         _description = response.data?.description ?? '';
-        _icon.value = response.data?.icon ?? 0;
+        _transactionType = response.data?.transactionType ?? 0;
+        _accountId = response.data?.account.id;
+        _categoryId = response.data?.category.id;
+        _date = response.data?.transactionDate ?? DateTime.now();
+        _amount = response.data?.amount ?? 0.0;
 
-        _categoryNameController.text = _categoryName ?? '';
-        _descriptionController.text = _description ?? '';
-        _pickerColor = Utils.hexStringToColor(color);
-        _colorController.text = color;
+        _descriptionController.text = _description!;
       });
     } catch (error) {
       messager.showSnackBar(
@@ -89,14 +96,22 @@ class _TransactionsFormPageState extends State<TransactionsFormPage> {
     }
   }
 
-  Future<void> loadFormData(BuildContext context) async {
+  Future<List<dynamic>> loadFormData(BuildContext context) async {
+    final categoryApi = ApiCategory(context);
+    final accountsApi = ApiAccounts(context);
+    final store = context.read<Store>();
+    final user = store.user!.userId;
+
+    final tasks = <Future>[];
     if (!widget.isNew && !_isLoaded) {
-      await loadCategoryData(context);
+      tasks.add(loadTransactionData(context));
       _isLoaded = true;
-      return;
     }
-    // _color = '#000000'; // Default color for new category
-    _pickerColor = Utils.hexStringToColor(_colorController.text);
+    tasks.addAll([
+      categoryApi.getCategories(),
+      accountsApi.getAccounts(userId: user),
+    ]);
+    return await Future.wait(tasks);
   }
 
   @override
@@ -116,89 +131,80 @@ class _TransactionsFormPageState extends State<TransactionsFormPage> {
           ),
           child: Column(
             children: <Widget>[
-              Center(
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    spacing: 10,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      TextFormField(
-                        controller: _categoryNameController,
-                        decoration: InputDecoration(labelText: 'Category Name'),
-                        onChanged: (value) => _categoryName = value,
-                        validator: (value) => value == null || value.isEmpty
-                            ? 'Please enter a category name'
-                            : null,
-                      ),
-                      TextFormField(
-                        controller: _descriptionController,
-                        decoration: InputDecoration(labelText: 'Description'),
-                        maxLines: null,
-                        keyboardType: TextInputType.multiline,
-                        onChanged: (value) => _description = value,
-                      ),
-                      TextFormField(
-                        controller: _iconController,
-                        decoration: InputDecoration(
-                          labelText: 'Icon',
-                          hint: Text('Icon'),
-                          prefixIcon: ValueListenableBuilder(
-                            valueListenable: _icon,
-                            builder: (context, value, child) {
-                              return Icon(
-                                IconData(
-                                  value,
-                                  fontFamily: Icons.category.fontFamily,
-                                ),
-                                color: _pickerColor,
-                              );
-                            },
+              FutureBuilder<List<dynamic>>(
+                future: loadFormData(context),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  }
+                  final categories =
+                      snapshot.data![0] as Res<Paginated<ItemCategory>>;
+                  final accounts = snapshot.data![1] as Res<List<ItemAccount>>;
+
+                  return Form(
+                    key: _formKey,
+                    child: Column(
+                      spacing: 10,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        TextFormField(
+                          controller: _descriptionController,
+                          decoration: InputDecoration(labelText: 'Description'),
+                          maxLines: null,
+                          keyboardType: TextInputType.multiline,
+                          onChanged: (value) => _description = value,
+                        ),
+                        DropdownButtonFormField<int>(
+                          value: _transactionType,
+                          items: _transactionTypes.entries.map((entry) {
+                            return DropdownMenuItem<int>(
+                              value: entry.key,
+                              child: Text(entry.value),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            _transactionType = value ?? -1;
+                          },
+                          decoration: InputDecoration(
+                            labelText: 'Transaction Type',
                           ),
                         ),
-                        readOnly: true,
-                        onTap: () async {
-                          final pickedIcon = await showIconPicker(
-                            context,
-                            configuration: SinglePickerConfiguration(
-                              iconColor: _pickerColor,
-                              iconPackModes: [IconPack.material],
-                            ),
-                          );
-                          setState(() {
-                            if (pickedIcon == null) return;
-                            _icon.value = pickedIcon.data.codePoint;
-                          });
-                        },
-                      ),
-                      TextFormField(
-                        controller: _colorController,
-                        decoration: InputDecoration(
-                          labelText: 'Color',
-                          prefixIcon: Icon(Icons.circle, color: _pickerColor),
+                        DropdownButtonFormField<String>(
+                          value: _categoryId,
+                          items:
+                              categories.data?.items.map((category) {
+                                return DropdownMenuItem<String>(
+                                  value: category.id,
+                                  child: Text(category.name),
+                                );
+                              }).toList() ??
+                              [],
+                          onChanged: (value) {
+                            _categoryId = value;
+                          },
+                          decoration: InputDecoration(labelText: 'Category'),
                         ),
-                        readOnly: true,
-                        onTap: () => showColorPicker(context, () {
-                          final hex = Utils.colorToHex(
-                            _pickerColor,
-                            includeHashSign: true,
-                            enableAlpha: false,
-                            toUpperCase: false,
-                          );
-                          setState(() {
-                            // _color = hex;
-                            _colorController.text = hex;
-                            _pickerColor = Utils.hexStringToColor(hex);
-                          });
-                          debugPrint(
-                            'Selected color: ${_pickerColor.toString()}',
-                          );
-                          Navigator.of(context).pop();
-                        }),
-                      ),
-                    ],
-                  ),
-                ),
+                        DropdownButtonFormField<String>(
+                          value: _accountId,
+                          items:
+                              accounts.data?.map((account) {
+                                return DropdownMenuItem<String>(
+                                  value: account.id,
+                                  child: Text(account.name),
+                                );
+                              }).toList() ??
+                              [],
+                          onChanged: (value) {
+                            _accountId = value;
+                          },
+                          decoration: InputDecoration(labelText: 'Account'),
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
               Expanded(
                 child: Align(
@@ -263,51 +269,18 @@ class _TransactionsFormPageState extends State<TransactionsFormPage> {
   }
 
   Future<void> save(BuildContext context) async {
-    final api = ApiCategory(context);
-    final payload = SaveCategory(
+    final api = ApiTransactions(context);
+    final payload = SaveTransaction(
       id: widget.itemId,
-      name: _categoryName ?? '',
       description: _description,
-      icon: _icon.value,
-      color: _colorController.text,
+      amount: _amount,
+      transactionType: _transactionType,
+      transactionDate: _date,
+      categoryId: _categoryId,
+      accountId: _accountId ?? '',
     );
 
-    await api.saveCategory(payload: payload);
-  }
-
-  Future<void> showColorPicker(
-    BuildContext context,
-    VoidCallback onColorSelected,
-  ) async {
-    return showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Select Color'),
-          content: SingleChildScrollView(
-            child: ColorPicker(
-              enableAlpha: false,
-              pickerColor: _pickerColor,
-              onColorChanged: (color) => _pickerColor = color,
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('Cancel'),
-            ),
-            TextButton(
-              child: Text('Confirm'),
-              onPressed: () {
-                onColorSelected();
-              },
-            ),
-          ],
-        );
-      },
-    );
+    await api.saveTransaction(payload: payload);
   }
 
   void onClosed() {
@@ -317,11 +290,7 @@ class _TransactionsFormPageState extends State<TransactionsFormPage> {
 
   @override
   void dispose() {
-    _icon.dispose();
-    _categoryNameController.dispose();
     _descriptionController.dispose();
-    _colorController.dispose();
-    _iconController.dispose();
     _formKey.currentState?.dispose();
     super.dispose();
   }

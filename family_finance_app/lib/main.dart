@@ -31,7 +31,7 @@ class FamilyFinancialApp extends StatelessWidget {
     return MaterialApp(
       title: 'Family Financial',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
       ),
       home: Login(), // Use Login widget as the home page
     );

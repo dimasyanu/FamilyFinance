@@ -8,8 +8,14 @@ public class TransactionDto
     public string Description { get; set; } = string.Empty;
     public decimal Amount { get; set; }
     public DateTime TransactionDate { get; set; }
+    public int TransactionType { get; set; }
+    public AccountDto Account { get; set; } = null!;
     public CategoryDto? Category { get; set; }
-    public Guid AccountId { get; set; }
+
+    public string CreatedAt { get; set; } = string.Empty;
+    public string CreatedBy { get; set; } = string.Empty;
+    public string UpdatedAt { get; set; } = string.Empty;
+    public string UpdatedBy { get; set; } = string.Empty;
 
     public TransactionDto()
     {
@@ -24,6 +30,11 @@ public class TransactionDto
         if (transaction.Category != null) {
             Category = new(transaction.Category);
         }
-        AccountId = transaction.AccountId;
+        Account = new(transaction.Account!);
+
+        CreatedAt = transaction.CreatedAt.ToString("dd MMM yyyy, HH:mm");
+        CreatedBy = transaction.CreatedBy.ToString();
+        UpdatedAt = transaction.UpdatedAt.ToString("dd MMM yyyy, HH:mm");
+        UpdatedBy = transaction.UpdatedBy.ToString();
     }
 }

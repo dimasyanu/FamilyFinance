@@ -1,8 +1,12 @@
 import 'package:family_financial_app/abstractions/store.dart';
 import 'package:family_financial_app/components/bottom_action_menu.dart';
 import 'package:family_financial_app/components/row_action.dart';
+import 'package:family_financial_app/constants/transaction_type.dart';
 import 'package:family_financial_app/models/mypage.dart';
 import 'package:family_financial_app/models/responses/item_transaction.dart';
+import 'package:family_financial_app/pages/transaction_page/transactions_detail.dart';
+import 'package:family_financial_app/pages/transaction_page/transactions_form_page.dart';
+import 'package:family_financial_app/pages/transaction_page/transactions_table_source.dart';
 import 'package:family_financial_app/plugins/api_transactions.dart';
 import 'package:flutter/material.dart';
 import 'package:loader_overlay/loader_overlay.dart';
@@ -30,13 +34,15 @@ class TransactionsPage extends MyPage {
       label: Row(
         children: [
           SizedBox(width: 16.0),
-          Text('Name', style: headerStyle),
+          Text('Description', style: headerStyle),
         ],
       ),
     ),
-    DataColumn(label: Text('Description', style: headerStyle)),
-    DataColumn(label: Text('Created At', style: headerStyle)),
-    DataColumn(label: Text('Created by', style: headerStyle)),
+    DataColumn(label: Text('Type', style: headerStyle)),
+    DataColumn(label: Text('Account', style: headerStyle)),
+    DataColumn(label: Text('Category', style: headerStyle)),
+    DataColumn(label: Text('Amount', style: headerStyle)),
+    DataColumn(label: Text('Transaction Date', style: headerStyle)),
   ];
 
   TransactionsPage(super.context)
@@ -47,12 +53,12 @@ class TransactionsPage extends MyPage {
 
   @override
   Color? appBarForegroundColor() {
-    return Colors.white;
+    return Colors.lightGreen;
   }
 
   @override
   Color? appBarBackgroundColor() {
-    return Colors.orange;
+    return Colors.white;
   }
 
   @override
@@ -87,7 +93,7 @@ class TransactionsPage extends MyPage {
       enablePullDown: true,
       header: WaterDropMaterialHeader(
         backgroundColor: appBarBackgroundColor(),
-        color: Colors.white,
+        color: appBarForegroundColor()!,
         distance: 80.0,
       ),
       onRefresh: () async {
@@ -109,7 +115,7 @@ class TransactionsPage extends MyPage {
                 context: context,
                 builder: (context) {
                   return BottomActionMenu(
-                    itemDetail: TransactionDetail(transaction: transaction),
+                    itemDetail: TransactionsDetail(transaction: transaction),
                     actions: [
                       RowAction(
                         icon: Icon(Icons.close, color: Colors.grey),
@@ -126,8 +132,8 @@ class TransactionsPage extends MyPage {
                           navigator.pop();
                           navigator.push(
                             MaterialPageRoute(
-                              builder: (context) => CategoriesFormPage(
-                                itemId: category.id,
+                              builder: (context) => TransactionsFormPage(
+                                itemId: transaction.id,
                                 onClosed: () {
                                   refreshController.requestRefresh();
                                 },
@@ -143,7 +149,7 @@ class TransactionsPage extends MyPage {
                         label: 'Delete',
                         backgroundColor: Colors.red.shade50,
                         onPressed: () {
-                          showDeleteConfirmationDialog(context, category);
+                          showDeleteConfirmationDialog(context, transaction);
                         },
                       ),
                     ],
@@ -169,8 +175,23 @@ class TransactionsPage extends MyPage {
       if (response.success) {
         setState(() {
           isError.value = false;
-          transactions.value = response.data?.items ?? [];
+          // transactions.value = response.data?.items ?? [];
           totalCount.value = response.data?.totalCount ?? 0;
+          for (int i = 0; i < 10; i++) {
+            transactions.value.add(
+              ItemTransaction(
+                id: 'txn_$i',
+                account: 'Account $i',
+                transactionDate: DateTime.now().subtract(Duration(days: i)),
+                transactionType: i % 2 == 0
+                    ? TransactionType.income
+                    : TransactionType.expense,
+                description: 'Transaction $i',
+                amount: 50.0 * (i + 1),
+                category: 'Category $i',
+              ),
+            );
+          }
         });
       } else {
         isError.value = true;
@@ -295,7 +316,7 @@ class TransactionsPage extends MyPage {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => TransactionFormPage(
+            builder: (context) => TransactionsFormPage(
               backgroundColor: appBarBackgroundColor()!,
               foregroundColor: appBarForegroundColor()!,
               onClosed: () {
