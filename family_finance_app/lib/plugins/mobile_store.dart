@@ -16,18 +16,18 @@ class MobileStore extends Store {
   Future<void> delete(String key) async {
     await storage.delete(key: StorageKey.user);
   }
-  
+
   @override
-  Future<Map<String, dynamic>> get(String key) async {
+  Future<Map<String, dynamic>?> get(String key) async {
     final value = await storage.read(key: key);
-    if (value == null) throw Exception('No data found for key: $key');
+    if (value == null) return null;
     final jsonData = jsonDecode(value);
 
     final result = jsonData as Map<String, dynamic>;
 
     return result;
   }
-  
+
   @override
   Future<void> set<T extends Serializable>(String key, T value) async {
     final jsonData = jsonEncode(value.toJson());

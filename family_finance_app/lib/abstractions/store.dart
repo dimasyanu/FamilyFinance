@@ -18,7 +18,7 @@ abstract class Store with ChangeNotifier, DiagnosticableTreeMixin {
 
   // Abstract methods for store operations
   Future<void> set<T extends Serializable>(String key, T value);
-  Future<Map<String, dynamic>> get(String key);
+  Future<Map<String, dynamic>?> get(String key);
   Future<void> delete(String key);
   LoginResponse? getUser() {
     return user;

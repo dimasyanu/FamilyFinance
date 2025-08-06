@@ -50,22 +50,20 @@ class _LoginState extends State<Login> {
     final navigator = Navigator.of(context);
 
     try {
-      final loginResponse = LoginResponse.fromJson(
-        await store.get(StorageKey.user),
-      );
+      final userData = await store.get(StorageKey.user);
+      if (userData == null || userData.isEmpty) return false;
+
+      final loginResponse = LoginResponse.fromJson(userData);
 
       final now = DateTime.now();
-      debugPrint('Checking user: ${loginResponse.username}');
       if (loginResponse.username.isNotEmpty &&
           loginResponse.accessToken.isNotEmpty &&
           loginResponse.expiration.isAfter(now)) {
-        debugPrint('User is already logged in: ${loginResponse.username}');
         navigator.pushReplacement(
           MaterialPageRoute(builder: (context) => const App()),
         );
         return true;
       }
-      debugPrint('Session expired');
       return false;
     } catch (e) {
       debugPrint('Error reading user data: $e');
@@ -134,7 +132,6 @@ class _LoginState extends State<Login> {
           return const Center(child: CircularProgressIndicator());
         }
 
-        debugPrint(snapshot.data.toString());
         return Scaffold(
           body: LoaderOverlay(
             child: Form(
