@@ -1,21 +1,17 @@
-import 'package:family_financial_app/models/requests/save_category.dart';
-import 'package:family_financial_app/plugins/api_category.dart';
+import 'package:family_financial_app/plugins/api_transactions.dart';
 import 'package:family_financial_app/plugins/size_util.dart';
 import 'package:family_financial_app/plugins/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:flutter_iconpicker/Models/configuration.dart';
-import 'package:flutter_iconpicker/flutter_iconpicker.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 
-class CategoriesFormPage extends StatefulWidget {
+class TransactionsFormPage extends StatefulWidget {
   final String? itemId;
   final VoidCallback? onClosed;
   final Color backgroundColor;
   final Color foregroundColor;
   get isNew => itemId == null || itemId!.isEmpty;
 
-  const CategoriesFormPage({
+  const TransactionsFormPage({
     this.itemId,
     this.onClosed,
     required this.backgroundColor,
@@ -24,10 +20,10 @@ class CategoriesFormPage extends StatefulWidget {
   });
 
   @override
-  State<CategoriesFormPage> createState() => _CategoriesFormPageState();
+  State<TransactionsFormPage> createState() => _TransactionsFormPageState();
 }
 
-class _CategoriesFormPageState extends State<CategoriesFormPage> {
+class _TransactionsFormPageState extends State<TransactionsFormPage> {
   Color _pickerColor = Color.fromARGB(255, 255, 255, 255);
 
   final _formKey = GlobalKey<FormState>();
@@ -58,20 +54,21 @@ class _CategoriesFormPageState extends State<CategoriesFormPage> {
   }
 
   Future<void> loadCategoryData(BuildContext context) async {
-    final api = ApiCategory(context);
+    final api = ApiTransactions(context);
     final messager = ScaffoldMessenger.of(context);
     final loaderOverlay = context.loaderOverlay;
     loaderOverlay.show();
     try {
-      final response = await api.getCategoryById(categoryId: widget.itemId!);
+      final response = await api.getTransactionById(
+        transactionId: widget.itemId!,
+      );
 
       if (response.hasError) {
-        throw Exception('Failed to load category: ${response.message}');
+        throw Exception('Failed to load transaction: ${response.message}');
       }
 
       final color = response.data?.color ?? '#000000';
       setState(() {
-        _categoryName = response.data?.name ?? '';
         _description = response.data?.description ?? '';
         _icon.value = response.data?.icon ?? 0;
 
@@ -83,7 +80,7 @@ class _CategoriesFormPageState extends State<CategoriesFormPage> {
     } catch (error) {
       messager.showSnackBar(
         SnackBar(
-          content: Text('Error loading category: $error'),
+          content: Text('Error loading transaction: $error'),
           backgroundColor: Colors.red.shade400,
         ),
       );
@@ -109,7 +106,7 @@ class _CategoriesFormPageState extends State<CategoriesFormPage> {
     final navigator = Navigator.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.isNew ? 'New Category' : 'Category Detail'),
+        title: Text(widget.isNew ? 'New Transaction' : 'Transaction Detail'),
       ),
       body: LoaderOverlay(
         child: Container(

@@ -5,7 +5,7 @@ import 'package:family_financial_app/pages/account_page/accounts_page.dart';
 import 'package:family_financial_app/pages/budgeting_page/budgeting_page.dart';
 import 'package:family_financial_app/pages/category_page/categories_page.dart';
 import 'package:family_financial_app/pages/overview_page/overview_page.dart';
-import 'package:family_financial_app/pages/transactions_page.dart';
+import 'package:family_financial_app/pages/transaction_page/transactions_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

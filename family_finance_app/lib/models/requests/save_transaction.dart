@@ -16,4 +16,28 @@ class SaveTransaction {
     this.categoryId,
     required this.accountId,
   });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'description': description,
+      'amount': amount,
+      'transactionType': transactionType,
+      'transactionDate': transactionDate.toIso8601String(),
+      'categoryId': categoryId,
+      'accountId': accountId,
+    };
+  }
+
+  factory SaveTransaction.fromJson(Map<String, dynamic> json) {
+    return SaveTransaction(
+      id: json['id'] as String?,
+      description: json['description'] as String?,
+      amount: (json['amount'] as num).toDouble(),
+      transactionType: json['transactionType'] as int,
+      transactionDate: DateTime.parse(json['transactionDate'] as String),
+      categoryId: json['categoryId'] as String?,
+      accountId: json['accountId'] as String,
+    );
+  }
 }

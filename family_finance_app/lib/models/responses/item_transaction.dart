@@ -1,13 +1,10 @@
-import 'package:family_financial_app/models/responses/item_account.dart';
-import 'package:family_financial_app/models/responses/item_category.dart';
-
 class ItemTransaction {
   final String id;
   final String description;
   final double amount;
   final DateTime transactionDate;
-  final ItemCategory category;
-  final ItemAccount account;
+  final String category;
+  final String account;
   final String? notes;
 
   ItemTransaction({
@@ -19,4 +16,16 @@ class ItemTransaction {
     required this.account,
     this.notes,
   });
+
+  factory ItemTransaction.fromJson(Map<String, dynamic> json) {
+    return ItemTransaction(
+      id: json['id'] as String,
+      description: json['description'] as String,
+      amount: (json['amount'] as num).toDouble(),
+      transactionDate: DateTime.parse(json['transactionDate'] as String),
+      category: json['category'] as String,
+      account: json['account'] as String,
+      notes: json['notes'] as String?,
+    );
+  }
 }

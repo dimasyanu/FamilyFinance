@@ -41,4 +41,19 @@ class ItemAccount {
       throw FormatException('Error parsing ItemAccount: $e', json);
     }
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'description': description,
+      'color': color,
+      'balance': balance,
+      'createdAt': createdAt,
+      'createdBy': createdBy,
+      'updatedAt': updatedAt,
+      'updatedBy': updatedBy,
+      'isActive': isActive,
+    };
+  }
 }
