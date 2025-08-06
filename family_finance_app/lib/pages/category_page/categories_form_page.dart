@@ -43,6 +43,20 @@ class _CategoriesFormPageState extends State<CategoriesFormPage> {
 
   bool _isLoaded = false;
 
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.isNew) {
+      _colorController.text = '#000000'; // Default color for new accounts
+      _pickerColor = Utils.hexStringToColor(_colorController.text);
+    } else {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        loadCategoryData(context);
+      });
+    }
+  }
+
   Future<void> loadCategoryData(BuildContext context) async {
     final api = ApiCategory(context);
     final messager = ScaffoldMessenger.of(context);
@@ -101,106 +115,89 @@ class _CategoriesFormPageState extends State<CategoriesFormPage> {
           ),
           child: Column(
             children: <Widget>[
-              FutureBuilder(
-                future: loadFormData(context),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return Center(
-                      child: Text(
-                        'Error loading categories: ${snapshot.error}',
-                        style: TextStyle(color: Colors.red),
+              Center(
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    spacing: 10,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      TextFormField(
+                        controller: _categoryNameController,
+                        decoration: InputDecoration(labelText: 'Category Name'),
+                        onChanged: (value) => _categoryName = value,
+                        validator: (value) => value == null || value.isEmpty
+                            ? 'Please enter a category name'
+                            : null,
                       ),
-                    );
-                  }
-                  context.loaderOverlay.hide();
-
-                  return Form(
-                    key: _formKey,
-                    child: Column(
-                      spacing: 10,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        TextFormField(
-                          controller: _categoryNameController,
-                          decoration: InputDecoration(
-                            labelText: 'Category Name',
+                      TextFormField(
+                        controller: _descriptionController,
+                        decoration: InputDecoration(labelText: 'Description'),
+                        maxLines: null,
+                        keyboardType: TextInputType.multiline,
+                        onChanged: (value) => _description = value,
+                      ),
+                      TextFormField(
+                        controller: _iconController,
+                        decoration: InputDecoration(
+                          labelText: 'Icon',
+                          hint: Text('Icon'),
+                          prefixIcon: ValueListenableBuilder(
+                            valueListenable: _icon,
+                            builder: (context, value, child) {
+                              return Icon(
+                                IconData(
+                                  value,
+                                  fontFamily: Icons.category.fontFamily,
+                                ),
+                                color: _pickerColor,
+                              );
+                            },
                           ),
-                          onChanged: (value) => _categoryName = value,
-                          validator: (value) => value == null || value.isEmpty
-                              ? 'Please enter a category name'
-                              : null,
                         ),
-                        TextFormField(
-                          controller: _descriptionController,
-                          decoration: InputDecoration(labelText: 'Description'),
-                          maxLines: null,
-                          keyboardType: TextInputType.multiline,
-                          onChanged: (value) => _description = value,
-                        ),
-                        TextFormField(
-                          controller: _iconController,
-                          decoration: InputDecoration(
-                            labelText: 'Icon',
-                            hint: Text('Icon'),
-                            prefixIcon: ValueListenableBuilder(
-                              valueListenable: _icon,
-                              builder: (context, value, child) {
-                                return Icon(
-                                  IconData(
-                                    value,
-                                    fontFamily: Icons.category.fontFamily,
-                                  ),
-                                  color: _pickerColor,
-                                );
-                              },
+                        readOnly: true,
+                        onTap: () async {
+                          final pickedIcon = await showIconPicker(
+                            context,
+                            configuration: SinglePickerConfiguration(
+                              iconColor: _pickerColor,
+                              iconPackModes: [IconPack.material],
                             ),
-                          ),
-                          readOnly: true,
-                          onTap: () async {
-                            final pickedIcon = await showIconPicker(
-                              context,
-                              configuration: SinglePickerConfiguration(
-                                iconColor: _pickerColor,
-                                iconPackModes: [IconPack.material],
-                              ),
-                            );
-                            setState(() {
-                              if (pickedIcon == null) return;
-                              _icon.value = pickedIcon.data.codePoint;
-                            });
-                          },
+                          );
+                          setState(() {
+                            if (pickedIcon == null) return;
+                            _icon.value = pickedIcon.data.codePoint;
+                          });
+                        },
+                      ),
+                      TextFormField(
+                        controller: _colorController,
+                        decoration: InputDecoration(
+                          labelText: 'Color',
+                          prefixIcon: Icon(Icons.circle, color: _pickerColor),
                         ),
-                        TextFormField(
-                          controller: _colorController,
-                          decoration: InputDecoration(
-                            labelText: 'Color',
-                            prefixIcon: Icon(Icons.circle, color: _pickerColor),
-                          ),
-                          readOnly: true,
-                          onTap: () => showColorPicker(context, () {
-                            final hex = Utils.colorToHex(
-                              _pickerColor,
-                              includeHashSign: true,
-                              enableAlpha: false,
-                              toUpperCase: false,
-                            );
-                            setState(() {
-                              // _color = hex;
-                              _colorController.text = hex;
-                              _pickerColor = Utils.hexStringToColor(hex);
-                            });
-                            debugPrint(
-                              'Selected color: ${_pickerColor.toString()}',
-                            );
-                            Navigator.of(context).pop();
-                          }),
-                        ),
-                      ],
-                    ),
-                  );
-                },
+                        readOnly: true,
+                        onTap: () => showColorPicker(context, () {
+                          final hex = Utils.colorToHex(
+                            _pickerColor,
+                            includeHashSign: true,
+                            enableAlpha: false,
+                            toUpperCase: false,
+                          );
+                          setState(() {
+                            // _color = hex;
+                            _colorController.text = hex;
+                            _pickerColor = Utils.hexStringToColor(hex);
+                          });
+                          debugPrint(
+                            'Selected color: ${_pickerColor.toString()}',
+                          );
+                          Navigator.of(context).pop();
+                        }),
+                      ),
+                    ],
+                  ),
+                ),
               ),
               Expanded(
                 child: Align(

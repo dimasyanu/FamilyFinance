@@ -20,13 +20,17 @@ class AccountsFormPage extends StatefulWidget {
 }
 
 class _AccountsFormPageState extends State<AccountsFormPage> {
-  Color pickerColor = Color.fromARGB(255, 255, 255, 255);
+  Color _pickerColor = Color.fromARGB(255, 255, 255, 255);
 
   final _formKey = GlobalKey<FormState>();
+
+  String _accountName = '';
+  String _description = '';
 
   final _colorController = TextEditingController();
   final _accountNameController = TextEditingController();
   final _descriptionController = TextEditingController();
+  bool _isLoaded = false;
 
   @override
   void initState() {
@@ -34,7 +38,7 @@ class _AccountsFormPageState extends State<AccountsFormPage> {
 
     if (widget.isNew) {
       _colorController.text = '#000000'; // Default color for new accounts
-      pickerColor = Utils.hexStringToColor(_colorController.text);
+      _pickerColor = Utils.hexStringToColor(_colorController.text);
     } else {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         loadAccountData(context);
@@ -58,10 +62,12 @@ class _AccountsFormPageState extends State<AccountsFormPage> {
         throw Exception('Failed to load account: ${response.message}');
       }
       setState(() {
-        _accountNameController.text = response.data?.name ?? '';
-        _descriptionController.text = response.data?.description ?? '';
+        _accountName = response.data?.name ?? '';
+        _description = response.data?.description ?? '';
+        _accountNameController.text = _accountName;
+        _descriptionController.text = _description;
         _colorController.text = response.data?.color ?? '';
-        pickerColor = Utils.hexStringToColor(_colorController.text);
+        _pickerColor = Utils.hexStringToColor(_colorController.text);
       });
     } catch (error) {
       messager.showSnackBar(
@@ -75,6 +81,14 @@ class _AccountsFormPageState extends State<AccountsFormPage> {
     }
   }
 
+  Future<void> loadFormData(BuildContext context) async {
+    if (!widget.isNew && !_isLoaded) {
+      await loadAccountData(context);
+      _isLoaded = true;
+      return;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final sizeUtil = SizeUtil(context);
@@ -84,103 +98,105 @@ class _AccountsFormPageState extends State<AccountsFormPage> {
       appBar: AppBar(
         title: Text(widget.isNew ? 'New Account' : 'Account Detail'),
       ),
-      body: Container(
-        padding: sizeUtil.dynamicPadding(
-          maxXPercentage: .1,
-          maxYPercentage: .04,
-        ),
-        child: Column(
-          children: <Widget>[
-            Center(
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  spacing: 10,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    TextFormField(
-                      controller: _accountNameController,
-                      decoration: InputDecoration(labelText: 'Account Name'),
-                      onChanged: (value) => _accountNameController.text = value,
-                      validator: (value) => value == null || value.isEmpty
-                          ? 'Please enter an account name'
-                          : null,
-                    ),
-                    TextFormField(
-                      controller: _descriptionController,
-                      decoration: InputDecoration(labelText: 'Description'),
-                      maxLines: null,
-                      keyboardType: TextInputType.multiline,
-                      onChanged: (value) => _descriptionController.text = value,
-                    ),
-                    TextFormField(
-                      controller: _colorController,
-                      decoration: InputDecoration(
-                        labelText: 'Color',
-                        prefixIcon: Icon(Icons.circle, color: pickerColor),
+      body: LoaderOverlay(
+        child: Container(
+          padding: sizeUtil.dynamicPadding(
+            maxXPercentage: .1,
+            maxYPercentage: .04,
+          ),
+          child: Column(
+            children: <Widget>[
+              Center(
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    spacing: 10,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      TextFormField(
+                        controller: _accountNameController,
+                        decoration: InputDecoration(labelText: 'Account Name'),
+                        onChanged: (value) => _accountName = value,
+                        validator: (value) => value == null || value.isEmpty
+                            ? 'Please enter an account name'
+                            : null,
                       ),
-                      readOnly: true,
-                      onTap: () => _dialogBuilder(context),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Expanded(
-              child: Align(
-                alignment: FractionalOffset.bottomCenter,
-                child: ElevatedButton.icon(
-                  key: const Key('saveAccountButton'),
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    backgroundColor: Colors.blueAccent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    minimumSize: Size(double.infinity, 48),
+                      TextFormField(
+                        controller: _descriptionController,
+                        decoration: InputDecoration(labelText: 'Description'),
+                        maxLines: null,
+                        keyboardType: TextInputType.multiline,
+                        onChanged: (value) => _description = value,
+                      ),
+                      TextFormField(
+                        controller: _colorController,
+                        decoration: InputDecoration(
+                          labelText: 'Color',
+                          prefixIcon: Icon(Icons.circle, color: _pickerColor),
+                        ),
+                        readOnly: true,
+                        onTap: () => _dialogBuilder(context),
+                      ),
+                    ],
                   ),
-                  onPressed: () {
-                    final loaderOverlay = context.loaderOverlay;
-                    if (_formKey.currentState!.validate()) {
-                      loaderOverlay.show();
-                      save(context)
-                          .then((_) {
-                            messager.showSnackBar(
-                              SnackBar(
-                                content: Text('Account saved successfully!'),
-                                backgroundColor: Colors.green.shade400,
-                              ),
-                            );
-
-                            navigator.pop();
-                            onClosed();
-                          })
-                          .catchError((error) {
-                            messager.showSnackBar(
-                              SnackBar(
-                                content: Text('Error saving account: $error'),
-                                backgroundColor: Colors.red.shade400,
-                              ),
-                            );
-                          })
-                          .whenComplete(() => loaderOverlay.hide());
-
-                      return;
-                    }
-
-                    messager.showSnackBar(
-                      SnackBar(
-                        content: Text('Please fill in all fields'),
-                        backgroundColor: Colors.red.shade400,
-                      ),
-                    );
-                  },
-                  icon: const Icon(Icons.save),
-                  label: Text('Save'),
                 ),
               ),
-            ),
-          ],
+              Expanded(
+                child: Align(
+                  alignment: FractionalOffset.bottomCenter,
+                  child: ElevatedButton.icon(
+                    key: const Key('saveAccountButton'),
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.blueAccent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      minimumSize: Size(double.infinity, 48),
+                    ),
+                    onPressed: () {
+                      final loaderOverlay = context.loaderOverlay;
+                      if (_formKey.currentState!.validate()) {
+                        loaderOverlay.show();
+                        save(context)
+                            .then((_) {
+                              messager.showSnackBar(
+                                SnackBar(
+                                  content: Text('Account saved successfully!'),
+                                  backgroundColor: Colors.green.shade400,
+                                ),
+                              );
+
+                              navigator.pop();
+                              onClosed();
+                            })
+                            .catchError((error) {
+                              messager.showSnackBar(
+                                SnackBar(
+                                  content: Text('Error saving account: $error'),
+                                  backgroundColor: Colors.red.shade400,
+                                ),
+                              );
+                            })
+                            .whenComplete(() => loaderOverlay.hide());
+
+                        return;
+                      }
+
+                      messager.showSnackBar(
+                        SnackBar(
+                          content: Text('Please fill in all fields'),
+                          backgroundColor: Colors.red.shade400,
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.save),
+                    label: Text('Save'),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -191,8 +207,8 @@ class _AccountsFormPageState extends State<AccountsFormPage> {
     final store = context.read<Store>();
     final payload = SaveAccount(
       id: widget.itemId,
-      name: _accountNameController.text,
-      description: _descriptionController.text,
+      name: _accountName,
+      description: _description,
       color: _colorController.text,
     );
 
@@ -203,9 +219,7 @@ class _AccountsFormPageState extends State<AccountsFormPage> {
   }
 
   void changeColor(Color color) {
-    setState(() {
-      pickerColor = color;
-    });
+    _pickerColor = color;
   }
 
   Future<void> _dialogBuilder(BuildContext context) async {
@@ -217,7 +231,7 @@ class _AccountsFormPageState extends State<AccountsFormPage> {
           content: SingleChildScrollView(
             child: ColorPicker(
               enableAlpha: false,
-              pickerColor: pickerColor,
+              pickerColor: _pickerColor,
               onColorChanged: changeColor,
             ),
           ),
@@ -232,7 +246,7 @@ class _AccountsFormPageState extends State<AccountsFormPage> {
               child: Text('Confirm'),
               onPressed: () {
                 final hex = Utils.colorToHex(
-                  pickerColor,
+                  _pickerColor,
                   includeHashSign: true,
                   enableAlpha: false,
                   toUpperCase: false,

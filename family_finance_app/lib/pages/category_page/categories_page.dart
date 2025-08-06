@@ -8,6 +8,7 @@ import 'package:family_financial_app/pages/category_page/categories_form_page.da
 import 'package:family_financial_app/pages/category_page/categories_table_source.dart';
 import 'package:family_financial_app/plugins/api_category.dart';
 import 'package:flutter/material.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh_flutter3/pull_to_refresh_flutter3.dart'
     hide RefreshIndicatorState;
@@ -243,31 +244,44 @@ class CategoriesPage extends MyPage {
       context: context,
       builder: (BuildContext context) {
         final navigator = Navigator.of(context);
-        return AlertDialog(
-          title: Text('Delete Category'),
-          content: Text(
-            'Are you sure you want to delete this category?\n${category.name}',
+        return LoaderOverlay(
+          child: Builder(
+            builder: (context) {
+              return AlertDialog(
+                title: Text('Delete Category'),
+                content: Text(
+                  'Are you sure you want to delete this category?\n${category.name}',
+                ),
+                actions: <Widget>[
+                  TextButton(
+                    child: Text('Cancel'),
+                    onPressed: () {
+                      navigator.pop();
+                    },
+                  ),
+                  TextButton(
+                    child: Text('Delete'),
+                    onPressed: () async {
+                      final loaderOverlay = context.loaderOverlay;
+                      loaderOverlay.show();
+
+                      await deleteItem(
+                        store.getUser()?.userId ?? '',
+                        category.id,
+                        messenger,
+                        navigator,
+                        () {
+                          loaderOverlay.hide();
+                          refreshController.requestRefresh();
+                        },
+                      );
+                      loaderOverlay.hide();
+                    },
+                  ),
+                ],
+              );
+            },
           ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Cancel'),
-              onPressed: () {
-                navigator.pop();
-              },
-            ),
-            TextButton(
-              child: Text('Delete'),
-              onPressed: () async {
-                await deleteItem(
-                  store.getUser()?.userId ?? '',
-                  category.id,
-                  messenger,
-                  navigator,
-                  () => refreshController.requestRefresh(),
-                );
-              },
-            ),
-          ],
         );
       },
     );

@@ -208,7 +208,6 @@ class AccountsPage extends MyPage {
   Future<void> deleteItem(
     String userId,
     String accountId,
-    OverlayExtensionHelper loaderOverlay,
     ScaffoldMessengerState messenger,
     NavigatorState navigator,
     VoidCallback loadTable,
@@ -255,33 +254,47 @@ class AccountsPage extends MyPage {
       context: context,
       builder: (BuildContext context) {
         final navigator = Navigator.of(context);
-        final loaderOverlay = context.loaderOverlay;
-        return AlertDialog(
-          title: Text('Delete Account'),
-          content: Text(
-            'Are you sure you want to delete this account?\n${account.name}',
+        return LoaderOverlay(
+          child: Builder(
+            builder: (context) {
+              return AlertDialog(
+                title: Text('Delete Account'),
+                content: SizedBox(
+                  width: double.maxFinite,
+                  child: Text(
+                    'Are you sure you want to delete this account?\n${account.name}',
+                  ),
+                ),
+                actions: <Widget>[
+                  TextButton(
+                    child: Text('Cancel'),
+                    onPressed: () {
+                      navigator.pop();
+                    },
+                  ),
+                  TextButton(
+                    child: Text('Delete'),
+                    onPressed: () async {
+                      final loaderOverlay = context.loaderOverlay;
+                      loaderOverlay.show();
+
+                      await deleteItem(
+                        store.getUser()?.userId ?? '',
+                        account.id,
+                        messenger,
+                        navigator,
+                        () {
+                          loaderOverlay.hide();
+                          refreshController.requestRefresh();
+                        },
+                      );
+                      loaderOverlay.hide();
+                    },
+                  ),
+                ],
+              );
+            },
           ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Cancel'),
-              onPressed: () {
-                navigator.pop();
-              },
-            ),
-            TextButton(
-              child: Text('Delete'),
-              onPressed: () async {
-                await deleteItem(
-                  store.getUser()?.userId ?? '',
-                  account.id,
-                  loaderOverlay,
-                  messenger,
-                  navigator,
-                  () => loadTable(context),
-                );
-              },
-            ),
-          ],
         );
       },
     );
