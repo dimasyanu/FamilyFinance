@@ -27,6 +27,8 @@ class TransactionsPage extends MyPage {
   final isError = ValueNotifier<bool>(false);
   final refreshController = RefreshController(initialRefresh: false);
 
+  // final _tabController = TabController(length: 3, vsync: ScrollableState());
+
   static const headerStyle = TextStyle(fontWeight: FontWeight.bold);
 
   final List<DataColumn> columns = const [
@@ -53,7 +55,7 @@ class TransactionsPage extends MyPage {
 
   @override
   Color? appBarForegroundColor() {
-    return Colors.lightGreen;
+    return Colors.blue.shade700;
   }
 
   @override
@@ -80,11 +82,69 @@ class TransactionsPage extends MyPage {
 
   @override
   Future<void> onMounted(BuildContext context) async {
-    await refreshController.requestRefresh();
+    // await refreshController.requestRefresh();
+    // _tabController.addListener(() {
+    // if (_tabController.indexIsChanging) {
+    // debugPrint('Tab changed to: ${_tabController.index}');
+    // }
+    // });
+  }
+
+  Widget? bottomNavigationBar(BuildContext context) {
+    return Container(
+      color: Colors.white,
+      child: TabBar(
+        tabs: [
+          Tab(
+            // icon: Icon(Icons.sync_alt, color: appBarForegroundColor()),
+            // text: 'All',
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.sync_alt, color: appBarForegroundColor(), size: 18),
+                const SizedBox(width: 8.0),
+                Text('All'),
+              ],
+            ),
+          ),
+          Tab(
+            // icon: Icon(Icons.arrow_upward, color: Colors.green.shade200),
+            child: Row(
+              children: [
+                Icon(Icons.arrow_upward, color: Colors.green.shade200),
+                Text('Expenses'),
+              ],
+            ),
+          ),
+          Tab(
+            // icon: Icon(Icons.arrow_downward, color: Colors.green.shade200),
+            text: 'Incomes',
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        body: TabBarView(
+          // controller: _tabController,
+          children: [
+            Center(child: Text('Categories tab')), // Placeholder for categories
+            Center(child: Text('Categories tab')), // Placeholder for categories
+            Center(child: Text('Accounts tab')), // Placeholder for accounts
+          ],
+        ),
+        bottomNavigationBar: bottomNavigationBar(context),
+      ),
+    );
+  }
+
+  Widget build1(BuildContext context) {
     _refreshKey.currentState?.show();
     final navigator = Navigator.of(context);
     return SmartRefresher(
@@ -327,6 +387,7 @@ class TransactionsPage extends MyPage {
         );
       },
       shape: CircleBorder(),
+      mini: true,
       backgroundColor: appBarBackgroundColor(),
       foregroundColor: appBarForegroundColor(),
       child: const Icon(Icons.add),
@@ -340,6 +401,8 @@ class TransactionsPage extends MyPage {
     pageSize.dispose();
     page.dispose();
     isError.dispose();
+    refreshController.dispose();
+    // _tabController.dispose();
     super.dispose();
   }
 }

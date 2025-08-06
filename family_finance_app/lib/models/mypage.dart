@@ -20,6 +20,9 @@ abstract class MyPage {
   Color? appBarForegroundColor() => null;
   Future<void> onMounted(BuildContext context);
   FloatingActionButton? floatingActionButton(BuildContext context) => null;
+  FloatingActionButtonLocation? floatingActionButtonLocation(
+    BuildContext context,
+  ) => null;
   void dispose() {}
 
   Widget body(BuildContext context) {

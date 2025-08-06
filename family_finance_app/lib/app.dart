@@ -106,6 +106,9 @@ class _AppState extends State<App> {
           return value?.floatingActionButton(context) ?? SizedBox.shrink();
         },
       ),
+      floatingActionButtonLocation:
+          _currentPage.value?.floatingActionButtonLocation(context) ??
+          FloatingActionButtonLocation.endFloat,
       drawer: MyDrawer(
         drawerItems: drawerItems,
         currentPageRoute: _currentPageRoute,
