@@ -28,13 +28,13 @@ class CategoriesFormPage extends StatefulWidget {
 }
 
 class _CategoriesFormPageState extends State<CategoriesFormPage> {
-  Color pickerColor = Color.fromARGB(255, 255, 255, 255);
+  Color _pickerColor = Color.fromARGB(255, 255, 255, 255);
 
   final _formKey = GlobalKey<FormState>();
 
-  final _categotyName = ValueNotifier<String>('');
-  final _description = ValueNotifier<String>('');
-  final _color = ValueNotifier<String>('');
+  String? _categoryName = '';
+  String? _description = '';
+  // String? _color = '';
   final _icon = ValueNotifier<int>(0);
 
   final _colorController = TextEditingController();
@@ -42,41 +42,29 @@ class _CategoriesFormPageState extends State<CategoriesFormPage> {
   final _descriptionController = TextEditingController();
   final _iconController = TextEditingController();
 
-  @override
-  void initState() {
-    super.initState();
-
-    if (widget.isNew) {
-      _color.value = '#000000'; // Default color for new category
-      pickerColor = Utils.hexStringToColor(_color.value);
-    } else {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        loadCategoryData(context);
-      });
-    }
-  }
+  bool _isLoaded = false;
 
   Future<void> loadCategoryData(BuildContext context) async {
     final api = ApiCategory(context);
-    final loaderOverlay = context.loaderOverlay;
     final messager = ScaffoldMessenger.of(context);
-    loaderOverlay.show();
     try {
       final response = await api.getCategoryById(categoryId: widget.itemId!);
 
       if (response.hasError) {
         throw Exception('Failed to load category: ${response.message}');
       }
+
+      final color = response.data?.color ?? '#000000';
       setState(() {
-        _categotyName.value = response.data?.name ?? '';
-        _description.value = response.data?.description ?? '';
-        _color.value = response.data?.color ?? '';
+        _categoryName = response.data?.name ?? '';
+        _description = response.data?.description ?? '';
+        // _color = response.data?.color ?? '';
         _icon.value = response.data?.icon ?? 0;
 
-        _categoryNameController.text = _categotyName.value;
-        _descriptionController.text = _description.value;
-        pickerColor = Utils.hexStringToColor(_color.value);
-        _colorController.text = _color.value;
+        _categoryNameController.text = _categoryName ?? '';
+        _descriptionController.text = _description ?? '';
+        _pickerColor = Utils.hexStringToColor(color);
+        _colorController.text = color;
       });
     } catch (error) {
       messager.showSnackBar(
@@ -85,9 +73,17 @@ class _CategoriesFormPageState extends State<CategoriesFormPage> {
           backgroundColor: Colors.red.shade400,
         ),
       );
-    } finally {
-      loaderOverlay.hide();
     }
+  }
+
+  Future<void> loadFormData(BuildContext context) async {
+    if (!widget.isNew && !_isLoaded) {
+      await loadCategoryData(context);
+      _isLoaded = true;
+      return;
+    }
+    // _color = '#000000'; // Default color for new category
+    _pickerColor = Utils.hexStringToColor(_colorController.text);
   }
 
   @override
@@ -99,137 +95,172 @@ class _CategoriesFormPageState extends State<CategoriesFormPage> {
       appBar: AppBar(
         title: Text(widget.isNew ? 'New Category' : 'Category Detail'),
       ),
-      body: Container(
-        padding: sizeUtil.dynamicPadding(
-          maxXPercentage: .1,
-          maxYPercentage: .04,
-        ),
-        child: Column(
-          children: <Widget>[
-            Center(
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  spacing: 10,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    TextFormField(
-                      controller: _categoryNameController,
-                      decoration: InputDecoration(labelText: 'Category Name'),
-                      onChanged: (value) => _categotyName.value = value,
-                      validator: (value) => value == null || value.isEmpty
-                          ? 'Please enter a category name'
-                          : null,
-                    ),
-                    TextFormField(
-                      controller: _descriptionController,
-                      decoration: InputDecoration(labelText: 'Description'),
-                      maxLines: null,
-                      keyboardType: TextInputType.multiline,
-                      onChanged: (value) => _description.value = value,
-                    ),
-                    TextFormField(
-                      controller: _iconController,
-                      decoration: InputDecoration(
-                        labelText: 'Icon',
-                        hint: Text('Icon'),
-                        prefixIcon: ValueListenableBuilder(
-                          valueListenable: _icon,
-                          builder: (context, value, child) {
-                            return Icon(
-                              IconData(
-                                value,
-                                fontFamily: Icons.category.fontFamily,
+      body: LoaderOverlay(
+        child: Container(
+          padding: sizeUtil.dynamicPadding(
+            maxXPercentage: .1,
+            maxYPercentage: .04,
+          ),
+          child: Column(
+            children: <Widget>[
+              FutureBuilder(
+                future: loadFormData(context),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(
+                      child: Text(
+                        'Error loading categories: ${snapshot.error}',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    );
+                  }
+                  context.loaderOverlay.hide();
+
+                  return Form(
+                    key: _formKey,
+                    child: Column(
+                      spacing: 10,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        TextFormField(
+                          controller: _categoryNameController,
+                          decoration: InputDecoration(
+                            labelText: 'Category Name',
+                          ),
+                          onChanged: (value) => _categoryName = value,
+                          validator: (value) => value == null || value.isEmpty
+                              ? 'Please enter a category name'
+                              : null,
+                        ),
+                        TextFormField(
+                          controller: _descriptionController,
+                          decoration: InputDecoration(labelText: 'Description'),
+                          maxLines: null,
+                          keyboardType: TextInputType.multiline,
+                          onChanged: (value) => _description = value,
+                        ),
+                        TextFormField(
+                          controller: _iconController,
+                          decoration: InputDecoration(
+                            labelText: 'Icon',
+                            hint: Text('Icon'),
+                            prefixIcon: ValueListenableBuilder(
+                              valueListenable: _icon,
+                              builder: (context, value, child) {
+                                return Icon(
+                                  IconData(
+                                    value,
+                                    fontFamily: Icons.category.fontFamily,
+                                  ),
+                                  color: _pickerColor,
+                                );
+                              },
+                            ),
+                          ),
+                          readOnly: true,
+                          onTap: () async {
+                            final pickedIcon = await showIconPicker(
+                              context,
+                              configuration: SinglePickerConfiguration(
+                                iconColor: _pickerColor,
+                                iconPackModes: [IconPack.material],
                               ),
-                              color: pickerColor,
                             );
+                            setState(() {
+                              if (pickedIcon == null) return;
+                              _icon.value = pickedIcon.data.codePoint;
+                            });
                           },
                         ),
+                        TextFormField(
+                          controller: _colorController,
+                          decoration: InputDecoration(
+                            labelText: 'Color',
+                            prefixIcon: Icon(Icons.circle, color: _pickerColor),
+                          ),
+                          readOnly: true,
+                          onTap: () => showColorPicker(context, () {
+                            final hex = Utils.colorToHex(
+                              _pickerColor,
+                              includeHashSign: true,
+                              enableAlpha: false,
+                              toUpperCase: false,
+                            );
+                            setState(() {
+                              // _color = hex;
+                              _colorController.text = hex;
+                              _pickerColor = Utils.hexStringToColor(hex);
+                            });
+                            debugPrint(
+                              'Selected color: ${_pickerColor.toString()}',
+                            );
+                            Navigator.of(context).pop();
+                          }),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+              Expanded(
+                child: Align(
+                  alignment: FractionalOffset.bottomCenter,
+                  child: ElevatedButton.icon(
+                    key: const Key('saveCategoryButton'),
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: widget.foregroundColor,
+                      backgroundColor: widget.backgroundColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0),
                       ),
-                      readOnly: true,
-                      onTap: () async {
-                        final pickedIcon = await showIconPicker(
-                          context,
-                          configuration: SinglePickerConfiguration(
-                            iconColor: pickerColor,
-                            iconPackModes: [IconPack.material],
+                      minimumSize: Size(double.infinity, 48),
+                    ),
+                    onPressed: () {
+                      final loaderOverlay = context.loaderOverlay;
+
+                      if (!_formKey.currentState!.validate()) {
+                        messager.showSnackBar(
+                          SnackBar(
+                            content: Text('Please fill in all fields'),
+                            backgroundColor: Colors.red.shade400,
                           ),
                         );
-                        setState(() {
-                          if (pickedIcon == null) return;
-                          _icon.value = pickedIcon.data.codePoint;
-                        });
-                      },
-                    ),
-                    TextFormField(
-                      controller: _colorController,
-                      decoration: InputDecoration(
-                        labelText: 'Color',
-                        prefixIcon: Icon(Icons.circle, color: pickerColor),
-                      ),
-                      readOnly: true,
-                      onTap: () => showColorPicker(context),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Expanded(
-              child: Align(
-                alignment: FractionalOffset.bottomCenter,
-                child: ElevatedButton.icon(
-                  key: const Key('saveCategoryButton'),
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: widget.foregroundColor,
-                    backgroundColor: widget.backgroundColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    minimumSize: Size(double.infinity, 48),
+                      }
+
+                      loaderOverlay.show();
+                      save(context)
+                          .then((_) {
+                            messager.showSnackBar(
+                              SnackBar(
+                                content: Text('Category saved successfully!'),
+                                backgroundColor: Colors.green.shade400,
+                              ),
+                            );
+
+                            navigator.pop();
+                            onClosed();
+                          })
+                          .catchError((error) {
+                            messager.showSnackBar(
+                              SnackBar(
+                                content: Text('Error saving category: $error'),
+                                backgroundColor: Colors.red.shade400,
+                              ),
+                            );
+                          })
+                          .whenComplete(() => loaderOverlay.hide());
+
+                      return;
+                    },
+                    icon: const Icon(Icons.save),
+                    label: Text('Save'),
                   ),
-                  onPressed: () {
-                    final loaderOverlay = context.loaderOverlay;
-
-                    if (!_formKey.currentState!.validate()) {
-                      messager.showSnackBar(
-                        SnackBar(
-                          content: Text('Please fill in all fields'),
-                          backgroundColor: Colors.red.shade400,
-                        ),
-                      );
-                    }
-
-                    loaderOverlay.show();
-                    save(context)
-                        .then((_) {
-                          messager.showSnackBar(
-                            SnackBar(
-                              content: Text('Category saved successfully!'),
-                              backgroundColor: Colors.green.shade400,
-                            ),
-                          );
-
-                          navigator.pop();
-                          onClosed();
-                        })
-                        .catchError((error) {
-                          messager.showSnackBar(
-                            SnackBar(
-                              content: Text('Error saving category: $error'),
-                              backgroundColor: Colors.red.shade400,
-                            ),
-                          );
-                        })
-                        .whenComplete(() => loaderOverlay.hide());
-
-                    return;
-                  },
-                  icon: const Icon(Icons.save),
-                  label: Text('Save'),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -239,22 +270,19 @@ class _CategoriesFormPageState extends State<CategoriesFormPage> {
     final api = ApiCategory(context);
     final payload = SaveCategory(
       id: widget.itemId,
-      name: _categotyName.value,
-      description: _description.value,
+      name: _categoryName ?? '',
+      description: _description,
       icon: _icon.value,
-      color: _color.value,
+      color: _colorController.text,
     );
 
     await api.saveCategory(payload: payload);
   }
 
-  void changeColor(Color color) {
-    setState(() {
-      pickerColor = color;
-    });
-  }
-
-  Future<void> showColorPicker(BuildContext context) async {
+  Future<void> showColorPicker(
+    BuildContext context,
+    VoidCallback onColorSelected,
+  ) async {
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
@@ -263,8 +291,8 @@ class _CategoriesFormPageState extends State<CategoriesFormPage> {
           content: SingleChildScrollView(
             child: ColorPicker(
               enableAlpha: false,
-              pickerColor: pickerColor,
-              onColorChanged: changeColor,
+              pickerColor: _pickerColor,
+              onColorChanged: (color) => _pickerColor = color,
             ),
           ),
           actions: <Widget>[
@@ -277,18 +305,7 @@ class _CategoriesFormPageState extends State<CategoriesFormPage> {
             TextButton(
               child: Text('Confirm'),
               onPressed: () {
-                setState(() {
-                  final hex = Utils.colorToHex(
-                    pickerColor,
-                    includeHashSign: true,
-                    enableAlpha: false,
-                    toUpperCase: false,
-                  );
-                  _color.value = hex;
-                  debugPrint('Selected hex color: $hex');
-                  _colorController.text = _color.value;
-                });
-                Navigator.of(context).pop();
+                onColorSelected();
               },
             ),
           ],
@@ -304,9 +321,6 @@ class _CategoriesFormPageState extends State<CategoriesFormPage> {
 
   @override
   void dispose() {
-    _categotyName.dispose();
-    _description.dispose();
-    _color.dispose();
     _icon.dispose();
     _categoryNameController.dispose();
     _descriptionController.dispose();

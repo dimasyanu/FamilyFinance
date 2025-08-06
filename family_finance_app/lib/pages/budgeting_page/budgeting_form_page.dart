@@ -43,7 +43,7 @@ class _BudgetingFormPageState extends State<BudgetingFormPage> {
     thousandSymbol: '.',
   );
 
-  Future<void> loadCategoryData(BuildContext context) async {
+  Future<void> loadBedgetingData(BuildContext context) async {
     final api = ApiBudgeting(context);
     final messager = ScaffoldMessenger.of(context);
     try {
@@ -219,7 +219,7 @@ class _BudgetingFormPageState extends State<BudgetingFormPage> {
                           .then((_) {
                             messager.showSnackBar(
                               SnackBar(
-                                content: Text('Category saved successfully!'),
+                                content: Text('Budget saved successfully!'),
                                 backgroundColor: Colors.green.shade400,
                               ),
                             );
@@ -259,7 +259,7 @@ class _BudgetingFormPageState extends State<BudgetingFormPage> {
     // loaderOverlay.show();
 
     if (!widget.isNew && !_isLoaded) {
-      await loadCategoryData(context);
+      await loadBedgetingData(context);
       _isLoaded = true;
     }
 

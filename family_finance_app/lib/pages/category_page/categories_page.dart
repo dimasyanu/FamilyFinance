@@ -8,7 +8,6 @@ import 'package:family_financial_app/pages/category_page/categories_form_page.da
 import 'package:family_financial_app/pages/category_page/categories_table_source.dart';
 import 'package:family_financial_app/plugins/api_category.dart';
 import 'package:flutter/material.dart';
-import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh_flutter3/pull_to_refresh_flutter3.dart'
     hide RefreshIndicatorState;
@@ -158,14 +157,12 @@ class CategoriesPage extends MyPage {
 
   @override
   Future<void> onMounted(BuildContext context) async {
-    await loadTable(context);
+    await refreshController.requestRefresh();
   }
 
   /// Load the categories table or any necessary data.
   Future<void> loadTable(BuildContext context) async {
     final user = store.getUser();
-    final loaderOverlay = context.loaderOverlay;
-    loaderOverlay.show();
     if (user == null) throw Exception('User not logged in');
     try {
       final response = await api.getCategories(
@@ -189,7 +186,6 @@ class CategoriesPage extends MyPage {
       }
     } catch (error) {
       isError.value = true;
-      debugPrint('Error loading categories: $error');
       messenger.showSnackBar(
         SnackBar(
           content: Text('Failed to load categories'),
@@ -197,18 +193,16 @@ class CategoriesPage extends MyPage {
         ),
       );
     }
-    loaderOverlay.hide();
   }
 
   Future<void> deleteItem(
     String userId,
     String categoryId,
-    OverlayExtensionHelper loaderOverlay,
     ScaffoldMessengerState messenger,
     NavigatorState navigator,
     VoidCallback loadTable,
   ) async {
-    loaderOverlay.show();
+    refreshController.requestLoading();
     try {
       final response = await api.deleteCategory(categoryId: categoryId);
       if (response.success) {
@@ -236,7 +230,7 @@ class CategoriesPage extends MyPage {
         ),
       );
     } finally {
-      loaderOverlay.hide();
+      refreshController.refreshCompleted();
       loadTable();
       navigator.pop();
     }
@@ -250,7 +244,6 @@ class CategoriesPage extends MyPage {
       context: context,
       builder: (BuildContext context) {
         final navigator = Navigator.of(context);
-        final loaderOverlay = context.loaderOverlay;
         return AlertDialog(
           title: Text('Delete Category'),
           content: Text(
@@ -269,7 +262,6 @@ class CategoriesPage extends MyPage {
                 await deleteItem(
                   store.getUser()?.userId ?? '',
                   category.id,
-                  loaderOverlay,
                   messenger,
                   navigator,
                   () => refreshController.requestRefresh(),

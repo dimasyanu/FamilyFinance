@@ -70,7 +70,6 @@ class BudgetingPage extends MyPage {
 
   @override
   Widget build(BuildContext context) {
-    // loadTable(context);
     _refreshKey.currentState?.show();
     final navigator = Navigator.of(context);
     return SmartRefresher(
@@ -90,66 +89,59 @@ class BudgetingPage extends MyPage {
         scrollDirection: Axis.vertical,
         child: Container(
           padding: const EdgeInsets.all(8.0),
-          child: Builder(
-            builder: (context) {
-              return PaginatedDataTable(
-                headingRowColor: WidgetStateProperty.all(Colors.grey.shade200),
-                columns: columns,
-                showEmptyRows: false,
-                source: BudgetingTableSource(
-                  context: context,
-                  budgets: budgets.value,
-                  onRowLongPressed: (budget) => showModalBottomSheet(
-                    context: context,
-                    builder: (context) {
-                      return BottomActionMenu(
-                        itemDetail: BudgetingDetail(budget: budget),
-                        actions: [
-                          RowAction(
-                            icon: Icon(Icons.close, color: Colors.grey),
-                            label: 'Cancel',
-                            onPressed: () {
-                              navigator.pop(); // Close the bottom sheet
-                            },
-                          ),
-                          RowAction(
-                            icon: Icon(Icons.edit),
-                            label: 'Edit',
-                            backgroundColor: Colors.blue.shade50,
-                            onPressed: () {
-                              navigator.pop();
-                              navigator.push(
-                                MaterialPageRoute(
-                                  builder: (context) => BudgetingFormPage(
-                                    itemId: budget.id,
-                                    onClosed: () {
-                                      refreshController.requestRefresh();
-                                    },
-                                    backgroundColor: appBarBackgroundColor()!,
-                                    foregroundColor: appBarForegroundColor()!,
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                          RowAction(
-                            icon: Icon(
-                              Icons.delete,
-                              color: Colors.red.shade300,
+          child: PaginatedDataTable(
+            headingRowColor: WidgetStateProperty.all(Colors.grey.shade200),
+            columns: columns,
+            showEmptyRows: false,
+            source: BudgetingTableSource(
+              context: context,
+              budgets: budgets.value,
+              onRowLongPressed: (budget) => showModalBottomSheet(
+                context: context,
+                builder: (context) {
+                  return BottomActionMenu(
+                    itemDetail: BudgetingDetail(budget: budget),
+                    actions: [
+                      RowAction(
+                        icon: Icon(Icons.close, color: Colors.grey),
+                        label: 'Cancel',
+                        onPressed: () {
+                          navigator.pop(); // Close the bottom sheet
+                        },
+                      ),
+                      RowAction(
+                        icon: Icon(Icons.edit),
+                        label: 'Edit',
+                        backgroundColor: Colors.blue.shade50,
+                        onPressed: () {
+                          navigator.pop();
+                          navigator.push(
+                            MaterialPageRoute(
+                              builder: (context) => BudgetingFormPage(
+                                itemId: budget.id,
+                                onClosed: () {
+                                  refreshController.requestRefresh();
+                                },
+                                backgroundColor: appBarBackgroundColor()!,
+                                foregroundColor: appBarForegroundColor()!,
+                              ),
                             ),
-                            label: 'Delete',
-                            backgroundColor: Colors.red.shade50,
-                            onPressed: () {
-                              showDeleteConfirmationDialog(context, budget);
-                            },
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                ),
-              );
-            },
+                          );
+                        },
+                      ),
+                      RowAction(
+                        icon: Icon(Icons.delete, color: Colors.red.shade300),
+                        label: 'Delete',
+                        backgroundColor: Colors.red.shade50,
+                        onPressed: () {
+                          showDeleteConfirmationDialog(context, budget);
+                        },
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
           ),
         ),
       ),
@@ -159,9 +151,6 @@ class BudgetingPage extends MyPage {
   @override
   Future<void> onMounted(BuildContext context) async {
     await refreshController.requestRefresh();
-    // loadTable(context).then((_) {
-    // refreshController.refreshCompleted();
-    // });
   }
 
   /// Load the budgeting table or any necessary data.
