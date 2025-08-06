@@ -75,8 +75,12 @@ class CategoriesPage extends MyPage {
   }
 
   @override
+  Future<void> onMounted(BuildContext context) async {
+    await refreshController.requestRefresh();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // loadTable(context);
     _refreshKey.currentState?.show();
     final navigator = Navigator.of(context);
     return SmartRefresher(
@@ -153,11 +157,6 @@ class CategoriesPage extends MyPage {
         ),
       ),
     );
-  }
-
-  @override
-  Future<void> onMounted(BuildContext context) async {
-    await refreshController.requestRefresh();
   }
 
   /// Load the categories table or any necessary data.

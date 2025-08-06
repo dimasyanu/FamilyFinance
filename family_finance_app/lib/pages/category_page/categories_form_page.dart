@@ -34,7 +34,6 @@ class _CategoriesFormPageState extends State<CategoriesFormPage> {
 
   String? _categoryName = '';
   String? _description = '';
-  // String? _color = '';
   final _icon = ValueNotifier<int>(0);
 
   final _colorController = TextEditingController();
@@ -58,7 +57,6 @@ class _CategoriesFormPageState extends State<CategoriesFormPage> {
       setState(() {
         _categoryName = response.data?.name ?? '';
         _description = response.data?.description ?? '';
-        // _color = response.data?.color ?? '';
         _icon.value = response.data?.icon ?? 0;
 
         _categoryNameController.text = _categoryName ?? '';

@@ -86,8 +86,12 @@ class AccountsPage extends MyPage {
   }
 
   @override
+  Future<void> onMounted(BuildContext context) async {
+    await refreshController.requestRefresh();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // loadTable(context);
     _refreshKey.currentState?.show();
     final navigator = Navigator.of(context);
     return SmartRefresher(
@@ -100,11 +104,8 @@ class AccountsPage extends MyPage {
         distance: 80.0,
       ),
       onRefresh: () async {
-        await Future.sync(() {
-          loadTable(context);
-        }).whenComplete(() {
-          refreshController.refreshCompleted();
-        });
+        await loadTable(context);
+        refreshController.refreshCompleted();
       },
       child: SingleChildScrollView(
         scrollDirection: Axis.vertical,
@@ -168,53 +169,40 @@ class AccountsPage extends MyPage {
     );
   }
 
-  @override
-  Future<void> onMounted(BuildContext context) async {
-    // Perform any additional setup or state initialization here
-    await Future.sync(() => loadTable(context));
-  }
-
   /// Load the accounts table or any necessary data.
-  void loadTable(BuildContext context) {
+  Future<void> loadTable(BuildContext context) async {
     final user = store.getUser();
-    final loaderOverlay = context.loaderOverlay;
-    loaderOverlay.show();
     if (user == null) throw Exception('User not logged in');
-    api
-        .getAccounts(
-          userId: user.userId,
-          page: page.value,
-          pageSize: pageSize.value,
-        )
-        .then((response) {
-          if (response.success) {
-            setState(() {
-              isError.value = false;
-              accounts.value = response.data?.items ?? [];
-              totalCount.value = response.data?.totalCount ?? 0;
-            });
-          } else {
-            isError.value = true;
-            messenger.showSnackBar(
-              SnackBar(
-                content: Text('Failed to load accounts'),
-                backgroundColor: Colors.red.shade400,
-              ),
-            );
-          }
-        })
-        .catchError((error) {
-          isError.value = true;
-          messenger.showSnackBar(
-            SnackBar(
-              content: Text('Failed to load accounts'),
-              backgroundColor: Colors.red.shade400,
-            ),
-          );
-        })
-        .whenComplete(() {
-          loaderOverlay.hide();
+    try {
+      final response = await api.getAccounts(
+        userId: user.userId,
+        page: page.value,
+        pageSize: pageSize.value,
+      );
+      if (response.success) {
+        setState(() {
+          isError.value = false;
+          accounts.value = response.data?.items ?? [];
+          totalCount.value = response.data?.totalCount ?? 0;
         });
+      } else {
+        isError.value = true;
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text('Failed to load accounts'),
+            backgroundColor: Colors.red.shade400,
+          ),
+        );
+      }
+    } catch (error) {
+      isError.value = true;
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Failed to load accounts'),
+          backgroundColor: Colors.red.shade400,
+        ),
+      );
+    }
   }
 
   Future<void> deleteItem(
@@ -225,7 +213,7 @@ class AccountsPage extends MyPage {
     NavigatorState navigator,
     VoidCallback loadTable,
   ) async {
-    loaderOverlay.show();
+    refreshController.requestLoading();
     try {
       final response = await api.deleteAccount(
         userId: store.getUser()?.userId ?? '',
@@ -256,7 +244,7 @@ class AccountsPage extends MyPage {
         ),
       );
     } finally {
-      loaderOverlay.hide();
+      refreshController.refreshCompleted();
       loadTable();
       navigator.pop();
     }
@@ -310,7 +298,7 @@ class AccountsPage extends MyPage {
           MaterialPageRoute(
             builder: (context) => AccountsFormPage(
               onClosed: () {
-                loadTable(context);
+                refreshController.requestRefresh();
               },
             ),
           ),

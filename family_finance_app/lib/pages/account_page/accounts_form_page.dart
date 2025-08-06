@@ -24,10 +24,6 @@ class _AccountsFormPageState extends State<AccountsFormPage> {
 
   final _formKey = GlobalKey<FormState>();
 
-  final _accountName = ValueNotifier<String>('');
-  final _description = ValueNotifier<String>('');
-  final _color = ValueNotifier<String>('');
-
   final _colorController = TextEditingController();
   final _accountNameController = TextEditingController();
   final _descriptionController = TextEditingController();
@@ -37,8 +33,8 @@ class _AccountsFormPageState extends State<AccountsFormPage> {
     super.initState();
 
     if (widget.isNew) {
-      _color.value = '#000000'; // Default color for new accounts
-      pickerColor = Utils.hexStringToColor(_color.value);
+      _colorController.text = '#000000'; // Default color for new accounts
+      pickerColor = Utils.hexStringToColor(_colorController.text);
     } else {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         loadAccountData(context);
@@ -62,13 +58,10 @@ class _AccountsFormPageState extends State<AccountsFormPage> {
         throw Exception('Failed to load account: ${response.message}');
       }
       setState(() {
-        _accountName.value = response.data?.name ?? '';
-        _description.value = response.data?.description ?? '';
-        _color.value = response.data?.color ?? '';
-        _accountNameController.text = _accountName.value;
-        _descriptionController.text = _description.value;
-        pickerColor = Utils.hexStringToColor(_color.value);
-        _colorController.text = _color.value;
+        _accountNameController.text = response.data?.name ?? '';
+        _descriptionController.text = response.data?.description ?? '';
+        _colorController.text = response.data?.color ?? '';
+        pickerColor = Utils.hexStringToColor(_colorController.text);
       });
     } catch (error) {
       messager.showSnackBar(
@@ -108,7 +101,7 @@ class _AccountsFormPageState extends State<AccountsFormPage> {
                     TextFormField(
                       controller: _accountNameController,
                       decoration: InputDecoration(labelText: 'Account Name'),
-                      onChanged: (value) => _accountName.value = value,
+                      onChanged: (value) => _accountNameController.text = value,
                       validator: (value) => value == null || value.isEmpty
                           ? 'Please enter an account name'
                           : null,
@@ -118,7 +111,7 @@ class _AccountsFormPageState extends State<AccountsFormPage> {
                       decoration: InputDecoration(labelText: 'Description'),
                       maxLines: null,
                       keyboardType: TextInputType.multiline,
-                      onChanged: (value) => _description.value = value,
+                      onChanged: (value) => _descriptionController.text = value,
                     ),
                     TextFormField(
                       controller: _colorController,
@@ -198,9 +191,9 @@ class _AccountsFormPageState extends State<AccountsFormPage> {
     final store = context.read<Store>();
     final payload = SaveAccount(
       id: widget.itemId,
-      name: _accountName.value,
-      description: _description.value,
-      color: _color.value,
+      name: _accountNameController.text,
+      description: _descriptionController.text,
+      color: _colorController.text,
     );
 
     await api.saveAccount(
@@ -238,16 +231,14 @@ class _AccountsFormPageState extends State<AccountsFormPage> {
             TextButton(
               child: Text('Confirm'),
               onPressed: () {
+                final hex = Utils.colorToHex(
+                  pickerColor,
+                  includeHashSign: true,
+                  enableAlpha: false,
+                  toUpperCase: false,
+                );
                 setState(() {
-                  final hex = Utils.colorToHex(
-                    pickerColor,
-                    includeHashSign: true,
-                    enableAlpha: false,
-                    toUpperCase: false,
-                  );
-                  _color.value = hex;
-                  debugPrint('Selected hex color: $hex');
-                  _colorController.text = _color.value;
+                  _colorController.text = hex;
                 });
                 Navigator.of(context).pop();
               },
@@ -265,9 +256,8 @@ class _AccountsFormPageState extends State<AccountsFormPage> {
 
   @override
   void dispose() {
-    _accountName.dispose();
-    _description.dispose();
-    _color.dispose();
+    _accountNameController.dispose();
+    _descriptionController.dispose();
     _colorController.dispose();
     _formKey.currentState?.dispose();
     super.dispose();
