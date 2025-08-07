@@ -4,6 +4,8 @@ import 'package:family_financial_app/components/row_action.dart';
 import 'package:family_financial_app/constants/transaction_type.dart';
 import 'package:family_financial_app/models/mypage.dart';
 import 'package:family_financial_app/models/responses/item_transaction.dart';
+import 'package:family_financial_app/pages/transaction_page/partials/transactions_bottom_navigation_bar.dart';
+import 'package:family_financial_app/pages/transaction_page/partials/transactions_list_view.dart';
 import 'package:family_financial_app/pages/transaction_page/transactions_detail.dart';
 import 'package:family_financial_app/pages/transaction_page/transactions_form_page.dart';
 import 'package:family_financial_app/pages/transaction_page/transactions_table_source.dart';
@@ -26,8 +28,13 @@ class TransactionsPage extends MyPage {
   final page = ValueNotifier<int>(1);
   final isError = ValueNotifier<bool>(false);
   final refreshController = RefreshController(initialRefresh: false);
+  int _currentTabIndex = 0;
 
-  // final _tabController = TabController(length: 3, vsync: ScrollableState());
+  final allTransactionsController = TransactionsListViewController();
+  final expansesTransactionsController = TransactionsListViewController();
+  final incomesTransactionsController = TransactionsListViewController();
+
+  TabController? _tabController;
 
   static const headerStyle = TextStyle(fontWeight: FontWeight.bold);
 
@@ -82,66 +89,56 @@ class TransactionsPage extends MyPage {
 
   @override
   Future<void> onMounted(BuildContext context) async {
-    // await refreshController.requestRefresh();
-    // _tabController.addListener(() {
-    // if (_tabController.indexIsChanging) {
-    // debugPrint('Tab changed to: ${_tabController.index}');
-    // }
-    // });
-  }
-
-  Widget? bottomNavigationBar(BuildContext context) {
-    return Container(
-      color: Colors.white,
-      child: TabBar(
-        tabs: [
-          Tab(
-            // icon: Icon(Icons.sync_alt, color: appBarForegroundColor()),
-            // text: 'All',
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.sync_alt, color: appBarForegroundColor(), size: 18),
-                const SizedBox(width: 8.0),
-                Text('All'),
-              ],
-            ),
-          ),
-          Tab(
-            // icon: Icon(Icons.arrow_upward, color: Colors.green.shade200),
-            child: Row(
-              children: [
-                Icon(Icons.arrow_upward, color: Colors.green.shade200),
-                Text('Expenses'),
-              ],
-            ),
-          ),
-          Tab(
-            // icon: Icon(Icons.arrow_downward, color: Colors.green.shade200),
-            text: 'Incomes',
-          ),
-        ],
-      ),
-    );
+    allTransactionsController.loadView(context);
   }
 
   @override
   Widget build(BuildContext context) {
+    initTabs(context);
     return DefaultTabController(
       length: 3,
       child: Scaffold(
         body: TabBarView(
-          // controller: _tabController,
+          controller: _tabController,
           children: [
-            Center(child: Text('Categories tab')), // Placeholder for categories
-            Center(child: Text('Categories tab')), // Placeholder for categories
-            Center(child: Text('Accounts tab')), // Placeholder for accounts
+            TransactionsListView(
+              controller: allTransactionsController,
+              name: 'All Transactions',
+            ), // Placeholder for categories
+            TransactionsListView(
+              controller: expansesTransactionsController,
+              name: 'Expenses Transactions',
+            ), // Placeholder for categories
+            TransactionsListView(
+              controller: incomesTransactionsController,
+              name: 'Incomes Transactions',
+            ), // Placeholder for accounts
           ],
         ),
-        bottomNavigationBar: bottomNavigationBar(context),
+        bottomNavigationBar: TransactionsBottomNavigationBar(
+          tabController: _tabController!,
+          foregroundColor: appBarForegroundColor()!,
+        ).getNavigationBar(context),
       ),
     );
+  }
+
+  void initTabs(BuildContext context) {
+    _tabController = TabController(length: 3, vsync: Scaffold.of(context));
+    final controllers = [
+      allTransactionsController,
+      expansesTransactionsController,
+      incomesTransactionsController,
+    ];
+
+    _tabController?.addListener(() {
+      if (_tabController!.index == _currentTabIndex) return;
+      _currentTabIndex = _tabController!.index;
+      final previousTabIndex = _tabController!.previousIndex;
+
+      controllers[_currentTabIndex].loadView(context);
+      controllers[previousTabIndex].destroy();
+    });
   }
 
   Widget build1(BuildContext context) {
@@ -242,7 +239,9 @@ class TransactionsPage extends MyPage {
               ItemTransaction(
                 id: 'txn_$i',
                 account: 'Account $i',
-                transactionDate: DateTime.now().subtract(Duration(days: i)),
+                transactionDate: DateTime.now()
+                    .subtract(Duration(days: i))
+                    .toString(),
                 transactionType: i % 2 == 0
                     ? TransactionType.income
                     : TransactionType.expense,
@@ -402,6 +401,7 @@ class TransactionsPage extends MyPage {
     page.dispose();
     isError.dispose();
     refreshController.dispose();
+    _tabController?.dispose();
     // _tabController.dispose();
     super.dispose();
   }

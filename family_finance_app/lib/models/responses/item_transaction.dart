@@ -1,10 +1,8 @@
-import 'package:family_financial_app/constants/transaction_type.dart';
-
 class ItemTransaction {
   final String id;
   final String description;
   final double amount;
-  final DateTime transactionDate;
+  final String transactionDate;
   final int transactionType;
   final String category;
   final String account;
@@ -26,7 +24,7 @@ class ItemTransaction {
       id: json['id'] as String,
       description: json['description'] as String,
       amount: (json['amount'] as num).toDouble(),
-      transactionDate: DateTime.parse(json['transactionDate'] as String),
+      transactionDate: json['transactionDate'] as String,
       transactionType: json['transactionType'] as int,
       category: json['category'] as String,
       account: json['account'] as String,

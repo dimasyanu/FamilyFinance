@@ -42,7 +42,7 @@ class TransactionsTableSource extends DataTableSource {
         DataCell(Text(transaction.account)),
         DataCell(Text(transaction.category)),
         DataCell(Text(Utils.formatCurrency(transaction.amount))),
-        DataCell(Text(Utils.formatDate(transaction.transactionDate))),
+        DataCell(Text(transaction.transactionDate)),
       ],
     );
   }
