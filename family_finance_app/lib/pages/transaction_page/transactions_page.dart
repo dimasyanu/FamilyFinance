@@ -89,12 +89,14 @@ class TransactionsPage extends MyPage {
 
   @override
   Future<void> onMounted(BuildContext context) async {
-    allTransactionsController.loadView(context);
+    // allTransactionsController.invoke(context);
+    // initTabs(context);
   }
 
   @override
   Widget build(BuildContext context) {
-    initTabs(context);
+    _tabController = TabController(length: 3, vsync: Scaffold.of(context));
+
     return DefaultTabController(
       length: 3,
       child: Scaffold(
@@ -124,7 +126,6 @@ class TransactionsPage extends MyPage {
   }
 
   void initTabs(BuildContext context) {
-    _tabController = TabController(length: 3, vsync: Scaffold.of(context));
     final controllers = [
       allTransactionsController,
       expansesTransactionsController,
@@ -141,84 +142,84 @@ class TransactionsPage extends MyPage {
     });
   }
 
-  Widget build1(BuildContext context) {
-    _refreshKey.currentState?.show();
-    final navigator = Navigator.of(context);
-    return SmartRefresher(
-      key: _refreshKey,
-      controller: refreshController,
-      enablePullDown: true,
-      header: WaterDropMaterialHeader(
-        backgroundColor: appBarBackgroundColor(),
-        color: appBarForegroundColor()!,
-        distance: 80.0,
-      ),
-      onRefresh: () async {
-        await loadTable(context);
-        refreshController.refreshCompleted();
-      },
-      child: SingleChildScrollView(
-        scrollDirection: Axis.vertical,
-        child: Container(
-          padding: const EdgeInsets.all(8.0),
-          child: PaginatedDataTable(
-            headingRowColor: WidgetStateProperty.all(Colors.grey.shade200),
-            columns: columns,
-            showEmptyRows: false,
-            source: TransactionsTableSource(
-              context: context,
-              transactions: transactions.value,
-              onRowLongPressed: (transaction) => showModalBottomSheet(
-                context: context,
-                builder: (context) {
-                  return BottomActionMenu(
-                    itemDetail: TransactionsDetail(transaction: transaction),
-                    actions: [
-                      RowAction(
-                        icon: Icon(Icons.close, color: Colors.grey),
-                        label: 'Cancel',
-                        onPressed: () {
-                          navigator.pop(); // Close the bottom sheet
-                        },
-                      ),
-                      RowAction(
-                        icon: Icon(Icons.edit),
-                        label: 'Edit',
-                        backgroundColor: Colors.blue.shade50,
-                        onPressed: () {
-                          navigator.pop();
-                          navigator.push(
-                            MaterialPageRoute(
-                              builder: (context) => TransactionsFormPage(
-                                itemId: transaction.id,
-                                onClosed: () {
-                                  refreshController.requestRefresh();
-                                },
-                                backgroundColor: appBarBackgroundColor()!,
-                                foregroundColor: appBarForegroundColor()!,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                      RowAction(
-                        icon: Icon(Icons.delete, color: Colors.red.shade300),
-                        label: 'Delete',
-                        backgroundColor: Colors.red.shade50,
-                        onPressed: () {
-                          showDeleteConfirmationDialog(context, transaction);
-                        },
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  // Widget build1(BuildContext context) {
+  // _refreshKey.currentState?.show();
+  // final navigator = Navigator.of(context);
+  // return SmartRefresher(
+  // key: _refreshKey,
+  // controller: refreshController,
+  // enablePullDown: true,
+  // header: WaterDropMaterialHeader(
+  // backgroundColor: appBarBackgroundColor(),
+  // color: appBarForegroundColor()!,
+  // distance: 80.0,
+  // ),
+  // onRefresh: () async {
+  // await loadTable(context);
+  // refreshController.refreshCompleted();
+  // },
+  // child: SingleChildScrollView(
+  // scrollDirection: Axis.vertical,
+  // child: Container(
+  // padding: const EdgeInsets.all(8.0),
+  // child: PaginatedDataTable(
+  // headingRowColor: WidgetStateProperty.all(Colors.grey.shade200),
+  // columns: columns,
+  // showEmptyRows: false,
+  // source: TransactionsTableSource(
+  // context: context,
+  // transactions: transactions.value,
+  // onRowLongPressed: (transaction) => showModalBottomSheet(
+  // context: context,
+  // builder: (context) {
+  // return BottomActionMenu(
+  // itemDetail: TransactionsDetail(transaction: transaction),
+  // actions: [
+  // RowAction(
+  // icon: Icon(Icons.close, color: Colors.grey),
+  // label: 'Cancel',
+  // onPressed: () {
+  // navigator.pop(); // Close the bottom sheet
+  // },
+  // ),
+  // RowAction(
+  // icon: Icon(Icons.edit),
+  // label: 'Edit',
+  // backgroundColor: Colors.blue.shade50,
+  // onPressed: () {
+  // navigator.pop();
+  // navigator.push(
+  // MaterialPageRoute(
+  // builder: (context) => TransactionsFormPage(
+  // itemId: transaction.id,
+  // onClosed: () {
+  // refreshController.requestRefresh();
+  // },
+  // backgroundColor: appBarBackgroundColor()!,
+  // foregroundColor: appBarForegroundColor()!,
+  // ),
+  // ),
+  // );
+  // },
+  // ),
+  // RowAction(
+  // icon: Icon(Icons.delete, color: Colors.red.shade300),
+  // label: 'Delete',
+  // backgroundColor: Colors.red.shade50,
+  // onPressed: () {
+  // showDeleteConfirmationDialog(context, transaction);
+  // },
+  // ),
+  // ],
+  // );
+  // },
+  // ),
+  // ),
+  // ),
+  // ),
+  // ),
+  // );
+  // }
 
   /// Load the categories table or any necessary data.
   Future<void> loadTable(BuildContext context) async {
