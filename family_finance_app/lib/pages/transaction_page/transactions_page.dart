@@ -1,14 +1,10 @@
 import 'package:family_financial_app/abstractions/store.dart';
-import 'package:family_financial_app/components/bottom_action_menu.dart';
-import 'package:family_financial_app/components/row_action.dart';
 import 'package:family_financial_app/constants/transaction_type.dart';
 import 'package:family_financial_app/models/mypage.dart';
 import 'package:family_financial_app/models/responses/item_transaction.dart';
 import 'package:family_financial_app/pages/transaction_page/partials/transactions_bottom_navigation_bar.dart';
 import 'package:family_financial_app/pages/transaction_page/partials/transactions_list_view.dart';
-import 'package:family_financial_app/pages/transaction_page/transactions_detail.dart';
 import 'package:family_financial_app/pages/transaction_page/transactions_form_page.dart';
-import 'package:family_financial_app/pages/transaction_page/transactions_table_source.dart';
 import 'package:family_financial_app/plugins/api_transactions.dart';
 import 'package:flutter/material.dart';
 import 'package:loader_overlay/loader_overlay.dart';
@@ -20,7 +16,6 @@ class TransactionsPage extends MyPage {
   final ApiTransactions api;
   final Store store;
   final ScaffoldMessengerState messenger;
-  final _refreshKey = GlobalKey<RefreshIndicatorState>();
 
   final transactions = ValueNotifier<List<ItemTransaction>>([]);
   final totalCount = ValueNotifier<int>(0);
@@ -110,10 +105,12 @@ class TransactionsPage extends MyPage {
             TransactionsListView(
               controller: expansesTransactionsController,
               name: 'Expenses Transactions',
+              type: TransactionType.expense,
             ), // Placeholder for categories
             TransactionsListView(
               controller: incomesTransactionsController,
               name: 'Incomes Transactions',
+              type: TransactionType.income,
             ), // Placeholder for accounts
           ],
         ),
@@ -140,137 +137,6 @@ class TransactionsPage extends MyPage {
       controllers[_currentTabIndex].loadView(context);
       controllers[previousTabIndex].destroy();
     });
-  }
-
-  // Widget build1(BuildContext context) {
-  // _refreshKey.currentState?.show();
-  // final navigator = Navigator.of(context);
-  // return SmartRefresher(
-  // key: _refreshKey,
-  // controller: refreshController,
-  // enablePullDown: true,
-  // header: WaterDropMaterialHeader(
-  // backgroundColor: appBarBackgroundColor(),
-  // color: appBarForegroundColor()!,
-  // distance: 80.0,
-  // ),
-  // onRefresh: () async {
-  // await loadTable(context);
-  // refreshController.refreshCompleted();
-  // },
-  // child: SingleChildScrollView(
-  // scrollDirection: Axis.vertical,
-  // child: Container(
-  // padding: const EdgeInsets.all(8.0),
-  // child: PaginatedDataTable(
-  // headingRowColor: WidgetStateProperty.all(Colors.grey.shade200),
-  // columns: columns,
-  // showEmptyRows: false,
-  // source: TransactionsTableSource(
-  // context: context,
-  // transactions: transactions.value,
-  // onRowLongPressed: (transaction) => showModalBottomSheet(
-  // context: context,
-  // builder: (context) {
-  // return BottomActionMenu(
-  // itemDetail: TransactionsDetail(transaction: transaction),
-  // actions: [
-  // RowAction(
-  // icon: Icon(Icons.close, color: Colors.grey),
-  // label: 'Cancel',
-  // onPressed: () {
-  // navigator.pop(); // Close the bottom sheet
-  // },
-  // ),
-  // RowAction(
-  // icon: Icon(Icons.edit),
-  // label: 'Edit',
-  // backgroundColor: Colors.blue.shade50,
-  // onPressed: () {
-  // navigator.pop();
-  // navigator.push(
-  // MaterialPageRoute(
-  // builder: (context) => TransactionsFormPage(
-  // itemId: transaction.id,
-  // onClosed: () {
-  // refreshController.requestRefresh();
-  // },
-  // backgroundColor: appBarBackgroundColor()!,
-  // foregroundColor: appBarForegroundColor()!,
-  // ),
-  // ),
-  // );
-  // },
-  // ),
-  // RowAction(
-  // icon: Icon(Icons.delete, color: Colors.red.shade300),
-  // label: 'Delete',
-  // backgroundColor: Colors.red.shade50,
-  // onPressed: () {
-  // showDeleteConfirmationDialog(context, transaction);
-  // },
-  // ),
-  // ],
-  // );
-  // },
-  // ),
-  // ),
-  // ),
-  // ),
-  // ),
-  // );
-  // }
-
-  /// Load the categories table or any necessary data.
-  Future<void> loadTable(BuildContext context) async {
-    final user = store.getUser();
-    if (user == null) throw Exception('User not logged in');
-    try {
-      final response = await api.getTransactions(
-        page: page.value,
-        pageSize: pageSize.value,
-      );
-      if (response.success) {
-        setState(() {
-          isError.value = false;
-          // transactions.value = response.data?.items ?? [];
-          totalCount.value = response.data?.totalCount ?? 0;
-          for (int i = 0; i < 10; i++) {
-            transactions.value.add(
-              ItemTransaction(
-                id: 'txn_$i',
-                account: 'Account $i',
-                transactionDate: DateTime.now()
-                    .subtract(Duration(days: i))
-                    .toString(),
-                transactionType: i % 2 == 0
-                    ? TransactionType.income
-                    : TransactionType.expense,
-                description: 'Transaction $i',
-                amount: 50.0 * (i + 1),
-                category: 'Category $i',
-              ),
-            );
-          }
-        });
-      } else {
-        isError.value = true;
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text('Failed to load categories'),
-            backgroundColor: Colors.red.shade400,
-          ),
-        );
-      }
-    } catch (error) {
-      isError.value = true;
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text('Failed to load categories'),
-          backgroundColor: Colors.red.shade400,
-        ),
-      );
-    }
   }
 
   Future<void> deleteItem(

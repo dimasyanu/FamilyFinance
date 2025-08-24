@@ -2,14 +2,22 @@ import 'package:family_financial_app/constants/transaction_type.dart';
 import 'package:family_financial_app/models/responses/item_transaction.dart';
 import 'package:family_financial_app/pages/transaction_page/partials/transactions_list_item.dart';
 import 'package:family_financial_app/plugins/api_transactions.dart';
+import 'package:family_financial_app/plugins/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:pull_to_refresh_flutter3/pull_to_refresh_flutter3.dart';
 
 class TransactionsListView extends StatefulWidget {
   final TransactionsListViewController controller;
   final String? name;
+  final int? type;
+  final String backgroundColor = '#f6f8fa';
 
-  const TransactionsListView({super.key, required this.controller, this.name});
+  const TransactionsListView({
+    super.key,
+    required this.controller,
+    this.name,
+    this.type,
+  });
 
   @override
   State<TransactionsListView> createState() => _TransactionsListViewState();
@@ -18,42 +26,37 @@ class TransactionsListView extends StatefulWidget {
 class _TransactionsListViewState extends State<TransactionsListView> {
   final List<ItemTransaction> _transactions = [];
   final refreshController = RefreshController();
-  // final ValueNotifier<bool> _isActive = ValueNotifier(false);
-  bool _isActive = false;
 
-  _TransactionsListViewState() {
-    // widget.controller.setInvoker((context) {
-    // setState(() {
-    // _isActive = true;
-    // });
-    // });
-    // widget.controller.setDestroyer(destroy);
-  }
+  _TransactionsListViewState();
 
   @override
   void initState() {
     super.initState();
-    debugPrint('Initializing TransactionsListView');
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      refreshController.requestRefresh();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!_isActive) {
-      return Center(child: Text('No transactions found.'));
-    }
-
     return SmartRefresher(
       controller: refreshController,
       onRefresh: () {
-        _transactions.clear();
         loadItems();
       },
-      child: ListView.builder(
-        itemCount: _transactions.length,
-        itemBuilder: (context, index) {
-          final transaction = _transactions[index];
-          return TransactionsListItem(transaction: transaction);
-        },
+      header: const WaterDropMaterialHeader(
+        backgroundColor: Colors.white,
+        color: Colors.blue,
+        distance: 80.0,
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: List.generate(_transactions.length, (index) {
+            return TransactionsListItem(transaction: _transactions[index]);
+          }),
+        ),
       ),
     );
   }
@@ -62,27 +65,42 @@ class _TransactionsListViewState extends State<TransactionsListView> {
     final api = ApiTransactions(context);
     final messager = ScaffoldMessenger.of(context);
     api
-        .getTransactions()
+        .getTransactions(type: widget.type)
         .then((response) {
+          _transactions.clear();
           _transactions.addAll(response.data?.items ?? []);
 
-          for (int i = 0; i < 10; i++) {
-            _transactions.add(
+          final tmp = <ItemTransaction>[];
+          for (int i = 0; i < 30; i++) {
+            final now = DateTime.now().subtract(Duration(days: i));
+            tmp.add(
               ItemTransaction(
                 id: 'txn_$i',
                 account: 'Account $i',
-                transactionDate: DateTime.now()
-                    .subtract(Duration(days: i))
-                    .toString(),
+                accountColor:
+                    '#${(0x1000000 + (i * 0xFFFFFF / 30).toInt()).toRadixString(16).substring(1)}',
+                transactionDate:
+                    '${now.day.toString()} ${Utils.getMonthName(now.month - 1)} ${now.year}',
+                transactionTime:
+                    '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}',
                 transactionType: i % 2 == 0
                     ? TransactionType.income
                     : TransactionType.expense,
                 description: 'Transaction $i',
-                amount: 50.0 * (i + 1),
+                amount: 500000000.0 / (i + 1),
+                categoryIcon: 984964 + i,
+                categoryColor:
+                    '#${(0x1000000 + (i * 0xFFFFFF / 30).toInt()).toRadixString(16).substring(1)}',
                 category: 'Category $i',
+                notes: i % 3 == 0
+                    ? 'Lorem Ipsum dolor sir amet, note for transaction $i'
+                    : null,
               ),
             );
           }
+          setState(() {
+            _transactions.addAll(tmp);
+          });
           debugPrint('Loaded ${_transactions.length} transactions');
         })
         .catchError((error) {

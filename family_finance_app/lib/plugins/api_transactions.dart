@@ -13,11 +13,12 @@ class ApiTransactions extends Api {
   ApiTransactions(super.context);
 
   Future<Res<Paginated<ItemTransaction>>> getTransactions({
+    int? type,
     int page = 1,
     int pageSize = 25,
   }) async {
     final url = Uri.parse(
-      '${super.baseUrl}/api/transactions?page=$page&pageSize=$pageSize',
+      '${super.baseUrl}/api/transactions?page=$page&pageSize=$pageSize${type != null ? '&type=$type' : ''}',
     );
 
     final response = await http.get(

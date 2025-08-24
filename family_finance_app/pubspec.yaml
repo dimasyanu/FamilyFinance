@@ -44,6 +44,7 @@ dependencies:
   pull_to_refresh_flutter3: ^2.0.2
   flutter_iconpicker: ^4.0.1
   currency_textfield: ^4.14.1
+  google_fonts: ^6.3.0
 
 dev_dependencies:
   flutter_test:
