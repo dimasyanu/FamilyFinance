@@ -6,7 +6,15 @@ import 'package:google_fonts/google_fonts.dart';
 class TransactionsListItem extends StatelessWidget {
   final ItemTransaction transaction;
 
-  const TransactionsListItem({super.key, required this.transaction});
+  final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
+
+  const TransactionsListItem({
+    super.key,
+    required this.transaction,
+    this.onTap,
+    this.onLongPress,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -20,8 +28,8 @@ class TransactionsListItem extends StatelessWidget {
         shadowColor: Colors.grey.withValues(alpha: .25),
         child: InkWell(
           borderRadius: BorderRadius.circular(12.0),
-          onLongPress: () =>
-              debugPrint('Long pressed transaction ${transaction.id}'),
+          onTap: onTap ?? () {},
+          onLongPress: onLongPress ?? () {},
           child: Padding(
             padding: const EdgeInsets.all(12.0),
             child: Row(

@@ -76,6 +76,16 @@ class Utils {
   }
 
   static String formatDate(DateTime date) {
+    // Format the date as a string in 'dd MMM yyyy' format
+    return '${date.day.toString().padLeft(2, '0')} ${getMonthName(date.month)} ${date.year}';
+  }
+
+  static String formatTime(DateTime date) {
+    // Format the time as a string in 'HH:mm' format
+    return '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+  }
+
+  static String formatDateTime(DateTime date) {
     // Format the date as a string in 'dd MMM yyyy HH:mm' format
     return '${date.day.toString().padLeft(2, '0')} ${getMonthName(date.month)} ${date.year} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
   }

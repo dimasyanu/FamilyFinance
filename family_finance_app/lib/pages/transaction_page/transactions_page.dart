@@ -261,6 +261,13 @@ class TransactionsPage extends MyPage {
   }
 
   @override
+  FloatingActionButtonLocation? floatingActionButtonLocation(
+    BuildContext context,
+  ) {
+    return TransactionsFloatingActionButtonLocation(16.0, 64.0);
+  }
+
+  @override
   void dispose() {
     transactions.dispose();
     totalCount.dispose();
@@ -271,5 +278,26 @@ class TransactionsPage extends MyPage {
     _tabController?.dispose();
     // _tabController.dispose();
     super.dispose();
+  }
+}
+
+class TransactionsFloatingActionButtonLocation
+    extends FloatingActionButtonLocation {
+  final double offsetX;
+  final double offsetY;
+
+  TransactionsFloatingActionButtonLocation(this.offsetX, this.offsetY);
+
+  @override
+  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+    final fabSize = scaffoldGeometry.floatingActionButtonSize;
+    final scaffoldSize = scaffoldGeometry.scaffoldSize;
+    final contentBottom = scaffoldSize.height - scaffoldGeometry.contentBottom;
+
+    // Position the FAB at the bottom right with some offset
+    return Offset(
+      scaffoldSize.width - fabSize.width - offsetX,
+      scaffoldSize.height - fabSize.height - contentBottom - offsetY,
+    );
   }
 }

@@ -45,6 +45,7 @@ dependencies:
   flutter_iconpicker: ^4.0.1
   currency_textfield: ^4.14.1
   google_fonts: ^6.3.0
+  currency_text_input_formatter: ^2.3.0
 
 dev_dependencies:
   flutter_test:

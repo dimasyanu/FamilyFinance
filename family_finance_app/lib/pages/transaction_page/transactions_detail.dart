@@ -1,9 +1,11 @@
 import 'package:family_financial_app/constants/transaction_type.dart';
-import 'package:family_financial_app/models/responses/dto_transaction.dart';
+import 'package:family_financial_app/models/responses/item_transaction.dart';
+import 'package:family_financial_app/plugins/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class TransactionsDetail extends StatelessWidget {
-  final DtoTransaction transaction;
+  final ItemTransaction transaction;
 
   const TransactionsDetail({super.key, required this.transaction});
 
@@ -17,23 +19,73 @@ class TransactionsDetail extends StatelessWidget {
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
         ),
-        Builder(
-          builder: (context) {
-            switch (transaction.transactionType) {
-              case TransactionType.expense:
-                return Icon(Icons.arrow_downward, color: Colors.red);
-              case TransactionType.income:
-                return Icon(Icons.arrow_upward, color: Colors.green);
-              case TransactionType.transfer:
-                return Icon(Icons.swap_horiz, color: Colors.blue);
-              default:
-                return Icon(Icons.help, color: Colors.grey);
-            }
-          },
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Icon(
+              IconData(transaction.categoryIcon, fontFamily: 'MaterialIcons'),
+              color: Utils.hexStringToColor(transaction.categoryColor),
+              size: 16,
+            ),
+            SizedBox(width: 4),
+            Text(
+              transaction.category,
+              style: GoogleFonts.interTight(fontSize: 10),
+            ),
+            SizedBox(width: 8),
+            Text('|', style: TextStyle(color: Colors.grey)),
+            SizedBox(width: 8),
+            Icon(
+              Icons.circle,
+              color: Utils.hexStringToColor(transaction.accountColor),
+              size: 16,
+            ),
+            SizedBox(width: 4),
+            Text(
+              transaction.account,
+              style: GoogleFonts.interTight(fontSize: 10),
+            ),
+          ],
         ),
-        Text(transaction.category.name),
-        Text('Created: ${transaction.createdAt}'),
-        Text('Updated: ${transaction.updatedAt}'),
+        (transaction.notes != null && transaction.notes!.isNotEmpty)
+            ? Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Text(
+                  transaction.notes!,
+                  style: TextStyle(fontSize: 12),
+                  textAlign: TextAlign.center,
+                ),
+              )
+            : SizedBox.shrink(),
+        Padding(
+          padding: const EdgeInsets.only(top: 6.0, bottom: 4.0),
+          child: Text(
+            (transaction.transactionType == TransactionType.expense
+                    ? '- '
+                    : '') +
+                Utils.formatCurrency(transaction.amount),
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: transaction.transactionType == TransactionType.expense
+                  ? Colors.red.shade400
+                  : transaction.transactionType == TransactionType.income
+                  ? Colors.green.shade400
+                  : Colors.blue.shade400,
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: Text(
+            transaction.transactionDate,
+            style: GoogleFonts.interTight(fontSize: 12, color: Colors.grey),
+          ),
+        ),
+        Text(
+          transaction.transactionTime,
+          style: GoogleFonts.interTight(fontSize: 12, color: Colors.grey),
+        ),
       ],
     );
   }

@@ -1,4 +1,6 @@
+import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
 import 'package:family_financial_app/abstractions/store.dart';
+import 'package:family_financial_app/constants/transaction_type.dart';
 import 'package:family_financial_app/models/requests/save_transaction.dart';
 import 'package:family_financial_app/models/responses/item_account.dart';
 import 'package:family_financial_app/models/responses/item_category.dart';
@@ -8,7 +10,10 @@ import 'package:family_financial_app/plugins/api_accounts.dart';
 import 'package:family_financial_app/plugins/api_category.dart';
 import 'package:family_financial_app/plugins/api_transactions.dart';
 import 'package:family_financial_app/plugins/size_util.dart';
+import 'package:family_financial_app/plugins/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
 
@@ -33,30 +38,40 @@ class TransactionsFormPage extends StatefulWidget {
 
 class _TransactionsFormPageState extends State<TransactionsFormPage> {
   final _formKey = GlobalKey<FormState>();
+  final _amountInputFormatter = CurrencyTextInputFormatter.currency(
+    locale: 'id_ID',
+    symbol: '',
+    decimalDigits: 0,
+  );
   final _transactionTypes = Map<int, String>.from({
     -1: 'Expense',
-    0: 'Transfer',
     1: 'Income',
+    0: 'Transfer',
   });
 
   String? _description = '';
   int _transactionType = -1; // -1 for expense, 1 for income, 0 for transfer
   String? _accountId;
+  String? _toAccountId;
   String? _categoryId;
   DateTime _date = DateTime.now();
+  DateTime _time = DateTime.now();
   double _amount = 0.0;
+  List<ItemAccount> _accounts = [];
+  List<ItemCategory> _categories = [];
 
   final _descriptionController = TextEditingController();
 
-  bool _isLoaded = false;
+  bool _isLoadingTransaction = false;
+  bool _isLoadingFormData = false;
 
   @override
   void initState() {
     super.initState();
 
-    if (widget.isNew) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      loadTransactionData(context);
+      setState(() => _isLoadingFormData = true);
+      loadFormData(context);
     });
   }
 
@@ -93,25 +108,37 @@ class _TransactionsFormPageState extends State<TransactionsFormPage> {
       );
     } finally {
       loaderOverlay.hide();
+      setState(() {
+        _isLoadingTransaction = false;
+      });
     }
   }
 
-  Future<List<dynamic>> loadFormData(BuildContext context) async {
+  Future<void> loadFormData(BuildContext context) async {
     final categoryApi = ApiCategory(context);
     final accountsApi = ApiAccounts(context);
     final store = context.read<Store>();
     final user = store.user!.userId;
 
     final tasks = <Future>[];
-    if (!widget.isNew && !_isLoaded) {
+    if (!widget.isNew) {
       tasks.add(loadTransactionData(context));
-      _isLoaded = true;
     }
     tasks.addAll([
       categoryApi.getCategories(),
       accountsApi.getAccounts(userId: user),
     ]);
-    return await Future.wait(tasks);
+    final results = await Future.wait(tasks);
+    setState(() {
+      _isLoadingFormData = false;
+      _isLoadingTransaction = false;
+      if (results.length > 1) {
+        final categories = results[0] as Res<Paginated<ItemCategory>>;
+        final accounts = results[1] as Res<Paginated<ItemAccount>>;
+        _categories = categories.data?.items ?? [];
+        _accounts = accounts.data?.items ?? [];
+      }
+    });
   }
 
   @override
@@ -131,17 +158,11 @@ class _TransactionsFormPageState extends State<TransactionsFormPage> {
           ),
           child: Column(
             children: <Widget>[
-              FutureBuilder<List<dynamic>>(
-                future: loadFormData(context),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
+              Builder(
+                builder: (context) {
+                  if (_isLoadingTransaction || _isLoadingFormData) {
                     return Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
                   }
-                  final categories =
-                      snapshot.data![0] as Res<Paginated<ItemCategory>>;
-                  final accounts = snapshot.data![1] as Res<List<ItemAccount>>;
 
                   return Form(
                     key: _formKey,
@@ -155,51 +176,244 @@ class _TransactionsFormPageState extends State<TransactionsFormPage> {
                           maxLines: null,
                           keyboardType: TextInputType.multiline,
                           onChanged: (value) => _description = value,
+                          validator: (value) => value == null || value.isEmpty
+                              ? 'Please enter a description'
+                              : null,
                         ),
-                        DropdownButtonFormField<int>(
-                          value: _transactionType,
-                          items: _transactionTypes.entries.map((entry) {
-                            return DropdownMenuItem<int>(
-                              value: entry.key,
-                              child: Text(entry.value),
-                            );
-                          }).toList(),
-                          onChanged: (value) {
-                            _transactionType = value ?? -1;
-                          },
-                          decoration: InputDecoration(
-                            labelText: 'Transaction Type',
-                          ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                            Flexible(
+                              child: DropdownButtonFormField<int>(
+                                value: _transactionType,
+                                items: _transactionTypes.entries.map((entry) {
+                                  return DropdownMenuItem<int>(
+                                    value: entry.key,
+                                    child: Text(entry.value),
+                                  );
+                                }).toList(),
+                                onChanged: (value) {
+                                  setState(() {
+                                    _transactionType = value ?? -1;
+                                  });
+                                },
+                                decoration: InputDecoration(
+                                  labelText: 'Transaction Type',
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 16),
+                            Flexible(
+                              child: TextField(
+                                textAlign: TextAlign.right,
+                                decoration: InputDecoration(
+                                  labelText: 'Amount',
+                                  prefixText: 'Rp ',
+                                ),
+                                inputFormatters: <TextInputFormatter>[
+                                  _amountInputFormatter,
+                                ],
+                                keyboardType: TextInputType.number,
+                              ),
+                            ),
+                          ],
                         ),
-                        DropdownButtonFormField<String>(
-                          value: _categoryId,
-                          items:
-                              categories.data?.items.map((category) {
+                        Builder(
+                          builder: (context) {
+                            if (_transactionType == TransactionType.transfer) {
+                              return SizedBox.shrink();
+                            }
+
+                            return DropdownButtonFormField<String>(
+                              value: _categoryId,
+                              items: _categories.map((category) {
                                 return DropdownMenuItem<String>(
                                   value: category.id,
-                                  child: Text(category.name),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        IconData(
+                                          category.icon,
+                                          fontFamily: 'MaterialIcons',
+                                        ),
+                                        color: Utils.hexStringToColor(
+                                          category.color,
+                                        ),
+                                      ),
+                                      SizedBox(width: 10),
+                                      Text(category.name),
+                                    ],
+                                  ),
                                 );
-                              }).toList() ??
-                              [],
-                          onChanged: (value) {
-                            _categoryId = value;
+                              }).toList(),
+                              onChanged: (value) {
+                                _categoryId = value;
+                              },
+                              decoration: InputDecoration(
+                                labelText: 'Category',
+                              ),
+                              validator: (value) =>
+                                  value == null || value.isEmpty
+                                  ? 'Please select a category'
+                                  : null,
+                            );
                           },
-                          decoration: InputDecoration(labelText: 'Category'),
                         ),
                         DropdownButtonFormField<String>(
                           value: _accountId,
-                          items:
-                              accounts.data?.map((account) {
-                                return DropdownMenuItem<String>(
-                                  value: account.id,
-                                  child: Text(account.name),
-                                );
-                              }).toList() ??
-                              [],
+                          items: _accounts.map((account) {
+                            return DropdownMenuItem<String>(
+                              value: account.id,
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.circle,
+                                    color: Utils.hexStringToColor(
+                                      account.color,
+                                    ),
+                                    size: 16,
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text(account.name),
+                                ],
+                              ),
+                            );
+                          }).toList(),
                           onChanged: (value) {
-                            _accountId = value;
+                            setState(() {
+                              _accountId = value;
+                            });
                           },
-                          decoration: InputDecoration(labelText: 'Account'),
+                          decoration: InputDecoration(
+                            labelText:
+                                _transactionType == TransactionType.transfer
+                                ? 'From Account'
+                                : 'Account',
+                          ),
+                          validator: (value) => value == null || value.isEmpty
+                              ? 'Please select an account'
+                              : null,
+                        ),
+                        Builder(
+                          builder: (context) {
+                            if (_transactionType != 0) {
+                              return SizedBox.shrink();
+                            }
+                            return DropdownButtonFormField<String>(
+                              value: _toAccountId,
+                              items: _accounts
+                                  .where((account) {
+                                    return account.id != _accountId;
+                                  })
+                                  .map((account) {
+                                    return DropdownMenuItem<String>(
+                                      value: account.id,
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.circle,
+                                            color: Utils.hexStringToColor(
+                                              account.color,
+                                            ),
+                                            size: 16,
+                                          ),
+                                          SizedBox(width: 8),
+                                          Text(account.name),
+                                        ],
+                                      ),
+                                    );
+                                  })
+                                  .toList(),
+                              onChanged: (value) {
+                                setState(() {
+                                  _toAccountId = value;
+                                });
+                              },
+                              decoration: InputDecoration(
+                                labelText: 'To Account',
+                              ),
+                              validator: (value) =>
+                                  value == null || value.isEmpty
+                                  ? 'Please select a target account'
+                                  : null,
+                            );
+                          },
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                readOnly: true,
+                                decoration: InputDecoration(
+                                  labelText: 'Transaction Date',
+                                ),
+                                controller: TextEditingController(
+                                  text: Utils.formatDate(_date),
+                                ),
+                                onTap: () async {
+                                  final pickedDate = await showDatePicker(
+                                    context: context,
+                                    initialDate: _date,
+                                    firstDate: DateTime(2000),
+                                    lastDate: DateTime(2101),
+                                  );
+                                  if (pickedDate != null &&
+                                      pickedDate != _date) {
+                                    setState(() {
+                                      _date = pickedDate;
+                                    });
+                                  }
+                                },
+                              ),
+                            ),
+                            SizedBox(width: 16.0),
+                            ConstrainedBox(
+                              constraints: BoxConstraints(maxWidth: 100),
+                              child: TextFormField(
+                                readOnly: true,
+                                decoration: InputDecoration(labelText: 'Time'),
+                                controller: TextEditingController(
+                                  text: Utils.formatTime(_time),
+                                ),
+                                onTap: () async {
+                                  final pickedTime = await showTimePicker(
+                                    context: context,
+                                    initialTime: TimeOfDay.fromDateTime(_time),
+                                  );
+                                  if (pickedTime != null) {
+                                    setState(() {
+                                      _time = DateTime(
+                                        _date.year,
+                                        _date.month,
+                                        _date.day,
+                                        pickedTime.hour,
+                                        pickedTime.minute,
+                                      );
+                                    });
+                                  }
+                                },
+                              ),
+                            ),
+                            SizedBox(width: 16.0),
+                            TextButton(
+                              style: TextButton.styleFrom(
+                                backgroundColor: widget.foregroundColor,
+                                foregroundColor: widget.backgroundColor,
+                              ),
+                              child: Text(
+                                'Now',
+                                style: GoogleFonts.interTight(),
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _date = DateTime.now();
+                                  _time = DateTime.now();
+                                });
+                              },
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -229,6 +443,7 @@ class _TransactionsFormPageState extends State<TransactionsFormPage> {
                             backgroundColor: Colors.red.shade400,
                           ),
                         );
+                        return;
                       }
 
                       loaderOverlay.show();
