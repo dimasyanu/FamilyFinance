@@ -104,7 +104,7 @@ class ApiTransactions extends Api {
         },
         body: jsonEncode(payload),
       );
-      if (response.statusCode != 200) {
+      if (response.statusCode != 200 && response.statusCode != 201) {
         final body = Res.fromJson(jsonDecode(response.body), (data) => data);
         throw Exception(body.message ?? 'Failed to save transaction');
       }
@@ -117,7 +117,7 @@ class ApiTransactions extends Api {
         },
         body: jsonEncode(payload.toJson()),
       );
-      if (response.statusCode != 201) {
+      if (response.statusCode != 200 && response.statusCode != 201) {
         final body = Res.fromJson(jsonDecode(response.body), (data) => data);
         throw Exception(body.message ?? 'Failed to save transaction');
       }

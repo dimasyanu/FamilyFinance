@@ -46,7 +46,7 @@ public class CategoryController(CategoryService service) : BaseController
         return Created(category, "Category created successfully");
     }
 
-    [HttpPut]
+    [HttpPatch]
     [Route("{categoryId:guid}")]
     public async Task<ActionResult<Response<CategoryDto>>> Update(Guid categoryId, [FromBody] CategorySaveRequest request)
     {

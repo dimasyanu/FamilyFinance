@@ -19,10 +19,21 @@ public class TransactionService(AppDbContext dbContext) : BaseService(dbContext)
     public async Task<Paginated<TransactionListItem>> ListAsync(TransactionListFilter filter)
     {
         var query = DbContext.Transactions.AsQueryable();
+
+        if (filter.IsActive != null) {
+            query = (filter.IsActive ?? true) ? query.Where(x => x.DeletedAt == null) : query.Where(x => x.DeletedAt != null);
+        }
+
+        if (filter.Type != null) {
+            query = query.Where(x => x.TransactionType == (TransactionType)filter.Type);
+        }
+
         var totalCount = await query.CountAsync();
         var items = await query
-            .Skip(filter.Page * filter.PageSize)
+            .Skip((filter.Page - 1) * filter.PageSize)
             .Take(filter.PageSize)
+            .Include(x => x.Account)
+            .Include(x => x.Category)
             .ToListAsync();
 
         return new Paginated<TransactionListItem> {
@@ -41,7 +52,11 @@ public class TransactionService(AppDbContext dbContext) : BaseService(dbContext)
     /// <exception cref="EntityNotFoundException"></exception>
     public async Task<TransactionDto> GetByIdAsync(Guid transactionId)
     {
-        var transaction = await DbContext.Transactions.FirstOrDefaultAsync(x => x.Id == transactionId)
+        var transaction = await DbContext.Transactions
+            .Where(x => x.Id == transactionId)
+            .Include(x => x.Account)
+            .Include(x => x.Category)
+            .FirstOrDefaultAsync()
             ?? throw new EntityNotFoundException("Transaction is not found");
         return new(transaction);
     }
@@ -69,7 +84,7 @@ public class TransactionService(AppDbContext dbContext) : BaseService(dbContext)
         };
         DbContext.Transactions.Add(transaction);
         await DbContext.SaveChangesAsync();
-        return new(transaction);
+        return await GetByIdAsync(transaction.Id);
     }
 
     /// <summary>
@@ -109,7 +124,7 @@ public class TransactionService(AppDbContext dbContext) : BaseService(dbContext)
 
         DbContext.Transactions.Update(transaction);
         await DbContext.SaveChangesAsync();
-        return new(transaction);
+        return await GetByIdAsync(transaction.Id);
     }
 
     /// <summary>

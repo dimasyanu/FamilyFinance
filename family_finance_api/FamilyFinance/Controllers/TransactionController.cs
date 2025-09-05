@@ -46,7 +46,7 @@ public class TransactionController(TransactionService service) : BaseController
         return Ok(transaction, "Transaction created successfully");
     }
 
-    [HttpPut]
+    [HttpPatch]
     [Route("{transactionId:guid}")]
     public async Task<ActionResult<Response<TransactionDto>>> Update(Guid transactionId, [FromBody] TransactionSaveRequest request)
     {

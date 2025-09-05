@@ -43,7 +43,7 @@ public class BudgetController(BudgetService service) : BaseController
         return Created(budget, "Budget created successfully");
     }
 
-    [HttpPut]
+    [HttpPatch]
     [Route("{budgetId:guid}")]
     public async Task<ActionResult<Response<BudgetDto>>> Update(Guid budgetId, [FromBody] BudgetSaveRequest request)
     {

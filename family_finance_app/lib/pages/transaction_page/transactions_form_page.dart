@@ -215,6 +215,13 @@ class _TransactionsFormPageState extends State<TransactionsFormPage> {
                                   _amountInputFormatter,
                                 ],
                                 keyboardType: TextInputType.number,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _amount = _amountInputFormatter
+                                        .getUnformattedValue()
+                                        .toDouble();
+                                  });
+                                },
                               ),
                             ),
                           ],

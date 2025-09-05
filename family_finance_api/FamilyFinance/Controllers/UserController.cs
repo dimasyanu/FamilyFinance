@@ -46,7 +46,7 @@ public class UserController(IUserService service) : BaseController
         return Ok(new CreationResponse(id), "User created successfully");
     }
 
-    [HttpPut]
+    [HttpPatch]
     [Route("{userId:guid}")]
     public async Task<ActionResult<Response<UserDto>>> Update(Guid userId, [FromBody] UserSaveRequest request)
     {

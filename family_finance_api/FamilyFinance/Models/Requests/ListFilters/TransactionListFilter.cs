@@ -2,6 +2,7 @@
 
 public class TransactionListFilter : BaseListFilter
 {
+    public int? Type { get; set; }
     public decimal? MinAmount { get; set; }
     public decimal? MaxAmount { get; set; }
     public DateTime? MinDate { get; set; }
@@ -10,5 +11,5 @@ public class TransactionListFilter : BaseListFilter
     public IEnumerable<string>? CategoryIds { get; set; }
     public string? SortBy { get; set; }
     public string? SortDirection { get; set; }
-    public bool? IsActive { get; set; } = true;
+    public bool? IsActive { get; set; }
 }

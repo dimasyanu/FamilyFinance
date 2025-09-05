@@ -45,7 +45,7 @@ public class AccountController(AccountService service) : BaseController
         return Created(account, "Account created successfully");
     }
 
-    [HttpPut]
+    [HttpPatch]
     [Route("{userId:guid}/Accounts/{accountId:guid}")]
     public async Task<ActionResult<Response<AccountDto>>> UpdateAccount(Guid userId, Guid accountId, [FromBody] AccountSaveRequest request)
     {

@@ -99,8 +99,11 @@ class _TransactionsListViewState extends State<TransactionsListView> {
     api
         .getTransactions(type: widget.type)
         .then((response) {
-          _transactions.clear();
-          _transactions.addAll(response.data?.items ?? []);
+          setState(() {
+            _transactions.clear();
+            _transactions.addAll(response.data?.items ?? []);
+            debugPrint('Loaded ${_transactions.length} transactions');
+          });
         })
         .catchError((error) {
           debugPrint('Error loading transactions: $error');
