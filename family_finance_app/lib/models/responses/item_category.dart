@@ -24,8 +24,8 @@ class ItemCategory {
       description: json['description'] as String?,
       color: json['color'] as String,
       icon: json['icon'] as int,
-      createdAt: json['createdAt'] as String,
-      createdBy: json['createdBy'] as String,
+      createdAt: json['createdAt'] as String? ?? '',
+      createdBy: json['createdBy'] as String? ?? '',
     );
   }
 

@@ -94,7 +94,7 @@ class ApiAccounts extends Api {
         path: '${uri.path}/${payload.id}',
       ); // Update existing account
 
-      response = await http.put(
+      response = await http.patch(
         updateUri,
         headers: {
           'Content-Type': 'application/json',

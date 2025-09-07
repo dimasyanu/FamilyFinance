@@ -7,7 +7,8 @@ public class TransactionDto
     public Guid Id { get; set; }
     public string Description { get; set; } = string.Empty;
     public decimal Amount { get; set; }
-    public DateTime TransactionDate { get; set; }
+    public string TransactionDate { get; set; } = null!;
+    public string TransactionTime { get; set; } = null!;
     public int TransactionType { get; set; }
     public AccountDto Account { get; set; } = null!;
     public CategoryDto? Category { get; set; }
@@ -26,7 +27,9 @@ public class TransactionDto
         Id = transaction.Id;
         Description = transaction.Description;
         Amount = transaction.Amount;
-        TransactionDate = transaction.Date;
+        TransactionDate = transaction.Date.ToString("yyyy-MM-dd");
+        TransactionTime = transaction.Date.ToString("HH:mm");
+        TransactionType = (int)transaction.TransactionType;
         if (transaction.Category != null) {
             Category = new(transaction.Category);
         }

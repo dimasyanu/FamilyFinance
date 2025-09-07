@@ -5,7 +5,8 @@ class DtoTransaction {
   final String id;
   final String description;
   final double amount;
-  final DateTime transactionDate;
+  final String transactionDate;
+  final String transactionTime;
   final int transactionType;
   final ItemCategory category;
   final ItemAccount account;
@@ -21,6 +22,7 @@ class DtoTransaction {
     required this.description,
     required this.amount,
     required this.transactionDate,
+    required this.transactionTime,
     required this.transactionType,
     required this.category,
     required this.account,
@@ -36,7 +38,8 @@ class DtoTransaction {
       id: json['id'] as String,
       description: json['description'] as String,
       amount: (json['amount'] as num).toDouble(),
-      transactionDate: DateTime.parse(json['transactionDate'] as String),
+      transactionDate: json['transactionDate'] as String,
+      transactionTime: json['transactionTime'] as String,
       transactionType: json['transactionType'] as int,
       category: ItemCategory.fromJson(json['category']),
       account: ItemAccount.fromJson(json['account']),
@@ -53,7 +56,8 @@ class DtoTransaction {
       'id': id,
       'description': description,
       'amount': amount,
-      'transactionDate': transactionDate.toIso8601String(),
+      'transactionDate': transactionDate,
+      'transactionTime': transactionTime,
       'transactionType': transactionType,
       'category': category.toJson(),
       'account': account.toJson(),

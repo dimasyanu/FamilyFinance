@@ -30,11 +30,11 @@ class ItemAccount {
         name: json['name'] as String,
         color: json['color'] ?? '#000',
         description: json['description'] as String?,
-        balance: (json['balance'] as num).toDouble(),
-        createdAt: json['createdAt'],
-        createdBy: json['createdBy'] as String,
-        updatedAt: json['updatedAt'] ?? '',
-        updatedBy: json['updatedBy'] as String?,
+        balance: (json['balance'] as num? ?? 0).toDouble(),
+        createdAt: json['createdAt'] as String? ?? '',
+        createdBy: json['createdBy'] as String? ?? '',
+        updatedAt: json['updatedAt'] as String? ?? '',
+        updatedBy: json['updatedBy'] as String? ?? '',
         isActive: json['isActive'] as bool? ?? true,
       );
     } catch (e) {

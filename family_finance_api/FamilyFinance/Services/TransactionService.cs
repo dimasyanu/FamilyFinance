@@ -30,6 +30,7 @@ public class TransactionService(AppDbContext dbContext) : BaseService(dbContext)
 
         var totalCount = await query.CountAsync();
         var items = await query
+            .OrderByDescending(x => x.Date)
             .Skip((filter.Page - 1) * filter.PageSize)
             .Take(filter.PageSize)
             .Include(x => x.Account)

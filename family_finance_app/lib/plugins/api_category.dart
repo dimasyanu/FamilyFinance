@@ -91,7 +91,7 @@ class ApiCategory extends Api {
         path: '${uri.path}/${payload.id}',
       ); // Update existing category
 
-      response = await http.put(
+      response = await http.patch(
         updateUri,
         headers: {
           'Content-Type': 'application/json',

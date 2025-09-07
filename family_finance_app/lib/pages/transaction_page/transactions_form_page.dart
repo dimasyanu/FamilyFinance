@@ -61,16 +61,13 @@ class _TransactionsFormPageState extends State<TransactionsFormPage> {
   List<ItemCategory> _categories = [];
 
   final _descriptionController = TextEditingController();
-
-  bool _isLoadingTransaction = false;
-  bool _isLoadingFormData = false;
+  final _amountController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      setState(() => _isLoadingFormData = true);
       loadFormData(context);
     });
   }
@@ -78,40 +75,48 @@ class _TransactionsFormPageState extends State<TransactionsFormPage> {
   Future<void> loadTransactionData(BuildContext context) async {
     final api = ApiTransactions(context);
     final messager = ScaffoldMessenger.of(context);
-    final loaderOverlay = context.loaderOverlay;
-    loaderOverlay.show();
-    try {
-      final response = await api.getTransactionById(
-        transactionId: widget.itemId!,
-      );
+    api
+        .getTransactionById(transactionId: widget.itemId!)
+        .then((res) {
+          if (res.hasError) {
+            throw Exception('Failed to load transaction: ${res.message}');
+          }
 
-      if (response.hasError) {
-        throw Exception('Failed to load transaction: ${response.message}');
-      }
+          setState(() {
+            final now = DateTime.now();
+            final nowDatePart =
+                '${now.year.toString()}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+            final nowTimePart =
+                '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+            final dateTime = DateTime.parse(
+              '${res.data?.transactionDate ?? nowDatePart} ${res.data?.transactionTime ?? nowTimePart}',
+            );
+            _date = dateTime;
+            _time = dateTime;
+            _description = res.data?.description ?? '';
+            _amount = res.data?.amount ?? 0.0;
+            _transactionType = res.data?.transactionType ?? 0;
+            _accountId = res.data?.account.id;
+            _categoryId = res.data?.category.id;
 
-      setState(() {
-        _description = response.data?.description ?? '';
-        _transactionType = response.data?.transactionType ?? 0;
-        _accountId = response.data?.account.id;
-        _categoryId = response.data?.category.id;
-        _date = response.data?.transactionDate ?? DateTime.now();
-        _amount = response.data?.amount ?? 0.0;
+            _amountController.text = _amountInputFormatter.formatDouble(
+              res.data?.amount ?? 0.0,
+            );
 
-        _descriptionController.text = _description!;
-      });
-    } catch (error) {
-      messager.showSnackBar(
-        SnackBar(
-          content: Text('Error loading transaction: $error'),
-          backgroundColor: Colors.red.shade400,
-        ),
-      );
-    } finally {
-      loaderOverlay.hide();
-      setState(() {
-        _isLoadingTransaction = false;
-      });
-    }
+            _descriptionController.text = _description!;
+          });
+        })
+        .catchError((error, stackTrace) {
+          debugPrint('Error loading transaction: $error');
+          debugPrint(stackTrace.toString());
+
+          messager.showSnackBar(
+            SnackBar(
+              content: Text('Error loading transaction: $error'),
+              backgroundColor: Colors.red.shade400,
+            ),
+          );
+        });
   }
 
   Future<void> loadFormData(BuildContext context) async {
@@ -120,32 +125,43 @@ class _TransactionsFormPageState extends State<TransactionsFormPage> {
     final store = context.read<Store>();
     final user = store.user!.userId;
 
+    final messager = ScaffoldMessenger.of(context);
+    final loaderOverlay = context.loaderOverlay;
+    loaderOverlay.show();
+
     final tasks = <Future>[];
-    if (!widget.isNew) {
-      tasks.add(loadTransactionData(context));
-    }
     tasks.addAll([
       categoryApi.getCategories(),
       accountsApi.getAccounts(userId: user),
     ]);
-    final results = await Future.wait(tasks);
-    setState(() {
-      _isLoadingFormData = false;
-      _isLoadingTransaction = false;
-      if (results.length > 1) {
-        final categories = results[0] as Res<Paginated<ItemCategory>>;
-        final accounts = results[1] as Res<Paginated<ItemAccount>>;
-        _categories = categories.data?.items ?? [];
-        _accounts = accounts.data?.items ?? [];
-      }
-    });
+    if (!widget.isNew) {
+      tasks.add(loadTransactionData(context));
+    }
+    Future.wait(tasks)
+        .then((results) {
+          setState(() {
+            if (results.length > 1) {
+              final categories = results[0] as Res<Paginated<ItemCategory>>;
+              final accounts = results[1] as Res<Paginated<ItemAccount>>;
+              _categories = categories.data?.items ?? [];
+              _accounts = accounts.data?.items ?? [];
+            }
+          });
+        })
+        .catchError((error, stackTrace) {
+          messager.showSnackBar(
+            SnackBar(
+              content: Text('Error loading form data: $error'),
+              backgroundColor: Colors.red.shade400,
+            ),
+          );
+        })
+        .whenComplete(() => loaderOverlay.hide());
   }
 
   @override
   Widget build(BuildContext context) {
     final sizeUtil = SizeUtil(context);
-    final messager = ScaffoldMessenger.of(context);
-    final navigator = Navigator.of(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.isNew ? 'New Transaction' : 'Transaction Detail'),
@@ -160,10 +176,6 @@ class _TransactionsFormPageState extends State<TransactionsFormPage> {
             children: <Widget>[
               Builder(
                 builder: (context) {
-                  if (_isLoadingTransaction || _isLoadingFormData) {
-                    return Center(child: CircularProgressIndicator());
-                  }
-
                   return Form(
                     key: _formKey,
                     child: Column(
@@ -186,7 +198,7 @@ class _TransactionsFormPageState extends State<TransactionsFormPage> {
                           children: <Widget>[
                             Flexible(
                               child: DropdownButtonFormField<int>(
-                                value: _transactionType,
+                                initialValue: _transactionType,
                                 items: _transactionTypes.entries.map((entry) {
                                   return DropdownMenuItem<int>(
                                     value: entry.key,
@@ -215,13 +227,11 @@ class _TransactionsFormPageState extends State<TransactionsFormPage> {
                                   _amountInputFormatter,
                                 ],
                                 keyboardType: TextInputType.number,
-                                onChanged: (value) {
-                                  setState(() {
+                                onChanged: (value) =>
                                     _amount = _amountInputFormatter
                                         .getUnformattedValue()
-                                        .toDouble();
-                                  });
-                                },
+                                        .toDouble(),
+                                controller: _amountController,
                               ),
                             ),
                           ],
@@ -233,7 +243,7 @@ class _TransactionsFormPageState extends State<TransactionsFormPage> {
                             }
 
                             return DropdownButtonFormField<String>(
-                              value: _categoryId,
+                              initialValue: _categoryId,
                               items: _categories.map((category) {
                                 return DropdownMenuItem<String>(
                                   value: category.id,
@@ -268,7 +278,7 @@ class _TransactionsFormPageState extends State<TransactionsFormPage> {
                           },
                         ),
                         DropdownButtonFormField<String>(
-                          value: _accountId,
+                          initialValue: _accountId,
                           items: _accounts.map((account) {
                             return DropdownMenuItem<String>(
                               value: account.id,
@@ -308,7 +318,7 @@ class _TransactionsFormPageState extends State<TransactionsFormPage> {
                               return SizedBox.shrink();
                             }
                             return DropdownButtonFormField<String>(
-                              value: _toAccountId,
+                              initialValue: _toAccountId,
                               items: _accounts
                                   .where((account) {
                                     return account.id != _accountId;
@@ -431,7 +441,7 @@ class _TransactionsFormPageState extends State<TransactionsFormPage> {
                 child: Align(
                   alignment: FractionalOffset.bottomCenter,
                   child: ElevatedButton.icon(
-                    key: const Key('saveCategoryButton'),
+                    key: const Key('saveTransactionButton'),
                     style: ElevatedButton.styleFrom(
                       foregroundColor: widget.foregroundColor,
                       backgroundColor: widget.backgroundColor,
@@ -440,44 +450,7 @@ class _TransactionsFormPageState extends State<TransactionsFormPage> {
                       ),
                       minimumSize: Size(double.infinity, 48),
                     ),
-                    onPressed: () {
-                      final loaderOverlay = context.loaderOverlay;
-
-                      if (!_formKey.currentState!.validate()) {
-                        messager.showSnackBar(
-                          SnackBar(
-                            content: Text('Please fill in all fields'),
-                            backgroundColor: Colors.red.shade400,
-                          ),
-                        );
-                        return;
-                      }
-
-                      loaderOverlay.show();
-                      save(context)
-                          .then((_) {
-                            messager.showSnackBar(
-                              SnackBar(
-                                content: Text('Category saved successfully!'),
-                                backgroundColor: Colors.green.shade400,
-                              ),
-                            );
-
-                            navigator.pop();
-                            onClosed();
-                          })
-                          .catchError((error) {
-                            messager.showSnackBar(
-                              SnackBar(
-                                content: Text('Error saving category: $error'),
-                                backgroundColor: Colors.red.shade400,
-                              ),
-                            );
-                          })
-                          .whenComplete(() => loaderOverlay.hide());
-
-                      return;
-                    },
+                    onPressed: save(context),
                     icon: const Icon(Icons.save),
                     label: Text('Save'),
                   ),
@@ -490,19 +463,61 @@ class _TransactionsFormPageState extends State<TransactionsFormPage> {
     );
   }
 
-  Future<void> save(BuildContext context) async {
-    final api = ApiTransactions(context);
-    final payload = SaveTransaction(
-      id: widget.itemId,
-      description: _description,
-      amount: _amount,
-      transactionType: _transactionType,
-      transactionDate: _date,
-      categoryId: _categoryId,
-      accountId: _accountId ?? '',
-    );
+  VoidCallback save(BuildContext context) {
+    return () async {
+      final messager = ScaffoldMessenger.of(context);
+      final navigator = Navigator.of(context);
+      final loaderOverlay = context.loaderOverlay;
 
-    await api.saveTransaction(payload: payload);
+      if (!_formKey.currentState!.validate()) {
+        messager.showSnackBar(
+          SnackBar(
+            content: Text('Please fill in all fields'),
+            backgroundColor: Colors.red.shade400,
+          ),
+        );
+        return;
+      }
+
+      final api = ApiTransactions(context);
+      final payload = SaveTransaction(
+        id: widget.itemId,
+        description: _description,
+        amount: _amount,
+        transactionType: _transactionType,
+        transactionDate: _date,
+        categoryId: _categoryId,
+        accountId: _accountId ?? '',
+      );
+
+      loaderOverlay.show();
+      api
+          .saveTransaction(payload: payload)
+          .then((res) {
+            if (res.success) return;
+            throw Exception('Failed to save category: ${res.message}');
+          })
+          .catchError((error, stackTrace) {
+            messager.showSnackBar(
+              SnackBar(
+                content: Text('Error saving category: $error'),
+                backgroundColor: Colors.red.shade400,
+              ),
+            );
+          })
+          .whenComplete(() {
+            messager.showSnackBar(
+              SnackBar(
+                content: Text('Category saved successfully!'),
+                backgroundColor: Colors.green.shade400,
+              ),
+            );
+
+            navigator.pop();
+            loaderOverlay.hide();
+            onClosed();
+          });
+    };
   }
 
   void onClosed() {
@@ -513,6 +528,7 @@ class _TransactionsFormPageState extends State<TransactionsFormPage> {
   @override
   void dispose() {
     _descriptionController.dispose();
+    _amountController.dispose();
     _formKey.currentState?.dispose();
     super.dispose();
   }

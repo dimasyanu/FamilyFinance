@@ -236,18 +236,16 @@ class TransactionsPage extends MyPage {
   @override
   FloatingActionButton? floatingActionButton(BuildContext context) {
     return FloatingActionButton(
-      key: const Key('addCategoryButton'),
+      key: const Key('addTransactionButton'),
       onPressed: () {
-        // Navigate to the add category page
+        // Navigate to the add transaction page
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => TransactionsFormPage(
               backgroundColor: appBarBackgroundColor()!,
               foregroundColor: appBarForegroundColor()!,
-              onClosed: () {
-                refreshController.requestRefresh();
-              },
+              onClosed: refresh,
             ),
           ),
         );
@@ -258,6 +256,10 @@ class TransactionsPage extends MyPage {
       foregroundColor: appBarForegroundColor(),
       child: const Icon(Icons.add),
     );
+  }
+
+  void refresh() {
+    refreshController.requestRefresh();
   }
 
   @override
@@ -276,7 +278,7 @@ class TransactionsPage extends MyPage {
     isError.dispose();
     refreshController.dispose();
     _tabController?.dispose();
-    // _tabController.dispose();
+
     super.dispose();
   }
 }
