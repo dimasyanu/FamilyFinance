@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace FamilyFinance.Models.Entities;
 
 [Table("categories")]
-public class Category : BasicModel
+public class Category : BasicModel<int>
 {
     [Column("name")]
     [MaxLength(100)]

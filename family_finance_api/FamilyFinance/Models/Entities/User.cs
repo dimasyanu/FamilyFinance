@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace FamilyFinance.Models.Entities;
 
 [Table("users")]
-public class User : BaseModel
+public class User : BaseModel<int>
 {
     [Column("name")]
     [MaxLength(100)]

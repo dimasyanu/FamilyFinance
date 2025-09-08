@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FamilyFinance.Models.Entities;
 
-public class BaseModel : BasicModel
+public class BaseModel<TId> : BasicModel<TId>
 {
 
     [Column("updated_at")]
@@ -21,12 +21,12 @@ public class BaseModel : BasicModel
     public Guid? DeletedBy { get; set; }
 }
 
-public class BasicModel
+public class BasicModel<TId>
 {
     [Key]
     [Column("id")]
     [Required]
-    public Guid Id { get; set; }
+    public TId Id { get; set; } = default!;
 
     [Column("created_at")]
     [Required]

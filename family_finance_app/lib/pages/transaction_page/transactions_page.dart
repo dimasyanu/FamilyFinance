@@ -7,7 +7,6 @@ import 'package:family_financial_app/pages/transaction_page/partials/transaction
 import 'package:family_financial_app/pages/transaction_page/transactions_form_page.dart';
 import 'package:family_financial_app/plugins/api_transactions.dart';
 import 'package:flutter/material.dart';
-import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh_flutter3/pull_to_refresh_flutter3.dart'
     hide RefreshIndicatorState;
@@ -22,12 +21,12 @@ class TransactionsPage extends MyPage {
   final pageSize = ValueNotifier<int>(10);
   final page = ValueNotifier<int>(1);
   final isError = ValueNotifier<bool>(false);
-  final refreshController = RefreshController(initialRefresh: false);
-  int _currentTabIndex = 0;
+  RefreshController? refreshController;
 
   final allTransactionsController = TransactionsListViewController();
   final expansesTransactionsController = TransactionsListViewController();
   final incomesTransactionsController = TransactionsListViewController();
+  TransactionsListViewController? _currentController;
 
   TabController? _tabController;
 
@@ -85,7 +84,6 @@ class TransactionsPage extends MyPage {
   @override
   Future<void> onMounted(BuildContext context) async {
     // allTransactionsController.invoke(context);
-    // initTabs(context);
   }
 
   @override
@@ -101,17 +99,22 @@ class TransactionsPage extends MyPage {
             TransactionsListView(
               controller: allTransactionsController,
               name: 'All Transactions',
-            ), // Placeholder for categories
+              onLoaded: () => _currentController = allTransactionsController,
+            ),
             TransactionsListView(
               controller: expansesTransactionsController,
               name: 'Expenses Transactions',
               type: TransactionType.expense,
-            ), // Placeholder for categories
+              onLoaded: () =>
+                  _currentController = expansesTransactionsController,
+            ),
             TransactionsListView(
               controller: incomesTransactionsController,
               name: 'Incomes Transactions',
               type: TransactionType.income,
-            ), // Placeholder for accounts
+              onLoaded: () =>
+                  _currentController = incomesTransactionsController,
+            ),
           ],
         ),
         bottomNavigationBar: TransactionsBottomNavigationBar(
@@ -119,117 +122,6 @@ class TransactionsPage extends MyPage {
           foregroundColor: appBarForegroundColor()!,
         ).getNavigationBar(context),
       ),
-    );
-  }
-
-  void initTabs(BuildContext context) {
-    final controllers = [
-      allTransactionsController,
-      expansesTransactionsController,
-      incomesTransactionsController,
-    ];
-
-    _tabController?.addListener(() {
-      if (_tabController!.index == _currentTabIndex) return;
-      _currentTabIndex = _tabController!.index;
-      final previousTabIndex = _tabController!.previousIndex;
-
-      controllers[_currentTabIndex].loadView(context);
-      controllers[previousTabIndex].destroy();
-    });
-  }
-
-  Future<void> deleteItem(
-    String userId,
-    String transactionId,
-    ScaffoldMessengerState messenger,
-    NavigatorState navigator,
-    VoidCallback loadTable,
-  ) async {
-    refreshController.requestLoading();
-    try {
-      final response = await api.deleteTransaction(
-        transactionId: transactionId,
-      );
-      if (response.success) {
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text('Category deleted successfully'),
-            backgroundColor: Colors.green.shade400,
-          ),
-        );
-        navigator.pop(); // Close the dialog
-        () => loadTable(); // Refresh the table after deletion
-      } else {
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text('Failed to delete category'),
-            backgroundColor: Colors.red.shade400,
-          ),
-        );
-      }
-    } catch (error) {
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text('Failed to delete category'),
-          backgroundColor: Colors.red.shade400,
-        ),
-      );
-    } finally {
-      refreshController.refreshCompleted();
-      loadTable();
-      navigator.pop();
-    }
-  }
-
-  void showDeleteConfirmationDialog(
-    BuildContext context,
-    ItemTransaction transaction,
-  ) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        final navigator = Navigator.of(context);
-        return LoaderOverlay(
-          child: Builder(
-            builder: (context) {
-              return AlertDialog(
-                title: Text('Delete Transaction'),
-                content: Text(
-                  'Are you sure you want to delete this transaction?\n${transaction.description}',
-                ),
-                actions: <Widget>[
-                  TextButton(
-                    child: Text('Cancel'),
-                    onPressed: () {
-                      navigator.pop();
-                    },
-                  ),
-                  TextButton(
-                    child: Text('Delete'),
-                    onPressed: () async {
-                      final loaderOverlay = context.loaderOverlay;
-                      loaderOverlay.show();
-
-                      await deleteItem(
-                        store.getUser()?.userId ?? '',
-                        transaction.id,
-                        messenger,
-                        navigator,
-                        () {
-                          loaderOverlay.hide();
-                          refreshController.requestRefresh();
-                        },
-                      );
-                      loaderOverlay.hide();
-                    },
-                  ),
-                ],
-              );
-            },
-          ),
-        );
-      },
     );
   }
 
@@ -259,7 +151,7 @@ class TransactionsPage extends MyPage {
   }
 
   void refresh() {
-    refreshController.requestRefresh();
+    _currentController?.refresh();
   }
 
   @override
@@ -276,7 +168,7 @@ class TransactionsPage extends MyPage {
     pageSize.dispose();
     page.dispose();
     isError.dispose();
-    refreshController.dispose();
+    refreshController?.dispose();
     _tabController?.dispose();
 
     super.dispose();

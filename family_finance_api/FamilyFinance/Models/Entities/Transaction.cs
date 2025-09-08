@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace FamilyFinance.Models.Entities;
 
 [Table("transactions")]
-public class Transaction : BaseModel
+public class Transaction : BaseModel<Guid>
 {
     [Column("account_id")]
     public required Guid AccountId { get; set; }

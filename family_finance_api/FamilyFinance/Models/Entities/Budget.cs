@@ -3,7 +3,7 @@
 namespace FamilyFinance.Models.Entities;
 
 [Table("Budgets")]
-public class Budget : BaseModel
+public class Budget : BaseModel<int>
 {
     [Column("category_id")]
     public Guid CategoryId { get; set; }

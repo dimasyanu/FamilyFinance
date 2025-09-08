@@ -19,12 +19,14 @@ class TransactionsListView extends StatefulWidget {
   final String? name;
   final int? type;
   final String backgroundColor = '#f6f8fa';
+  final VoidCallback? onLoaded;
 
   const TransactionsListView({
     super.key,
     required this.controller,
     this.name,
     this.type,
+    this.onLoaded,
   });
 
   @override
@@ -42,6 +44,8 @@ class _TransactionsListViewState extends State<TransactionsListView> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       refreshController.requestRefresh();
+      widget.controller.setRefresher(refreshController);
+      widget.onLoaded?.call();
     });
   }
 
@@ -102,7 +106,6 @@ class _TransactionsListViewState extends State<TransactionsListView> {
           setState(() {
             _transactions.clear();
             _transactions.addAll(response.data?.items ?? []);
-            debugPrint('Loaded ${_transactions.length} transactions');
           });
         })
         .catchError((error) {
@@ -433,11 +436,20 @@ class _TransactionsListViewState extends State<TransactionsListView> {
 class TransactionsListViewController {
   late final Function(BuildContext context) invoke;
   late final Function destroy;
+  RefreshController? refreshController;
 
   TransactionsListViewController();
 
   void setInvoker(Function(BuildContext context) invoker) {
     invoke = invoker;
+  }
+
+  void setRefresher(RefreshController refresher) {
+    refreshController = refresher;
+  }
+
+  void refresh() {
+    refreshController?.requestRefresh();
   }
 
   void setDestroyer(Function destroyer) {

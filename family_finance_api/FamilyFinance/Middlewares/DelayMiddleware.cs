@@ -1,11 +1,13 @@
 
 namespace FamilyFinance.Middlewares;
 
-public class DelayMiddleware : IMiddleware
+public class DelayMiddleware(IConfiguration config) : IMiddleware
 {
+    private readonly int _delayMilliseconds = int.Parse(config["AppConfig:DelayMilliseconds"] ?? "0");
+
     public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {
-        await Task.Delay(100); // Simulate a delay of 100 milliseconds
-        await next(context); // Call the next middleware in the pipeline
+        if (_delayMilliseconds > 0) await Task.Delay(_delayMilliseconds);
+        await next(context);
     }
 }

@@ -480,12 +480,14 @@ class _TransactionsFormPageState extends State<TransactionsFormPage> {
       }
 
       final api = ApiTransactions(context);
+      final dateTime =
+          '${_date.toString().split(' ').first} ${_time.toString().split(' ').last}';
       final payload = SaveTransaction(
         id: widget.itemId,
         description: _description,
         amount: _amount,
         transactionType: _transactionType,
-        transactionDate: _date,
+        transactionDate: DateTime.parse(dateTime),
         categoryId: _categoryId,
         accountId: _accountId ?? '',
       );
