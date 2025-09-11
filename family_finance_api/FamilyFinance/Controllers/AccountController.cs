@@ -19,24 +19,24 @@ public class AccountController(AccountService service) : BaseController
     private readonly AccountService _service = service ?? throw new ArgumentNullException(nameof(service));
 
     [HttpGet]
-    [Route("{userId:guid}/Accounts")]
-    public async Task<ActionResult<Paginated<AccountListItem>>> AccountList(Guid userId, [FromQuery] AccountListFilter filter)
+    [Route("{userId:int}/Accounts")]
+    public async Task<ActionResult<Paginated<AccountListItem>>> AccountList(int userId, [FromQuery] AccountListFilter filter)
     {
         var results = await _service.ListAsync(userId, filter);
         return Ok(results);
     }
 
     [HttpGet]
-    [Route("{userId:guid}/Accounts/{accountId:guid}")]
-    public async Task<ActionResult<AccountDto>> GetAccount(Guid userId, Guid accountId)
+    [Route("{userId:int}/Accounts/{accountId:int}")]
+    public async Task<ActionResult<AccountDto>> GetAccount(int userId, int accountId)
     {
         var account = await _service.Get(userId, accountId);
         return Ok(account);
     }
 
     [HttpPost]
-    [Route("{userId:guid}/Accounts")]
-    public async Task<ActionResult<Response<AccountDto>>> CreateAccount(Guid userId, [FromBody] AccountSaveRequest request)
+    [Route("{userId:int}/Accounts")]
+    public async Task<ActionResult<Response<AccountDto>>> CreateAccount(int userId, [FromBody] AccountSaveRequest request)
     {
         if (request == null) return BadRequest("Request cannot be null.");
         if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -46,8 +46,8 @@ public class AccountController(AccountService service) : BaseController
     }
 
     [HttpPatch]
-    [Route("{userId:guid}/Accounts/{accountId:guid}")]
-    public async Task<ActionResult<Response<AccountDto>>> UpdateAccount(Guid userId, Guid accountId, [FromBody] AccountSaveRequest request)
+    [Route("{userId:int}/Accounts/{accountId:int}")]
+    public async Task<ActionResult<Response<AccountDto>>> UpdateAccount(int userId, int accountId, [FromBody] AccountSaveRequest request)
     {
         if (request == null) return BadRequest("Request cannot be null.");
         if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -57,16 +57,16 @@ public class AccountController(AccountService service) : BaseController
     }
 
     [HttpDelete]
-    [Route("{userId:guid}/Accounts/{accountId:guid}")]
-    public async Task<ActionResult> DeleteAccount(Guid userId, Guid accountId)
+    [Route("{userId:int}/Accounts/{accountId:int}")]
+    public async Task<ActionResult> DeleteAccount(int userId, int accountId)
     {
         await _service.DeleteAsync(userId, accountId, CurrentUser.Id);
         return Ok("Account deleted successfully");
     }
 
     [HttpPut]
-    [Route("{userId:guid}/Accounts/{accountId:guid}/Restore")]
-    public async Task<ActionResult<Response<AccountDto>>> RestoreAccount(Guid userId, Guid accountId)
+    [Route("{userId:int}/Accounts/{accountId:int}/Restore")]
+    public async Task<ActionResult<Response<AccountDto>>> RestoreAccount(int userId, int accountId)
     {
         var account = await _service.RestoreAsync(userId, accountId, CurrentUser.Id);
         return Ok(account, "Account restored successfully");

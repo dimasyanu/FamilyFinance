@@ -25,8 +25,8 @@ public class BudgetController(BudgetService service) : BaseController
     }
 
     [HttpGet]
-    [Route("{budgetId:guid}")]
-    public async Task<ActionResult<BudgetListItem>> Get(Guid budgetId)
+    [Route("{budgetId:int}")]
+    public async Task<ActionResult<BudgetListItem>> Get(int budgetId)
     {
         var budget = await service.GetByIdAsync(budgetId);
         if (budget == null) return NotFound("Budget not found.");
@@ -44,8 +44,8 @@ public class BudgetController(BudgetService service) : BaseController
     }
 
     [HttpPatch]
-    [Route("{budgetId:guid}")]
-    public async Task<ActionResult<Response<BudgetDto>>> Update(Guid budgetId, [FromBody] BudgetSaveRequest request)
+    [Route("{budgetId:int}")]
+    public async Task<ActionResult<Response<BudgetDto>>> Update(int budgetId, [FromBody] BudgetSaveRequest request)
     {
         if (request == null) return BadRequest("Request cannot be null.");
         if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -54,8 +54,8 @@ public class BudgetController(BudgetService service) : BaseController
     }
 
     [HttpDelete]
-    [Route("{budgetId:guid}")]
-    public async Task<ActionResult> Delete(Guid budgetId)
+    [Route("{budgetId:int}")]
+    public async Task<ActionResult> Delete(int budgetId)
     {
         await service.DeleteAsync(budgetId, CurrentUser.Id);
         return Ok<object>(null, "Budget deleted successfully");

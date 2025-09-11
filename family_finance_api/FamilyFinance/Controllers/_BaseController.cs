@@ -14,7 +14,7 @@ public abstract class BaseController : ControllerBase
     internal virtual void CheckCurrentUser()
     {
         CurrentUser = GetCurrentUser().GetAwaiter().GetResult();
-        if (CurrentUser == null || CurrentUser.Id == Guid.Empty || CurrentUser.Username.IsNullOrEmpty())
+        if (CurrentUser == null || CurrentUser.Id == 0 || CurrentUser.Username.IsNullOrEmpty())
         {
             throw new UnauthorizedAccessException();
         }

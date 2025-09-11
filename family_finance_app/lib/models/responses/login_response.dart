@@ -2,7 +2,7 @@ import 'package:family_financial_app/abstractions/serializable.dart';
 
 class LoginResponse extends Serializable {
   final String username;
-  final String userId;
+  final int userId;
   final String accessToken;
   final String refreshToken;
   final DateTime expiration;
@@ -19,7 +19,7 @@ class LoginResponse extends Serializable {
   factory LoginResponse.fromJson(Map<String, dynamic> json) {
     return LoginResponse(
       username: json['username'] as String,
-      userId: json['userId'] as String,
+      userId: json['userId'] as int,
       accessToken: json['accessToken'] as String,
       refreshToken: json['refreshToken'] as String,
       expiration: DateTime.parse(json['expiration']).toLocal(),

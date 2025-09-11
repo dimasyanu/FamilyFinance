@@ -13,7 +13,7 @@ class ApiAccounts extends Api {
   ApiAccounts(super.context);
 
   Future<Res<Paginated<ItemAccount>>> getAccounts({
-    required String userId,
+    required int userId,
     int page = 1,
     int pageSize = 25,
   }) async {
@@ -52,8 +52,8 @@ class ApiAccounts extends Api {
   }
 
   Future<Res<DtoAccount>> getAccountById({
-    required String userId,
-    required String accountId,
+    required int userId,
+    required int accountId,
   }) async {
     final url = Uri.parse('$baseUrl/api/users/$userId/accounts/$accountId');
 
@@ -83,13 +83,13 @@ class ApiAccounts extends Api {
   }
 
   Future<Res<CreationResponse>> saveAccount({
-    required String userId,
+    required int userId,
     required SaveAccount payload,
   }) async {
     final uri = Uri.parse('$baseUrl/api/users/$userId/accounts');
 
     http.Response response;
-    if (payload.id != null && payload.id!.isNotEmpty) {
+    if (payload.id != null && payload.id! > 0) {
       final updateUri = uri.replace(
         path: '${uri.path}/${payload.id}',
       ); // Update existing account
@@ -134,8 +134,8 @@ class ApiAccounts extends Api {
   }
 
   Future<Res<void>> deleteAccount({
-    required String userId,
-    required String accountId,
+    required int userId,
+    required int accountId,
   }) async {
     final url = Uri.parse('$baseUrl/api/users/$userId/accounts/$accountId');
 

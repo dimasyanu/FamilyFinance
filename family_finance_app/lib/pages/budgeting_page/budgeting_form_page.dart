@@ -9,11 +9,11 @@ import 'package:flutter/material.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 
 class BudgetingFormPage extends StatefulWidget {
-  final String? itemId;
+  final int? itemId;
   final VoidCallback? onClosed;
   final Color backgroundColor;
   final Color foregroundColor;
-  get isNew => itemId == null || itemId!.isEmpty;
+  get isNew => itemId == null || itemId! <= 0;
 
   const BudgetingFormPage({
     this.itemId,
@@ -33,7 +33,7 @@ class _BudgetingFormPageState extends State<BudgetingFormPage> {
   final _formKey = GlobalKey<FormState>();
 
   bool _isLoaded = false;
-  String? _category;
+  int? _category;
   int? _month = DateTime.now().month;
   int? _year = DateTime.now().year;
 
@@ -52,7 +52,7 @@ class _BudgetingFormPageState extends State<BudgetingFormPage> {
       if (response.hasError) {
         throw Exception('Failed to load budget: ${response.message}');
       }
-      _category = response.data?.category?.id ?? '';
+      _category = response.data?.category?.id;
       _month = response.data?.month ?? DateTime.now().month;
       _year = response.data?.year ?? DateTime.now().year;
 
@@ -117,11 +117,11 @@ class _BudgetingFormPageState extends State<BudgetingFormPage> {
                       spacing: 10,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        DropdownButtonFormField<String>(
-                          value: _category,
+                        DropdownButtonFormField<int>(
+                          initialValue: _category,
                           hint: Text('Select a Category'),
                           items: snapshot.data!.map((category) {
-                            return DropdownMenuItem<String>(
+                            return DropdownMenuItem<int>(
                               value: category.id,
                               child: Row(
                                 children: [
@@ -156,7 +156,7 @@ class _BudgetingFormPageState extends State<BudgetingFormPage> {
                               : null,
                         ),
                         DropdownButtonFormField<int>(
-                          value: _month,
+                          initialValue: _month,
                           menuMaxHeight: 270,
                           items: utils.monthNames.map((month) {
                             final i = utils.monthNames.indexOf(month) + 1;
@@ -171,7 +171,7 @@ class _BudgetingFormPageState extends State<BudgetingFormPage> {
                           decoration: InputDecoration(labelText: 'Month'),
                         ),
                         DropdownButtonFormField<int>(
-                          value: _year,
+                          initialValue: _year,
                           items: List.generate(5, (index) {
                             int year = DateTime.now().year - 2 + index;
                             return DropdownMenuItem<int>(

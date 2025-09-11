@@ -28,7 +28,7 @@ public class CategoryController(CategoryService service) : BaseController
 
     [HttpGet]
     [Route("{categoryId:guid}")]
-    public async Task<ActionResult<CategoryListItem>> Get(Guid categoryId)
+    public async Task<ActionResult<CategoryListItem>> Get(int categoryId)
     {
         var category = await _service.GetByIdAsync(categoryId);
         if (category == null) return NotFound("Category not found.");

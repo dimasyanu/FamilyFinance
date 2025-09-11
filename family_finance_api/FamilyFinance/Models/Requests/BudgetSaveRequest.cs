@@ -5,7 +5,7 @@ namespace FamilyFinance.Models.Requests;
 public class BudgetSaveRequest
 {
     [Required]
-    public Guid CategoryId { get; set; }
+    public int CategoryId { get; set; }
 
     [Required]
     public int Month { get; set; }

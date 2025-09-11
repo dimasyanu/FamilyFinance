@@ -1,6 +1,6 @@
 class SaveBudget {
-  String? id;
-  final String categoryId;
+  int? id;
+  final int categoryId;
   final int month;
   final int year;
   final double amount;
@@ -25,8 +25,8 @@ class SaveBudget {
 
   factory SaveBudget.fromJson(Map<String, dynamic> json) {
     return SaveBudget(
-      id: json['id'] as String?,
-      categoryId: json['categoryId'] as String,
+      id: json['id'] as int?,
+      categoryId: json['categoryId'] as int,
       month: json['month'] as int,
       year: json['year'] as int,
       amount: (json['amount'] as num).toDouble(),

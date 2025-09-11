@@ -1,5 +1,5 @@
 class DtoAccount {
-  final String? id;
+  final int? id;
   final String? name;
   final String? description;
   final String? color;
@@ -8,7 +8,7 @@ class DtoAccount {
 
   factory DtoAccount.fromJson(Map<String, dynamic> json) {
     return DtoAccount(
-      id: json['id'] as String?,
+      id: json['id'] as int?,
       name: json['name'] as String?,
       description: json['description'] as String?,
       color: json['color'] as String?,

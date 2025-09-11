@@ -15,21 +15,24 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     {
         base.OnModelCreating(modelBuilder);
 
-        const string systemId = "de178780-234b-49c9-b5cd-f01fe5edb4d2";
+        modelBuilder.Entity<Transaction>()
+            .Property(t => t.Id)
+            .HasColumnType("BINARY(16)");
+
+        const int systemId = 1;
         const string timestamp = "2025-07-10T12:00:00Z";
         const string hash = "$2a$12$9MGisUIZgp80yLvdS5dCBORiaheBxVlBY6kN8SVfYLp4OxrMi6xZq";
         var dt = DateTime.Parse(timestamp);
-        var systemGuid = Guid.Parse(systemId);
         _ = modelBuilder.Entity<User>().HasData(
             new User() {
-                Id = systemGuid,
+                Id = systemId,
                 Name = "System Administrator",
                 Username = "system",
                 PasswordHash = hash,
                 CreatedAt = dt,
-                CreatedBy = systemGuid,
+                CreatedBy = systemId,
                 UpdatedAt = dt,
-                UpdatedBy = systemGuid,
+                UpdatedBy = systemId,
             }
         );
     }

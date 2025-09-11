@@ -1,11 +1,11 @@
 ﻿namespace FamilyFinance.Models.Responses;
 
-public class CreationResponse
+public class CreationResponse<TId>
 {
-    public Guid Id { get; set; }
+    public TId? Id { get; set; }
     public CreationResponse()
     {
     }
 
-    public CreationResponse(Guid id) => Id = id;
+    public CreationResponse(TId id) => Id = id;
 }

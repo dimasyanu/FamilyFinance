@@ -50,7 +50,7 @@ class ApiBudgeting extends Api {
     return result;
   }
 
-  Future<Res<DtoBudget>> getBudgetById({required String budgetId}) async {
+  Future<Res<DtoBudget>> getBudgetById({required int budgetId}) async {
     final url = Uri.parse('$baseUrl/api/budgets/$budgetId');
 
     final response = await http.get(
@@ -84,7 +84,7 @@ class ApiBudgeting extends Api {
     final uri = Uri.parse('$baseUrl/api/budgets');
 
     http.Response response;
-    if (payload.id != null && payload.id!.isNotEmpty) {
+    if (payload.id != null && payload.id! > 0) {
       final updateUri = uri.replace(
         path: '${uri.path}/${payload.id}',
       ); // Update existing budget
@@ -128,7 +128,7 @@ class ApiBudgeting extends Api {
     return result;
   }
 
-  Future<Res<void>> deleteBudget({required String budgetId}) async {
+  Future<Res<void>> deleteBudget({required int budgetId}) async {
     final url = Uri.parse('$baseUrl/api/budgets/$budgetId');
 
     final response = await http.delete(

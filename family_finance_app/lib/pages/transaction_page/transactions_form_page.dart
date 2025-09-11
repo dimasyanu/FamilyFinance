@@ -51,9 +51,9 @@ class _TransactionsFormPageState extends State<TransactionsFormPage> {
 
   String? _description = '';
   int _transactionType = -1; // -1 for expense, 1 for income, 0 for transfer
-  String? _accountId;
-  String? _toAccountId;
-  String? _categoryId;
+  int? _accountId;
+  int? _toAccountId;
+  int? _categoryId;
   DateTime _date = DateTime.now();
   DateTime _time = DateTime.now();
   double _amount = 0.0;
@@ -242,10 +242,10 @@ class _TransactionsFormPageState extends State<TransactionsFormPage> {
                               return SizedBox.shrink();
                             }
 
-                            return DropdownButtonFormField<String>(
+                            return DropdownButtonFormField<int>(
                               initialValue: _categoryId,
                               items: _categories.map((category) {
-                                return DropdownMenuItem<String>(
+                                return DropdownMenuItem<int>(
                                   value: category.id,
                                   child: Row(
                                     children: [
@@ -270,17 +270,16 @@ class _TransactionsFormPageState extends State<TransactionsFormPage> {
                               decoration: InputDecoration(
                                 labelText: 'Category',
                               ),
-                              validator: (value) =>
-                                  value == null || value.isEmpty
+                              validator: (value) => value == null || value <= 0
                                   ? 'Please select a category'
                                   : null,
                             );
                           },
                         ),
-                        DropdownButtonFormField<String>(
+                        DropdownButtonFormField<int>(
                           initialValue: _accountId,
                           items: _accounts.map((account) {
-                            return DropdownMenuItem<String>(
+                            return DropdownMenuItem<int>(
                               value: account.id,
                               child: Row(
                                 children: [
@@ -308,7 +307,7 @@ class _TransactionsFormPageState extends State<TransactionsFormPage> {
                                 ? 'From Account'
                                 : 'Account',
                           ),
-                          validator: (value) => value == null || value.isEmpty
+                          validator: (value) => value == null || value <= 0
                               ? 'Please select an account'
                               : null,
                         ),
@@ -317,14 +316,14 @@ class _TransactionsFormPageState extends State<TransactionsFormPage> {
                             if (_transactionType != 0) {
                               return SizedBox.shrink();
                             }
-                            return DropdownButtonFormField<String>(
+                            return DropdownButtonFormField<int>(
                               initialValue: _toAccountId,
                               items: _accounts
                                   .where((account) {
                                     return account.id != _accountId;
                                   })
                                   .map((account) {
-                                    return DropdownMenuItem<String>(
+                                    return DropdownMenuItem<int>(
                                       value: account.id,
                                       child: Row(
                                         children: [
@@ -350,8 +349,7 @@ class _TransactionsFormPageState extends State<TransactionsFormPage> {
                               decoration: InputDecoration(
                                 labelText: 'To Account',
                               ),
-                              validator: (value) =>
-                                  value == null || value.isEmpty
+                              validator: (value) => value == null || value <= 0
                                   ? 'Please select a target account'
                                   : null,
                             );
@@ -489,7 +487,7 @@ class _TransactionsFormPageState extends State<TransactionsFormPage> {
         transactionType: _transactionType,
         transactionDate: DateTime.parse(dateTime),
         categoryId: _categoryId,
-        accountId: _accountId ?? '',
+        accountId: _accountId ?? 0,
       );
 
       loaderOverlay.show();

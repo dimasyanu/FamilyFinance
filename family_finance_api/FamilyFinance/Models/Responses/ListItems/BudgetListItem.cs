@@ -4,7 +4,7 @@ namespace FamilyFinance.Models.Responses.ListItems;
 
 public class BudgetListItem
 {
-    public Guid Id { get; set; }
+    public int Id { get; set; }
     public int Month { get; set; }
     public int Year { get; set; }
     public decimal Amount { get; set; }

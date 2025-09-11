@@ -9,11 +9,11 @@ import 'package:flutter_iconpicker/flutter_iconpicker.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 
 class CategoriesFormPage extends StatefulWidget {
-  final String? itemId;
+  final int? itemId;
   final VoidCallback? onClosed;
   final Color backgroundColor;
   final Color foregroundColor;
-  get isNew => itemId == null || itemId!.isEmpty;
+  get isNew => itemId == null || itemId! <= 0;
 
   const CategoriesFormPage({
     this.itemId,

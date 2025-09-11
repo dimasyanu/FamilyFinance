@@ -18,7 +18,7 @@ public class AccountService(AppDbContext dbContext) : BaseService(dbContext)
     /// <param name="userId"></param>
     /// <param name="filter"></param>
     /// <returns></returns>
-    public async Task<Paginated<AccountListItem>> ListAsync(Guid userId, AccountListFilter filter)
+    public async Task<Paginated<AccountListItem>> ListAsync(int userId, AccountListFilter filter)
     {
         var query = DbContext.Accounts.Where(x => x.UserId == userId);
         if (filter.IsActive != null){
@@ -50,7 +50,7 @@ public class AccountService(AppDbContext dbContext) : BaseService(dbContext)
     /// <param name="accountId"></param>
     /// <returns></returns>
     /// <exception cref="EntityNotFoundException"></exception>
-    public async Task<AccountDto> Get(Guid userId, Guid accountId)
+    public async Task<AccountDto> Get(int userId, int accountId)
     {
         var item = await DbContext.Accounts
             .FirstOrDefaultAsync(a => a.UserId == userId && a.Id == accountId)
@@ -64,7 +64,7 @@ public class AccountService(AppDbContext dbContext) : BaseService(dbContext)
     /// <param name="request"></param>
     /// <param name="userId"></param>
     /// <returns></returns>
-    public async Task<AccountDto> CreateAsync(Guid userId, AccountSaveRequest request, Guid currentUserId)
+    public async Task<AccountDto> CreateAsync(int userId, AccountSaveRequest request, int currentUserId)
     {
         var now = DateTime.Now;
         var account = new Account {
@@ -91,7 +91,7 @@ public class AccountService(AppDbContext dbContext) : BaseService(dbContext)
     /// <param name="currentUserId"></param>
     /// <returns></returns>
     /// <exception cref="EntityNotFoundException"></exception>
-    public async Task<AccountDto> UpdateAsync(Guid userId, Guid accountId, AccountSaveRequest request, Guid currentUserId)
+    public async Task<AccountDto> UpdateAsync(int userId, int accountId, AccountSaveRequest request, int currentUserId)
     {
         var account = await DbContext.Accounts
             .FirstOrDefaultAsync(a => a.Id == accountId && a.UserId == userId)
@@ -114,7 +114,7 @@ public class AccountService(AppDbContext dbContext) : BaseService(dbContext)
     /// <param name="currentUserId"></param>
     /// <returns></returns>
     /// <exception cref="EntityNotFoundException"></exception>
-    public async Task DeleteAsync(Guid userId, Guid accountId, Guid currentUserId)
+    public async Task DeleteAsync(int userId, int accountId, int currentUserId)
     {
         var account = await DbContext.Accounts
             .FirstOrDefaultAsync(a => a.Id == accountId && a.UserId == userId && a.DeletedAt == null)
@@ -134,7 +134,7 @@ public class AccountService(AppDbContext dbContext) : BaseService(dbContext)
     /// <param name="currentUserId"></param>
     /// <returns></returns>
     /// <exception cref="EntityNotFoundException"></exception>
-    public async Task<AccountDto> RestoreAsync(Guid userId, Guid accountId, Guid currentUserId)
+    public async Task<AccountDto> RestoreAsync(int userId, int accountId, int currentUserId)
     {
         var account = await DbContext.Accounts
             .FirstOrDefaultAsync(a => a.Id == accountId && a.UserId == userId && a.DeletedAt != null)

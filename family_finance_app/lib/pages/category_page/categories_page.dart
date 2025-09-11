@@ -196,8 +196,8 @@ class CategoriesPage extends MyPage {
   }
 
   Future<void> deleteItem(
-    String userId,
-    String categoryId,
+    int userId,
+    int categoryId,
     ScaffoldMessengerState messenger,
     NavigatorState navigator,
     VoidCallback loadTable,
@@ -266,7 +266,7 @@ class CategoriesPage extends MyPage {
                       loaderOverlay.show();
 
                       await deleteItem(
-                        store.getUser()?.userId ?? '',
+                        store.getUser()?.userId ?? 0,
                         category.id,
                         messenger,
                         navigator,

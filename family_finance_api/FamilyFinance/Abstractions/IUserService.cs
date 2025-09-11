@@ -11,10 +11,10 @@ public interface IUserService
     // Define methods that the UserService should implement
     // For example:
     Task<Paginated<UserListItem>> ListAsync(UserListFilter filter);
-    Task<UserDto> GetUserByIdAsync(Guid userId);
+    Task<UserDto> GetUserByIdAsync(int userId);
     Task<UserDto> GetUserByUsernameAsync(string username);
-    Task<Guid> CreateUserAsync(UserSaveRequest request, Guid currentUserId);
-    Task<UserDto> UpdateUserAsync(Guid userId, UserSaveRequest request, Guid currentUserId);
-    Task DeleteUserAsync(Guid userId, Guid currentUserId);
-    Task<UserDto> RestoreAsync(Guid userId, Guid currentUserId);
+    Task<int> CreateUserAsync(UserSaveRequest request, int currentUserId);
+    Task<UserDto> UpdateUserAsync(int userId, UserSaveRequest request, int currentUserId);
+    Task DeleteUserAsync(int userId, int currentUserId);
+    Task<UserDto> RestoreAsync(int userId, int currentUserId);
 }

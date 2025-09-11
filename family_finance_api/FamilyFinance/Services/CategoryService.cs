@@ -34,10 +34,10 @@ public class CategoryService(AppDbContext dbContext) : BaseService(dbContext)
             .Select(c => new CategoryListItem(c))
             .ToListAsync();
         
-        var creatorIds = items.Select(x => Guid.Parse(x.CreatedBy)).ToList();
+        var creatorIds = items.Select(x => x.CreatedBy).ToList();
         var users = await DbContext.Users.Where(x => creatorIds.Contains(x.Id)).ToListAsync();
         foreach (var item in items) {
-            item.CreatedBy = users.FirstOrDefault(x => x.Id == Guid.Parse(item.CreatedBy))?.Username ?? "";
+            item.CreatedBy = users.FirstOrDefault(x => x.Id == item.CreatedBy)?.Id ?? 0;
         }
 
         return new Paginated<CategoryListItem> {
@@ -53,7 +53,7 @@ public class CategoryService(AppDbContext dbContext) : BaseService(dbContext)
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
-    public async Task<CategoryDto?> GetByIdAsync(Guid id)
+    public async Task<CategoryDto?> GetByIdAsync(int id)
     {
         var category = await DbContext.Categories
             .FirstOrDefaultAsync(c => c.Id == id);
@@ -65,7 +65,7 @@ public class CategoryService(AppDbContext dbContext) : BaseService(dbContext)
     /// </summary>
     /// <param name="request"></param>
     /// <returns></returns>
-    public async Task<CategoryDto> CreateAsync(CategorySaveRequest request, Guid currentUserId)
+    public async Task<CategoryDto> CreateAsync(CategorySaveRequest request, int currentUserId)
     {
         var now = DateTime.Now;
         var newCategory = new Category {

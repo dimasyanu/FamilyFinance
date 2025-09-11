@@ -58,7 +58,7 @@ public class BudgetService(AppDbContext dbContext) : BaseService(dbContext)
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
-    public async Task<BudgetDto?> GetByIdAsync(Guid id)
+    public async Task<BudgetDto?> GetByIdAsync(int id)
     {
         var budget = await DbContext.Budgets.Where(c => c.Id == id)
             .Include(x => x.Category)
@@ -71,7 +71,7 @@ public class BudgetService(AppDbContext dbContext) : BaseService(dbContext)
     /// </summary>
     /// <param name="request"></param>
     /// <returns></returns>
-    public async Task<BudgetDto> CreateAsync(BudgetSaveRequest request, Guid currentUserId)
+    public async Task<BudgetDto> CreateAsync(BudgetSaveRequest request, int currentUserId)
     {
         var now = DateTime.Now;
         var sDate = DateTime.Parse($"{request.Year}-{request.Month}-1");
@@ -99,7 +99,7 @@ public class BudgetService(AppDbContext dbContext) : BaseService(dbContext)
     /// <param name="request"></param>
     /// <returns></returns>
     /// <exception cref="EntityNotFoundException"></exception>
-    public async Task<BudgetDto> UpdateAsync(Guid id, BudgetSaveRequest request, Guid currentUserId)
+    public async Task<BudgetDto> UpdateAsync(int id, BudgetSaveRequest request, int currentUserId)
     {
         var budget = await DbContext.Budgets.FindAsync(id)
             ?? throw new EntityNotFoundException($"Category with ID {id} not found.");
@@ -128,7 +128,7 @@ public class BudgetService(AppDbContext dbContext) : BaseService(dbContext)
     /// <param name="id"></param>
     /// <returns></returns>
     /// <exception cref="EntityNotFoundException"></exception>
-    public async Task DeleteAsync(Guid id, Guid currentUserId)
+    public async Task DeleteAsync(int id, int currentUserId)
     {
         var budget = await DbContext.Budgets.FindAsync(id)
             ?? throw new EntityNotFoundException($"Category with ID {id} not found.");

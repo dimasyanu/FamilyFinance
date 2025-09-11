@@ -191,8 +191,8 @@ class BudgetingPage extends MyPage {
   }
 
   Future<void> deleteItem(
-    String userId,
-    String budgetId,
+    int userId,
+    int budgetId,
     OverlayExtensionHelper loaderOverlay,
     ScaffoldMessengerState messenger,
     NavigatorState navigator,
@@ -258,7 +258,7 @@ class BudgetingPage extends MyPage {
                       final loaderOverlay = context.loaderOverlay;
                       loaderOverlay.show();
                       await deleteItem(
-                        store.getUser()?.userId ?? '',
+                        store.getUser()?.userId ?? 0,
                         budget.id,
                         loaderOverlay,
                         messenger,

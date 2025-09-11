@@ -359,7 +359,7 @@ class _TransactionsListViewState extends State<TransactionsListView> {
                       loaderOverlay.show();
 
                       await deleteItem(
-                        store.getUser()?.userId ?? '',
+                        store.getUser()?.userId ?? 0,
                         transaction.id,
                         messenger,
                         navigator,
@@ -381,7 +381,7 @@ class _TransactionsListViewState extends State<TransactionsListView> {
   }
 
   Future<void> deleteItem(
-    String userId,
+    int userId,
     String accountId,
     ScaffoldMessengerState messenger,
     NavigatorState navigator,

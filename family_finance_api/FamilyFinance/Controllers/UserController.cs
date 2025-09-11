@@ -27,8 +27,8 @@ public class UserController(IUserService service) : BaseController
     }
 
     [HttpGet]
-    [Route("{userId:guid}")]
-    public async Task<ActionResult<UserDto>> Get(Guid userId)
+    [Route("{userId:int}")]
+    public async Task<ActionResult<UserDto>> Get(int userId)
     {
         var user = await _service.GetUserByIdAsync(userId);
         if (user == null) return NotFound();
@@ -37,18 +37,18 @@ public class UserController(IUserService service) : BaseController
 
     [HttpPost]
     [Route("")]
-    public async Task<ActionResult<Response<CreationResponse>>> Create([FromBody] UserSaveRequest request)
+    public async Task<ActionResult<Response<CreationResponse<int>>>> Create([FromBody] UserSaveRequest request)
     {
         if (request == null) return BadRequest("Request cannot be null.");
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
         var id = await _service.CreateUserAsync(request, CurrentUser.Id);
-        return Ok(new CreationResponse(id), "User created successfully");
+        return Ok(new CreationResponse<int>(id), "User created successfully");
     }
 
     [HttpPatch]
-    [Route("{userId:guid}")]
-    public async Task<ActionResult<Response<UserDto>>> Update(Guid userId, [FromBody] UserSaveRequest request)
+    [Route("{userId:int}")]
+    public async Task<ActionResult<Response<UserDto>>> Update(int userId, [FromBody] UserSaveRequest request)
     {
         if (request == null) return BadRequest("Request cannot be null.");
         if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -58,16 +58,16 @@ public class UserController(IUserService service) : BaseController
     }
 
     [HttpDelete]
-    [Route("{userId:guid}")]
-    public async Task<ActionResult> Delete(Guid userId)
+    [Route("{userId:int}")]
+    public async Task<ActionResult> Delete(int userId)
     {
         await _service.DeleteUserAsync(userId, CurrentUser.Id);
         return Ok("User deleted successfully.");
     }
 
     [HttpPut]
-    [Route("{userId:guid}/Restore")]
-    public async Task<ActionResult> Restore(Guid userId)
+    [Route("{userId:int}/Restore")]
+    public async Task<ActionResult> Restore(int userId)
     {
         await _service.RestoreAsync(userId, CurrentUser.Id);
         return Ok("User restored successfully.");

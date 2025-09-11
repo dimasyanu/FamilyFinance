@@ -7,7 +7,7 @@ namespace FamilyFinance.Models.Entities;
 public class Transaction : BaseModel<Guid>
 {
     [Column("account_id")]
-    public required Guid AccountId { get; set; }
+    public required int AccountId { get; set; }
 
     [Column("transaction_type")]
     [Required]
@@ -27,7 +27,7 @@ public class Transaction : BaseModel<Guid>
     public string Description { get; set; } = string.Empty;
 
     [Column("category_id")]
-    public Guid? CategoryId { get; set; }
+    public int? CategoryId { get; set; }
 
     [ForeignKey("AccountId")]
     public virtual Account? Account { get; set; }

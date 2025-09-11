@@ -1,5 +1,5 @@
 class ItemAccount {
-  final String id;
+  final int id;
   final String name;
   final String? description;
   final String color;
@@ -26,7 +26,7 @@ class ItemAccount {
   factory ItemAccount.fromJson(Map<String, dynamic> json) {
     try {
       return ItemAccount(
-        id: json['id'] as String,
+        id: json['id'] as int,
         name: json['name'] as String,
         color: json['color'] ?? '#000',
         description: json['description'] as String?,

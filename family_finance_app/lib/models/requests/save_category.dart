@@ -1,5 +1,5 @@
 class SaveCategory {
-  final String? id;
+  final int? id;
   final String name;
   final String? description;
   final int? icon;
@@ -25,7 +25,7 @@ class SaveCategory {
 
   factory SaveCategory.fromJson(Map<String, dynamic> json) {
     return SaveCategory(
-      id: json['id'] as String?,
+      id: json['id'] as int?,
       name: json['name'] as String,
       description: json['description'] as String?,
       icon: json['icon'] as int?,

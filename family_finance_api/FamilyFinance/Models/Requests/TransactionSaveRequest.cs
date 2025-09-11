@@ -8,6 +8,6 @@ public class TransactionSaveRequest
     public decimal Amount { get; set; }
     public TransactionType TransactionType { get; set; }
     public DateTime TransactionDate { get; set; }
-    public Guid? CategoryId { get; set; }
-    public Guid AccountId { get; set; }
+    public int? CategoryId { get; set; }
+    public int AccountId { get; set; }
 }

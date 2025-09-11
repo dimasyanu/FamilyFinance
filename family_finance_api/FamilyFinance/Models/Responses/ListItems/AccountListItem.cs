@@ -4,15 +4,15 @@ namespace FamilyFinance.Models.Responses.ListItems;
 
 public class AccountListItem
 {
-    public Guid Id { get; set; }
+    public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Color { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public decimal Balance { get; set; }
-    public String CreatedAt { get; set; } = string.Empty;
-    public Guid CreatedBy { get; set; } = Guid.Empty;
-    public String? UpdatedAt { get; set; }
-    public Guid? UpdatedBy { get; set; }
+    public string CreatedAt { get; set; } = string.Empty;
+    public int CreatedBy { get; set; }
+    public string? UpdatedAt { get; set; }
+    public int? UpdatedBy { get; set; }
     public bool IsActive { get; set; }
 
     public AccountListItem()

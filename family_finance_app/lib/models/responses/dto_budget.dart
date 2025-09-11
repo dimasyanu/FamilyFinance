@@ -2,7 +2,7 @@ import 'package:family_financial_app/models/responses/dto_category.dart';
 import 'package:family_financial_app/plugins/utils.dart';
 
 class DtoBudget {
-  final String id;
+  final int id;
   final double amount;
   final int month;
   final int year;
@@ -19,7 +19,7 @@ class DtoBudget {
 
   factory DtoBudget.fromJson(Map<String, dynamic> json) {
     return DtoBudget(
-      id: json['id'] as String,
+      id: json['id'] as int,
       amount: (json['amount'] as num).toDouble(),
       month: json['month'] as int,
       year: json['year'] as int,

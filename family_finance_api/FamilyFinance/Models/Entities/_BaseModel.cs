@@ -12,13 +12,13 @@ public class BaseModel<TId> : BasicModel<TId>
 
     [Column("updated_by")]
     [Required]
-    public Guid UpdatedBy { get; set; }
+    public int UpdatedBy { get; set; }
 
     [Column("deleted_at")]
     public DateTime? DeletedAt { get; set; }
 
     [Column("deleted_by")]
-    public Guid? DeletedBy { get; set; }
+    public int? DeletedBy { get; set; }
 }
 
 public class BasicModel<TId>
@@ -34,5 +34,5 @@ public class BasicModel<TId>
 
     [Column("created_by")]
     [Required]
-    public Guid CreatedBy { get; set; }
+    public int CreatedBy { get; set; }
 }

@@ -52,7 +52,7 @@ class ApiCategory extends Api {
     return result;
   }
 
-  Future<Res<DtoCategory>> getCategoryById({required String categoryId}) async {
+  Future<Res<DtoCategory>> getCategoryById({required int categoryId}) async {
     final url = Uri.parse('$baseUrl/api/categories/$categoryId');
 
     final response = await http.get(
@@ -86,7 +86,7 @@ class ApiCategory extends Api {
     final uri = Uri.parse('$baseUrl/api/categories');
 
     http.Response response;
-    if (payload.id != null && payload.id!.isNotEmpty) {
+    if (payload.id != null && payload.id! > 0) {
       final updateUri = uri.replace(
         path: '${uri.path}/${payload.id}',
       ); // Update existing category
@@ -130,7 +130,7 @@ class ApiCategory extends Api {
     return result;
   }
 
-  Future<Res<void>> deleteCategory({required String categoryId}) async {
+  Future<Res<void>> deleteCategory({required int categoryId}) async {
     final url = Uri.parse('$baseUrl/api/categories/$categoryId');
 
     final response = await http.delete(

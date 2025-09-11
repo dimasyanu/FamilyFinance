@@ -9,9 +9,9 @@ import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
 
 class AccountsFormPage extends StatefulWidget {
-  final String? itemId;
+  final int? itemId;
   final VoidCallback? onClosed;
-  get isNew => itemId == null || itemId!.isEmpty;
+  get isNew => itemId == null || itemId! <= 0;
 
   const AccountsFormPage({this.itemId, this.onClosed, super.key});
 
@@ -54,7 +54,7 @@ class _AccountsFormPageState extends State<AccountsFormPage> {
     loaderOverlay.show();
     try {
       final response = await api.getAccountById(
-        userId: store.getUser()?.userId ?? '',
+        userId: store.getUser()?.userId ?? 0,
         accountId: widget.itemId!,
       );
 
@@ -213,7 +213,7 @@ class _AccountsFormPageState extends State<AccountsFormPage> {
     );
 
     await api.saveAccount(
-      userId: store.getUser()?.userId ?? '',
+      userId: store.getUser()?.userId ?? 0,
       payload: payload,
     );
   }

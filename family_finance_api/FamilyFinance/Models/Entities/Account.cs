@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace FamilyFinance.Models.Entities;
 
 [Table("accounts")]
-public class Account : BaseModel
+public class Account : BaseModel<int>
 {
     [Column("name")]
     [MaxLength(100)]
@@ -22,7 +22,7 @@ public class Account : BaseModel
     public decimal Balance { get; set; }
 
     [Column("user_id")]
-    public Guid UserId { get; set; }
+    public int UserId { get; set; }
 
     [ForeignKey("UserId")]
     public virtual User User { get; set; } = null!;

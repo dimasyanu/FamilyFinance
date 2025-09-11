@@ -206,8 +206,8 @@ class AccountsPage extends MyPage {
   }
 
   Future<void> deleteItem(
-    String userId,
-    String accountId,
+    int userId,
+    int accountId,
     ScaffoldMessengerState messenger,
     NavigatorState navigator,
     VoidCallback loadTable,
@@ -215,7 +215,7 @@ class AccountsPage extends MyPage {
     refreshController.requestLoading();
     try {
       final response = await api.deleteAccount(
-        userId: store.getUser()?.userId ?? '',
+        userId: store.getUser()?.userId ?? 0,
         accountId: accountId,
       );
       if (response.success) {
@@ -279,7 +279,7 @@ class AccountsPage extends MyPage {
                       loaderOverlay.show();
 
                       await deleteItem(
-                        store.getUser()?.userId ?? '',
+                        store.getUser()?.userId ?? 0,
                         account.id,
                         messenger,
                         navigator,

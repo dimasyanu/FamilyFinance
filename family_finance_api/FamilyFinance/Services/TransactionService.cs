@@ -68,7 +68,7 @@ public class TransactionService(AppDbContext dbContext) : BaseService(dbContext)
     /// <param name="request"></param>
     /// <returns></returns>
     /// <exception cref="UnauthorizedAccessException"></exception>
-    public async Task<TransactionDto> CreateAsync(TransactionSaveRequest request, Guid currentUserId)
+    public async Task<TransactionDto> CreateAsync(TransactionSaveRequest request, int currentUserId)
     {
         var now = DateTime.Now;
         var transaction = new Transaction {
@@ -96,7 +96,7 @@ public class TransactionService(AppDbContext dbContext) : BaseService(dbContext)
     /// <returns></returns>
     /// <exception cref="UnauthorizedAccessException"></exception>
     /// <exception cref="EntityNotFoundException"></exception>
-    public async Task<TransactionDto> UpdateAsync(Guid transactionId, TransactionSaveRequest request, Guid currentUserId)
+    public async Task<TransactionDto> UpdateAsync(Guid transactionId, TransactionSaveRequest request, int currentUserId)
     {
         var transaction = await DbContext.Transactions.FirstOrDefaultAsync(x => x.Id == transactionId)
             ?? throw new EntityNotFoundException("Transaction is not found");
@@ -150,7 +150,7 @@ public class TransactionService(AppDbContext dbContext) : BaseService(dbContext)
     /// <param name="currentUserId"></param>
     /// <returns></returns>
     /// <exception cref="EntityNotFoundException"></exception>
-    public async Task<TransactionDto> RestoreAsync(Guid transactionId, Guid currentUserId)
+    public async Task<TransactionDto> RestoreAsync(Guid transactionId, int currentUserId)
     {
         var transaction = await DbContext.Transactions.FirstOrDefaultAsync(x => x.Id == transactionId)
             ?? throw new EntityNotFoundException("Transaction is not found");

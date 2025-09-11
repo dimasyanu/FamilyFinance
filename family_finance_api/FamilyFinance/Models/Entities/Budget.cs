@@ -6,7 +6,7 @@ namespace FamilyFinance.Models.Entities;
 public class Budget : BaseModel<int>
 {
     [Column("category_id")]
-    public Guid CategoryId { get; set; }
+    public int CategoryId { get; set; }
 
     [Column("start_date")]
     public DateTime StartDate { get; set; }

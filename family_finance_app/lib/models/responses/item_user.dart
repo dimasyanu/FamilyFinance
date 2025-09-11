@@ -1,5 +1,5 @@
 class ItemUser {
-  final String id;
+  final int id;
   final String name;
   final String username;
   final bool isActive;

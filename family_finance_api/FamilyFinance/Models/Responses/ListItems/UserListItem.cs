@@ -4,7 +4,7 @@ namespace FamilyFinance.Models.Responses.ListItems;
 
 public class UserListItem
 {
-    public Guid Id { get; set; }
+    public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Username { get; set; } = string.Empty;
     public bool IsActive { get; set; }

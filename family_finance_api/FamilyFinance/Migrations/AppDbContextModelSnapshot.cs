@@ -21,9 +21,9 @@ namespace FamilyFinance.Migrations
 
             modelBuilder.Entity("FamilyFinance.Models.Entities.Account", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)")
+                        .HasColumnType("int")
                         .HasColumnName("id");
 
                     b.Property<decimal>("Balance")
@@ -40,16 +40,16 @@ namespace FamilyFinance.Migrations
                         .HasColumnType("datetime(6)")
                         .HasColumnName("created_at");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("char(36)")
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("int")
                         .HasColumnName("created_by");
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("deleted_at");
 
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("char(36)")
+                    b.Property<int?>("DeletedBy")
+                        .HasColumnType("int")
                         .HasColumnName("deleted_by");
 
                     b.Property<string>("Description")
@@ -68,12 +68,12 @@ namespace FamilyFinance.Migrations
                         .HasColumnType("datetime(6)")
                         .HasColumnName("updated_at");
 
-                    b.Property<Guid>("UpdatedBy")
-                        .HasColumnType("char(36)")
+                    b.Property<int>("UpdatedBy")
+                        .HasColumnType("int")
                         .HasColumnName("updated_by");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("char(36)")
+                    b.Property<int>("UserId")
+                        .HasColumnType("int")
                         .HasColumnName("user_id");
 
                     b.HasKey("Id");
@@ -85,33 +85,33 @@ namespace FamilyFinance.Migrations
 
             modelBuilder.Entity("FamilyFinance.Models.Entities.Budget", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)")
+                        .HasColumnType("int")
                         .HasColumnName("id");
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)")
                         .HasColumnName("amount");
 
-                    b.Property<Guid>("CategoryId")
-                        .HasColumnType("char(36)")
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("int")
                         .HasColumnName("category_id");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("created_at");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("char(36)")
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("int")
                         .HasColumnName("created_by");
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("deleted_at");
 
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("char(36)")
+                    b.Property<int?>("DeletedBy")
+                        .HasColumnType("int")
                         .HasColumnName("deleted_by");
 
                     b.Property<DateTime>("EndDate")
@@ -126,8 +126,8 @@ namespace FamilyFinance.Migrations
                         .HasColumnType("datetime(6)")
                         .HasColumnName("updated_at");
 
-                    b.Property<Guid>("UpdatedBy")
-                        .HasColumnType("char(36)")
+                    b.Property<int>("UpdatedBy")
+                        .HasColumnType("int")
                         .HasColumnName("updated_by");
 
                     b.HasKey("Id");
@@ -139,9 +139,9 @@ namespace FamilyFinance.Migrations
 
             modelBuilder.Entity("FamilyFinance.Models.Entities.Category", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)")
+                        .HasColumnType("int")
                         .HasColumnName("id");
 
                     b.Property<string>("Color")
@@ -154,8 +154,8 @@ namespace FamilyFinance.Migrations
                         .HasColumnType("datetime(6)")
                         .HasColumnName("created_at");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("char(36)")
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("int")
                         .HasColumnName("created_by");
 
                     b.Property<string>("Description")
@@ -181,29 +181,29 @@ namespace FamilyFinance.Migrations
 
             modelBuilder.Entity("FamilyFinance.Models.Entities.Transaction", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<byte[]>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)")
+                        .HasColumnType("BINARY(16)")
                         .HasColumnName("id");
 
-                    b.Property<Guid>("AccountId")
-                        .HasColumnType("char(36)")
+                    b.Property<int>("AccountId")
+                        .HasColumnType("int")
                         .HasColumnName("account_id");
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)")
                         .HasColumnName("amount");
 
-                    b.Property<Guid?>("CategoryId")
-                        .HasColumnType("char(36)")
+                    b.Property<int?>("CategoryId")
+                        .HasColumnType("int")
                         .HasColumnName("category_id");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("created_at");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("char(36)")
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("int")
                         .HasColumnName("created_by");
 
                     b.Property<DateTime>("Date")
@@ -214,8 +214,8 @@ namespace FamilyFinance.Migrations
                         .HasColumnType("datetime(6)")
                         .HasColumnName("deleted_at");
 
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("char(36)")
+                    b.Property<int?>("DeletedBy")
+                        .HasColumnType("int")
                         .HasColumnName("deleted_by");
 
                     b.Property<string>("Description")
@@ -232,8 +232,8 @@ namespace FamilyFinance.Migrations
                         .HasColumnType("datetime(6)")
                         .HasColumnName("updated_at");
 
-                    b.Property<Guid>("UpdatedBy")
-                        .HasColumnType("char(36)")
+                    b.Property<int>("UpdatedBy")
+                        .HasColumnType("int")
                         .HasColumnName("updated_by");
 
                     b.HasKey("Id");
@@ -247,25 +247,25 @@ namespace FamilyFinance.Migrations
 
             modelBuilder.Entity("FamilyFinance.Models.Entities.User", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)")
+                        .HasColumnType("int")
                         .HasColumnName("id");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("created_at");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("char(36)")
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("int")
                         .HasColumnName("created_by");
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("deleted_at");
 
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("char(36)")
+                    b.Property<int?>("DeletedBy")
+                        .HasColumnType("int")
                         .HasColumnName("deleted_by");
 
                     b.Property<string>("Name")
@@ -290,8 +290,8 @@ namespace FamilyFinance.Migrations
                         .HasColumnType("datetime(6)")
                         .HasColumnName("updated_at");
 
-                    b.Property<Guid>("UpdatedBy")
-                        .HasColumnType("char(36)")
+                    b.Property<int>("UpdatedBy")
+                        .HasColumnType("int")
                         .HasColumnName("updated_by");
 
                     b.Property<string>("Username")
@@ -307,14 +307,14 @@ namespace FamilyFinance.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("de178780-234b-49c9-b5cd-f01fe5edb4d2"),
+                            Id = 1,
                             CreatedAt = new DateTime(2025, 7, 10, 19, 0, 0, 0, DateTimeKind.Local),
-                            CreatedBy = new Guid("de178780-234b-49c9-b5cd-f01fe5edb4d2"),
+                            CreatedBy = 1,
                             Name = "System Administrator",
                             PasswordHash = "$2a$12$9MGisUIZgp80yLvdS5dCBORiaheBxVlBY6kN8SVfYLp4OxrMi6xZq",
                             RefreshToken = "",
                             UpdatedAt = new DateTime(2025, 7, 10, 19, 0, 0, 0, DateTimeKind.Local),
-                            UpdatedBy = new Guid("de178780-234b-49c9-b5cd-f01fe5edb4d2"),
+                            UpdatedBy = 1,
                             Username = "system"
                         });
                 });

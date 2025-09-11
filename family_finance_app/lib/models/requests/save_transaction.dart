@@ -4,8 +4,8 @@ class SaveTransaction {
   final double amount;
   final int transactionType; // -1 for expense, 1 for income, 0 for other
   final DateTime transactionDate;
-  final String? categoryId;
-  final String accountId;
+  final int? categoryId;
+  final int accountId;
 
   SaveTransaction({
     this.id,
@@ -36,8 +36,8 @@ class SaveTransaction {
       amount: (json['amount'] as num).toDouble(),
       transactionType: json['transactionType'] as int,
       transactionDate: DateTime.parse(json['transactionDate'] as String),
-      categoryId: json['categoryId'] as String?,
-      accountId: json['accountId'] as String,
+      categoryId: json['categoryId'] as int?,
+      accountId: json['accountId'] as int,
     );
   }
 }
