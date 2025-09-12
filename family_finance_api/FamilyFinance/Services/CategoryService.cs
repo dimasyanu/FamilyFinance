@@ -88,7 +88,7 @@ public class CategoryService(AppDbContext dbContext) : BaseService(dbContext)
     /// <param name="request"></param>
     /// <returns></returns>
     /// <exception cref="EntityNotFoundException"></exception>
-    public async Task<CategoryDto> UpdateAsync(Guid id, CategorySaveRequest request)
+    public async Task<CategoryDto> UpdateAsync(int id, CategorySaveRequest request)
     {
         var category = await DbContext.Categories.FindAsync(id)
             ?? throw new EntityNotFoundException($"Category with ID {id} not found.");
@@ -108,7 +108,7 @@ public class CategoryService(AppDbContext dbContext) : BaseService(dbContext)
     /// <param name="id"></param>
     /// <returns></returns>
     /// <exception cref="EntityNotFoundException"></exception>
-    public async Task DeleteAsync(Guid id)
+    public async Task DeleteAsync(int id)
     {
         var category = await DbContext.Categories.FindAsync(id)
             ?? throw new EntityNotFoundException($"Category with ID {id} not found.");

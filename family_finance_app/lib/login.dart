@@ -17,6 +17,7 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   final username = ValueNotifier('');
   final password = ValueNotifier('');
+  bool showPassword = false;
 
   late final ValueNotifier<bool> isFormValid = ValueNotifier(
     username.value.isNotEmpty && password.value.isNotEmpty,
@@ -112,89 +113,237 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
+    showPassword = false;
     final theme = Theme.of(context);
     final loginBtnStyle = ElevatedButton.styleFrom(
       backgroundColor: theme.colorScheme.primary,
       foregroundColor: theme.colorScheme.onPrimary,
       minimumSize: const Size(200, 50),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(8)),
+        borderRadius: BorderRadius.all(Radius.circular(10.0)),
       ),
     );
-    return FutureBuilder<bool>(
-      future: checkUser(context),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting ||
-            snapshot.connectionState != ConnectionState.done) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (snapshot.data ?? false) {
-          return const Center(child: CircularProgressIndicator());
-        }
+    return Scaffold(
+      body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('images/drawing.png'),
+            fit: BoxFit.fitWidth,
+            alignment: AlignmentGeometry.topCenter,
+          ),
+        ),
+        child: FutureBuilder<bool>(
+          future: checkUser(context),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting ||
+                snapshot.connectionState != ConnectionState.done) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.data ?? false) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-        return Scaffold(
-          body: LoaderOverlay(
-            child: Form(
-              child: Center(
-                child: Row(
-                  children: [
-                    Expanded(flex: 1, child: Column()),
-                    Expanded(
-                      flex: 6,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        spacing: 20,
-                        children: [
-                          Text(
-                            'Login to your account',
-                            style: Theme.of(context).textTheme.headlineMedium,
-                          ),
-                          TextFormField(
-                            decoration: const InputDecoration(
-                              labelText: 'Username',
-                            ),
-                            onChanged: (value) => username.value = value,
-                          ),
-                          TextFormField(
-                            decoration: const InputDecoration(
-                              labelText: 'Password',
-                            ),
-                            obscureText: true,
-                            onChanged: (value) => password.value = value,
-                          ),
-                          SizedBox(
-                            width: double.infinity,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 0,
-                                vertical: 20,
-                              ),
-                              child: ValueListenableBuilder<bool>(
-                                valueListenable: isFormValid,
-                                builder: (context, valid, child) {
-                                  return ElevatedButton(
-                                    style: loginBtnStyle,
-                                    onPressed: valid
-                                        ? () => login(context)
-                                        : null,
-                                    child: const Text('Login'),
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+            return LoaderOverlay(
+              child: Form(
+                child: Container(
+                  alignment: Alignment.bottomLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 40,
                     ),
-                    Expanded(flex: 1, child: Column()),
-                  ],
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        // Sign In text
+                        Container(
+                          alignment: Alignment.centerLeft,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            spacing: 0,
+                            children: [
+                              Text(
+                                'Sign In',
+                                style: TextStyle(
+                                  fontSize: 36,
+                                  fontWeight: FontWeight.w700,
+                                  height: 0,
+                                ),
+                                textAlign: TextAlign.start,
+                              ),
+                              SizedBox(
+                                width: 70,
+                                child: Divider(
+                                  color: theme.colorScheme.primary,
+                                  thickness: 3,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        SizedBox(height: 40),
+
+                        Container(
+                          alignment: Alignment.centerLeft,
+                          padding: null,
+                          child: Text(
+                            'Username',
+                            style: TextStyle(
+                              color: theme.colorScheme.onSurface,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 18,
+                              height: 0,
+                            ),
+                          ),
+                        ),
+
+                        SizedBox(height: 5),
+
+                        // Username fields
+                        TextFormField(
+                          decoration: InputDecoration(
+                            hintText: 'Enter your username',
+                            hintStyle: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey,
+                            ),
+                            prefixIcon: Icon(
+                              Icons.person_outline,
+                              weight: 15,
+                              size: 15,
+                              color: Colors.grey[500],
+                            ),
+                            prefixIconConstraints: BoxConstraints(
+                              minWidth: 32,
+                              minHeight: 32,
+                            ),
+                            isDense: true,
+                            contentPadding: null,
+                            enabledBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.grey),
+                            ),
+                            focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(
+                                color: theme.colorScheme.primary,
+                                width: 1,
+                              ),
+                            ),
+                          ),
+                          cursorHeight: 20,
+                          onChanged: (value) => username.value = value,
+                        ),
+
+                        SizedBox(height: 32),
+
+                        Container(
+                          alignment: Alignment.centerLeft,
+                          padding: null,
+                          child: Text(
+                            'Password',
+                            style: TextStyle(
+                              color: theme.colorScheme.onSurface,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 18,
+                              height: 0,
+                            ),
+                          ),
+                        ),
+
+                        SizedBox(height: 5),
+
+                        // Password field
+                        TextFormField(
+                          decoration: InputDecoration(
+                            hintText: 'Password',
+                            hintStyle: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey,
+                            ),
+                            prefixIcon: Icon(
+                              Icons.lock_outline,
+                              weight: 15,
+                              size: 15,
+                              color: Colors.grey[500],
+                            ),
+                            prefixIconConstraints: BoxConstraints(
+                              minWidth: 32,
+                              minHeight: 32,
+                            ),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                showPassword
+                                    ? Icons.visibility_outlined
+                                    : Icons.visibility_off_outlined,
+                                weight: 15,
+                                size: 15,
+                                color: Colors.grey[500],
+                              ),
+                              onPressed: () {
+                                showPassword = !showPassword;
+                              },
+                            ),
+                            suffixIconConstraints: BoxConstraints(
+                              maxWidth: 32,
+                              maxHeight: 32,
+                            ),
+                            isDense: true,
+                            contentPadding: null,
+                            enabledBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.grey),
+                            ),
+                            focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(
+                                color: theme.colorScheme.primary,
+                                width: 1,
+                              ),
+                            ),
+                          ),
+                          cursorHeight: 20,
+                          obscureText: !showPassword,
+                          onChanged: (value) => password.value = value,
+                        ),
+
+                        SizedBox(height: 80),
+
+                        // Login button
+                        SizedBox(
+                          width: double.infinity,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 0,
+                              vertical: 20,
+                            ),
+                            child: ValueListenableBuilder<bool>(
+                              valueListenable: isFormValid,
+                              builder: (context, valid, child) {
+                                return ElevatedButton(
+                                  style: loginBtnStyle,
+                                  onPressed: valid
+                                      ? () => login(context)
+                                      : null,
+                                  child: const Text(
+                                    'Login',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
-        );
-      },
+            );
+          },
+        ),
+      ),
     );
   }
 }

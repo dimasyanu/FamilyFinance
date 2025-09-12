@@ -82,7 +82,7 @@ class ApiAccounts extends Api {
     return result;
   }
 
-  Future<Res<CreationResponse>> saveAccount({
+  Future<Res<CreationResponse<int>>> saveAccount({
     required int userId,
     required SaveAccount payload,
   }) async {
@@ -121,9 +121,9 @@ class ApiAccounts extends Api {
       }
     }
 
-    final result = Res<CreationResponse>.fromJson(
+    final result = Res<CreationResponse<int>>.fromJson(
       jsonDecode(response.body),
-      (data) => CreationResponse.fromJson(data),
+      (data) => CreationResponse<int>.fromJson(data),
     );
 
     if (result.hasError) {

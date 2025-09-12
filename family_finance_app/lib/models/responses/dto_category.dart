@@ -9,7 +9,7 @@ class DtoCategory {
 
   factory DtoCategory.fromJson(Map<String, dynamic> json) {
     return DtoCategory(
-      id: json['id'] as int?,
+      id: json['id'] as int,
       name: json['name'] as String?,
       description: json['description'] as String?,
       color: json['color'] as String?,

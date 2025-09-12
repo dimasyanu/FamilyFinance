@@ -78,7 +78,7 @@ class ApiBudgeting extends Api {
     return result;
   }
 
-  Future<Res<CreationResponse>> saveBudget({
+  Future<Res<CreationResponse<int>>> saveBudget({
     required SaveBudget payload,
   }) async {
     final uri = Uri.parse('$baseUrl/api/budgets');
@@ -116,9 +116,9 @@ class ApiBudgeting extends Api {
       }
     }
 
-    final result = Res<CreationResponse>.fromJson(
+    final result = Res<CreationResponse<int>>.fromJson(
       jsonDecode(response.body),
-      (data) => CreationResponse.fromJson(data),
+      (data) => CreationResponse<int>.fromJson(data),
     );
 
     if (result.hasError) {

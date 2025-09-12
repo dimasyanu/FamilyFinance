@@ -80,7 +80,7 @@ class ApiCategory extends Api {
     return result;
   }
 
-  Future<Res<CreationResponse>> saveCategory({
+  Future<Res<CreationResponse<int>>> saveCategory({
     required SaveCategory payload,
   }) async {
     final uri = Uri.parse('$baseUrl/api/categories');
@@ -118,9 +118,9 @@ class ApiCategory extends Api {
       }
     }
 
-    final result = Res<CreationResponse>.fromJson(
+    final result = Res<CreationResponse<int>>.fromJson(
       jsonDecode(response.body),
-      (data) => CreationResponse.fromJson(data),
+      (data) => CreationResponse<int>.fromJson(data),
     );
 
     if (result.hasError) {

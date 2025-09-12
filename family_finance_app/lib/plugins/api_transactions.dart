@@ -85,7 +85,7 @@ class ApiTransactions extends Api {
     return result;
   }
 
-  Future<Res<CreationResponse>> saveTransaction({
+  Future<Res<CreationResponse<String>>> saveTransaction({
     required SaveTransaction payload,
   }) async {
     final uri = Uri.parse('$baseUrl/api/transactions');
@@ -123,9 +123,9 @@ class ApiTransactions extends Api {
       }
     }
 
-    final result = Res<CreationResponse>.fromJson(
+    final result = Res<CreationResponse<String>>.fromJson(
       jsonDecode(response.body),
-      (data) => CreationResponse.fromJson(data),
+      (data) => CreationResponse<String>.fromJson(data),
     );
 
     if (result.hasError) {

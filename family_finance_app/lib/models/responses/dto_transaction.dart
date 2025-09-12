@@ -1,5 +1,5 @@
-import 'package:family_financial_app/models/responses/item_account.dart';
-import 'package:family_financial_app/models/responses/item_category.dart';
+import 'package:family_financial_app/plugins/dropdown_account.dart';
+import 'package:family_financial_app/plugins/dropdown_category.dart';
 
 class DtoTransaction {
   final String id;
@@ -8,8 +8,8 @@ class DtoTransaction {
   final String transactionDate;
   final String transactionTime;
   final int transactionType;
-  final ItemCategory category;
-  final ItemAccount account;
+  final DropdownCategory category;
+  final DropdownAccount account;
   final String? notes;
 
   final String createdAt;
@@ -41,8 +41,8 @@ class DtoTransaction {
       transactionDate: json['transactionDate'] as String,
       transactionTime: json['transactionTime'] as String,
       transactionType: json['transactionType'] as int,
-      category: ItemCategory.fromJson(json['category']),
-      account: ItemAccount.fromJson(json['account']),
+      category: DropdownCategory.fromJson(json['category']),
+      account: DropdownAccount.fromJson(json['account']),
       notes: json['notes'] as String?,
       createdAt: json['createdAt'] as String,
       createdBy: json['createdBy'] as String,

@@ -27,7 +27,7 @@ public class CategoryController(CategoryService service) : BaseController
     }
 
     [HttpGet]
-    [Route("{categoryId:guid}")]
+    [Route("{categoryId:int}")]
     public async Task<ActionResult<CategoryListItem>> Get(int categoryId)
     {
         var category = await _service.GetByIdAsync(categoryId);
@@ -47,8 +47,8 @@ public class CategoryController(CategoryService service) : BaseController
     }
 
     [HttpPatch]
-    [Route("{categoryId:guid}")]
-    public async Task<ActionResult<Response<CategoryDto>>> Update(Guid categoryId, [FromBody] CategorySaveRequest request)
+    [Route("{categoryId:int}")]
+    public async Task<ActionResult<Response<CategoryDto>>> Update(int categoryId, [FromBody] CategorySaveRequest request)
     {
         if (request == null) return BadRequest("Request cannot be null.");
         if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -58,8 +58,8 @@ public class CategoryController(CategoryService service) : BaseController
     }
 
     [HttpDelete]
-    [Route("{categoryId:guid}")]
-    public async Task<ActionResult> Delete(Guid categoryId)
+    [Route("{categoryId:int}")]
+    public async Task<ActionResult> Delete(int categoryId)
     {
         await _service.DeleteAsync(categoryId);
         return Ok("Category deleted successfully");

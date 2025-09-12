@@ -5,9 +5,9 @@ class ItemAccount {
   final String color;
   final double balance;
   final String createdAt;
-  final String createdBy;
+  final int createdBy;
   final String? updatedAt;
-  final String? updatedBy;
+  final int? updatedBy;
   final bool isActive;
 
   ItemAccount({
@@ -32,9 +32,9 @@ class ItemAccount {
         description: json['description'] as String?,
         balance: (json['balance'] as num? ?? 0).toDouble(),
         createdAt: json['createdAt'] as String? ?? '',
-        createdBy: json['createdBy'] as String? ?? '',
-        updatedAt: json['updatedAt'] as String? ?? '',
-        updatedBy: json['updatedBy'] as String? ?? '',
+        createdBy: json['createdBy'] as int,
+        updatedAt: json['updatedAt'] as String?,
+        updatedBy: json['updatedBy'] as int?,
         isActive: json['isActive'] as bool? ?? true,
       );
     } catch (e) {
