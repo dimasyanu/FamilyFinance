@@ -1,3 +1,4 @@
+import 'package:family_financial_app/components/overview/month_expanses_bar_chart.dart';
 import 'package:family_financial_app/models/mypage.dart';
 import 'package:flutter/material.dart';
 
@@ -8,26 +9,9 @@ class OverviewPage extends MyPage {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          const Text('This is the Overview page.'),
-          ValueListenableBuilder<int>(
-            valueListenable: counter,
-            builder: (context, value, child) {
-              return Text(value.toString());
-            },
-          ),
-          const SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () {
-              counter.value++;
-            },
-            child: const Text('Action Button'),
-          ),
-        ],
-      ),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: <Widget>[MonthExpansesBarChart()],
     );
   }
 

@@ -73,7 +73,7 @@ class _LoginState extends State<Login> {
           return false;
         }
 
-        navigator.pushReplacement(
+        await navigator.pushReplacement(
           MaterialPageRoute(builder: (context) => const App()),
         );
         return true;
@@ -167,7 +167,7 @@ class _LoginState extends State<Login> {
     return Scaffold(
       body: Builder(
         builder: (context) {
-          if (loading) {
+          if (loading || !mounted) {
             return const Center(child: CircularProgressIndicator());
           }
 

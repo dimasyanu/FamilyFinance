@@ -49,12 +49,12 @@ class CategoriesPage extends MyPage {
       super(route: 'CategoriesPage', title: 'Categories');
 
   @override
-  Color? appBarForegroundColor() {
+  Color? appBarForegroundColor(BuildContext context) {
     return Colors.white;
   }
 
   @override
-  Color? appBarBackgroundColor() {
+  Color? appBarBackgroundColor(BuildContext context) {
     return Colors.orange;
   }
 
@@ -65,11 +65,11 @@ class CategoriesPage extends MyPage {
       mainAxisSize: MainAxisSize.min,
       key: const Key('appBarTitle'),
       children: [
-        Icon(Icons.category, color: appBarForegroundColor()),
+        Icon(Icons.category, color: appBarForegroundColor(context)),
         const SizedBox(width: 10.0),
         Text(
           title,
-          style: TextStyle(color: appBarForegroundColor(), fontSize: 18),
+          style: TextStyle(color: appBarForegroundColor(context), fontSize: 18),
         ),
       ],
     );
@@ -89,7 +89,7 @@ class CategoriesPage extends MyPage {
       controller: refreshController,
       enablePullDown: true,
       header: WaterDropMaterialHeader(
-        backgroundColor: appBarBackgroundColor(),
+        backgroundColor: appBarBackgroundColor(context),
         color: Colors.white,
         distance: 80.0,
       ),
@@ -133,8 +133,12 @@ class CategoriesPage extends MyPage {
                                 onClosed: () {
                                   refreshController.requestRefresh();
                                 },
-                                backgroundColor: appBarBackgroundColor()!,
-                                foregroundColor: appBarForegroundColor()!,
+                                backgroundColor: appBarBackgroundColor(
+                                  context,
+                                )!,
+                                foregroundColor: appBarForegroundColor(
+                                  context,
+                                )!,
                               ),
                             ),
                           );
@@ -296,8 +300,8 @@ class CategoriesPage extends MyPage {
           context,
           MaterialPageRoute(
             builder: (context) => CategoriesFormPage(
-              backgroundColor: appBarBackgroundColor()!,
-              foregroundColor: appBarForegroundColor()!,
+              backgroundColor: appBarBackgroundColor(context)!,
+              foregroundColor: appBarForegroundColor(context)!,
               onClosed: () {
                 refreshController.requestRefresh();
               },
@@ -306,8 +310,8 @@ class CategoriesPage extends MyPage {
         );
       },
       shape: CircleBorder(),
-      backgroundColor: appBarBackgroundColor(),
-      foregroundColor: appBarForegroundColor(),
+      backgroundColor: appBarBackgroundColor(context)!,
+      foregroundColor: appBarForegroundColor(context)!,
       child: const Icon(Icons.add),
     );
   }

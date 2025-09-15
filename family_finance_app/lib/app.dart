@@ -11,8 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class App extends StatefulWidget {
-  static const currentKey = 'Homepage';
-  final String title = 'Home';
+  static const currentKey = 'homepage';
 
   const App() : super(key: const Key(currentKey));
 
@@ -24,7 +23,7 @@ class _AppState extends State<App> {
   List<ListTile> drawerWidgets = [];
   late final List<DrawerItem> drawerItems;
 
-  final _currentPageRoute = ValueNotifier<String>('transactions');
+  final _currentPageRoute = ValueNotifier<String>('overview');
   final _currentMenu = ValueNotifier<DrawerItem?>(null);
   final _currentPage = ValueNotifier<MyPage?>(null);
 
@@ -34,31 +33,26 @@ class _AppState extends State<App> {
     drawerItems = <DrawerItem>[
       DrawerItem(
         route: 'overview',
-        title: 'Overview',
         icon: Icons.dashboard,
         page: () => OverviewPage(context),
       ),
       DrawerItem(
         route: 'transactions',
-        title: 'Transactions',
         icon: Icons.receipt,
         page: () => TransactionsPage(context),
       ),
       DrawerItem(
         route: 'accounts',
-        title: 'Accounts',
         icon: Icons.wallet,
         page: () => AccountsPage(context),
       ),
       DrawerItem(
         route: 'categories',
-        title: 'Categories',
         icon: Icons.category,
         page: () => CategoriesPage(context),
       ),
       DrawerItem(
         route: 'budgeting',
-        title: 'Budgeting',
         icon: Icons.attach_money,
         page: () => BudgetingPage(context),
       ),
@@ -85,14 +79,19 @@ class _AppState extends State<App> {
     if (_currentMenu.value == null) {
       setPageState(); // Ensure the current menu is set
     }
+    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: _currentPage.value?.appBarTitle(context) ?? Text(widget.title),
+        title:
+            _currentPage.value?.appBarTitle(context) ??
+            Text(_currentPage.value?.title ?? 'App'),
         backgroundColor:
-            _currentPage.value?.appBarBackgroundColor() ?? Colors.white,
+            _currentPage.value?.appBarBackgroundColor(context) ??
+            theme.colorScheme.surfaceDim,
         foregroundColor:
-            _currentPage.value?.appBarForegroundColor() ?? Colors.black,
+            _currentPage.value?.appBarForegroundColor(context) ??
+            theme.colorScheme.onSurface,
       ),
       body: ValueListenableBuilder(
         valueListenable: _currentPage,

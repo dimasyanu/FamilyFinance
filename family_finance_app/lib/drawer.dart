@@ -61,7 +61,7 @@ class MyDrawer extends Drawer {
 
           ...drawerItems.map(
             (item) => ListTile(
-              title: Text(item.title),
+              title: Text(item.page().title),
               leading: Icon(item.icon, color: theme.colorScheme.primary),
               selectedTileColor: theme.colorScheme.secondary,
               selectedColor: theme.colorScheme.onSecondary,

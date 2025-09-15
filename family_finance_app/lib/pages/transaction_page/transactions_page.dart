@@ -55,13 +55,18 @@ class TransactionsPage extends MyPage {
       super(route: 'TransactionsPage', title: 'Transactions');
 
   @override
-  Color? appBarForegroundColor() {
+  Color? appBarForegroundColor(BuildContext context) {
+    final theme = Theme.of(context);
+    if (theme.brightness == Brightness.dark) {
+      return theme.colorScheme.primary;
+    }
     return Colors.blue.shade700;
   }
 
   @override
-  Color? appBarBackgroundColor() {
-    return theme!.colorScheme.surfaceDim;
+  Color? appBarBackgroundColor(BuildContext context) {
+    final theme = Theme.of(context);
+    return theme.colorScheme.surfaceDim;
   }
 
   @override
@@ -71,11 +76,11 @@ class TransactionsPage extends MyPage {
       mainAxisSize: MainAxisSize.min,
       key: const Key('appBarTitle'),
       children: [
-        Icon(Icons.category, color: appBarForegroundColor()),
+        Icon(Icons.category, color: appBarForegroundColor(context)),
         const SizedBox(width: 10.0),
         Text(
           title,
-          style: TextStyle(color: appBarForegroundColor(), fontSize: 18),
+          style: TextStyle(color: appBarForegroundColor(context), fontSize: 18),
         ),
       ],
     );
@@ -88,6 +93,7 @@ class TransactionsPage extends MyPage {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     _tabController = TabController(length: 3, vsync: Scaffold.of(context));
 
     return DefaultTabController(
@@ -119,8 +125,8 @@ class TransactionsPage extends MyPage {
         ),
         bottomNavigationBar: TransactionsBottomNavigationBar(
           tabController: _tabController!,
-          foregroundColor: appBarForegroundColor()!,
-          backgroundColor: theme!.colorScheme.surface,
+          foregroundColor: appBarForegroundColor(context)!,
+          backgroundColor: theme.colorScheme.surface,
         ).getNavigationBar(context),
       ),
     );
@@ -136,8 +142,8 @@ class TransactionsPage extends MyPage {
           context,
           MaterialPageRoute(
             builder: (context) => TransactionsFormPage(
-              backgroundColor: appBarBackgroundColor()!,
-              foregroundColor: appBarForegroundColor()!,
+              backgroundColor: appBarBackgroundColor(context)!,
+              foregroundColor: appBarForegroundColor(context)!,
               onClosed: refresh,
             ),
           ),
@@ -145,8 +151,8 @@ class TransactionsPage extends MyPage {
       },
       shape: CircleBorder(),
       mini: true,
-      backgroundColor: appBarBackgroundColor(),
-      foregroundColor: appBarForegroundColor(),
+      backgroundColor: appBarBackgroundColor(context)!,
+      foregroundColor: appBarForegroundColor(context)!,
       child: const Icon(Icons.add),
     );
   }

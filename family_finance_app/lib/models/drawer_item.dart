@@ -3,14 +3,8 @@ import 'package:flutter/material.dart';
 
 class DrawerItem {
   final String route;
-  final String title;
   final IconData icon;
   final MyPage Function() page;
 
-  DrawerItem({
-    required this.route,
-    required this.title,
-    required this.icon,
-    required this.page,
-  });
+  DrawerItem({required this.route, required this.icon, required this.page});
 }

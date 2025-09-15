@@ -3,23 +3,25 @@ import 'package:flutter/material.dart';
 abstract class MyPage {
   late final AppBar appBar;
   final String route;
-  final String title;
-  late final ThemeData? theme;
+  final String _title;
+  String get title => _title;
   bool _isMounted = false;
   late void Function(VoidCallback) _setState;
 
-  MyPage(BuildContext context, {required this.route, required this.title}) {
-    theme = Theme.of(context);
+  MyPage(BuildContext context, {required this.route, required String title})
+    : _title = title {
+    final theme = Theme.of(context);
     appBar = AppBar(
-      title: appBarTitle(context) ?? Text(title),
-      backgroundColor: appBarBackgroundColor() ?? theme!.colorScheme.surface,
+      title: appBarTitle(context) ?? Text(_title),
+      backgroundColor:
+          appBarBackgroundColor(context) ?? theme.colorScheme.surface,
     );
   }
 
   Widget build(BuildContext context);
   Widget? appBarTitle(BuildContext context) => null;
-  Color? appBarBackgroundColor() => null;
-  Color? appBarForegroundColor() => null;
+  Color? appBarBackgroundColor(BuildContext context) => null;
+  Color? appBarForegroundColor(BuildContext context) => null;
   Future<void> onMounted(BuildContext context);
   FloatingActionButton? floatingActionButton(BuildContext context) => null;
   FloatingActionButtonLocation? floatingActionButtonLocation(

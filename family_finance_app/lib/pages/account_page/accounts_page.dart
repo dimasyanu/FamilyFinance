@@ -15,8 +15,6 @@ import 'package:pull_to_refresh_flutter3/pull_to_refresh_flutter3.dart'
 
 class AccountsPage extends MyPage {
   static const currentKey = 'AccountsPage';
-  @override
-  String get title => 'Accounts';
   final ApiAccounts api;
   final Store store;
   final ScaffoldMessengerState messenger;
@@ -59,12 +57,12 @@ class AccountsPage extends MyPage {
       super(route: 'AccountsPage', title: 'Accounts');
 
   @override
-  Color? appBarForegroundColor() {
+  Color? appBarForegroundColor(BuildContext context) {
     return Colors.white;
   }
 
   @override
-  Color? appBarBackgroundColor() {
+  Color? appBarBackgroundColor(BuildContext context) {
     return Colors.blue;
   }
 
@@ -75,11 +73,14 @@ class AccountsPage extends MyPage {
       mainAxisSize: MainAxisSize.min,
       key: const Key('appBarTitle'),
       children: [
-        Icon(Icons.account_balance_wallet, color: appBarForegroundColor()),
+        Icon(
+          Icons.account_balance_wallet,
+          color: appBarForegroundColor(context),
+        ),
         const SizedBox(width: 10.0),
         Text(
           title,
-          style: TextStyle(color: appBarForegroundColor(), fontSize: 18),
+          style: TextStyle(color: appBarForegroundColor(context), fontSize: 18),
         ),
       ],
     );
