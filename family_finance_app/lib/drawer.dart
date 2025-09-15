@@ -1,4 +1,5 @@
 import 'package:family_financial_app/abstractions/store.dart';
+import 'package:family_financial_app/components/profile_picture.dart';
 import 'package:family_financial_app/login.dart';
 import 'package:family_financial_app/models/drawer_item.dart';
 import 'package:family_financial_app/pages/settings_page.dart';
@@ -17,47 +18,75 @@ class MyDrawer extends Drawer {
 
   @override
   Widget build(BuildContext context) {
+    final navigator = Navigator.of(context);
+    final theme = Theme.of(context);
+    const borderColor = Color.fromARGB(255, 197, 197, 197);
+
     return Drawer(
+      backgroundColor: theme.colorScheme.surface,
       child: Column(
         children: <Widget>[
-          const DrawerHeader(
-            decoration: BoxDecoration(color: Colors.green),
-            child: Center(
-              child: CircleAvatar(
-                radius: 50,
-                // backgroundImage: AssetImage('../assets/images/profile.png'),
-              ),
+          Container(
+            alignment: Alignment.center,
+            padding: const EdgeInsets.only(top: 40, bottom: 30),
+            color: theme.colorScheme.primary,
+            child: FutureBuilder(
+              future: context.read<Store>().getUserData(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return CircularProgressIndicator();
+                } else if (snapshot.hasError || !snapshot.hasData) {
+                  return Text('Error: ${snapshot.error}');
+                } else {
+                  return Column(
+                    children: [
+                      ProfilePicture(
+                        username: snapshot.data!.username,
+                        radius: 75,
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        snapshot.data!.name,
+                        style: TextStyle(
+                          color: theme.colorScheme.onPrimary,
+                          fontSize: 20,
+                        ),
+                      ),
+                    ],
+                  );
+                }
+              },
             ),
           ),
 
           ...drawerItems.map(
             (item) => ListTile(
               title: Text(item.title),
-              leading: Icon(item.icon, color: Colors.green),
-              selectedTileColor: Colors.green.shade100,
+              leading: Icon(item.icon, color: theme.colorScheme.primary),
+              selectedTileColor: theme.colorScheme.secondary,
+              selectedColor: theme.colorScheme.onSecondary,
               selected: item.route == currentPageRoute.value,
               onTap: () {
+                navigator.pop();
                 if (currentPageRoute.value == item.route) return;
                 currentPageRoute.value = item.route;
-                Navigator.pop(context);
               },
             ),
           ),
 
-          const Divider(),
+          const Divider(color: borderColor),
 
           ListTile(
             title: const Text('Settings'),
             leading: const Icon(Icons.settings, color: Colors.grey),
             onTap: () {
-              Navigator.push(
-                context,
+              navigator.push(
                 MaterialPageRoute(builder: (context) => const SettingsPage()),
               );
             },
           ),
 
-          const Divider(),
+          const Divider(color: borderColor),
 
           Expanded(
             child: Align(
@@ -68,8 +97,7 @@ class MyDrawer extends Drawer {
                 textColor: Colors.red,
                 onTap: () {
                   context.read<Store>().logout();
-                  Navigator.pushReplacement(
-                    context,
+                  navigator.pushReplacement(
                     MaterialPageRoute(builder: (context) => Login()),
                   );
                 },

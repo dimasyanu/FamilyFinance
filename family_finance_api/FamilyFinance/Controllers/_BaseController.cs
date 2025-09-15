@@ -20,7 +20,7 @@ public abstract class BaseController : ControllerBase
         }
     }
 
-    private async Task<UserDto> GetCurrentUser()
+    protected async Task<UserDto> GetCurrentUser()
     {
         var username = User.FindFirstValue(ClaimTypes.Name);
         if (string.IsNullOrEmpty(username)) throw new UnauthorizedAccessException();

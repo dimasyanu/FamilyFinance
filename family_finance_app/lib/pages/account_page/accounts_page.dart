@@ -112,7 +112,6 @@ class AccountsPage extends MyPage {
         child: Container(
           padding: const EdgeInsets.all(8.0),
           child: PaginatedDataTable(
-            headingRowColor: WidgetStateProperty.all(Colors.grey.shade200),
             columns: columns,
             showEmptyRows: false,
             source: AccountsTableSource(
@@ -142,8 +141,8 @@ class AccountsPage extends MyPage {
                             MaterialPageRoute(
                               builder: (context) => AccountsFormPage(
                                 itemId: account.id,
-                                onClosed: () {
-                                  loadTable(context);
+                                onClosed: () async {
+                                  await loadTable(context);
                                 },
                               ),
                             ),
@@ -171,8 +170,9 @@ class AccountsPage extends MyPage {
 
   /// Load the accounts table or any necessary data.
   Future<void> loadTable(BuildContext context) async {
-    final user = store.getUser();
+    final user = store.getLoginData();
     if (user == null) throw Exception('User not logged in');
+
     try {
       final response = await api.getAccounts(
         userId: user.userId,
@@ -210,12 +210,12 @@ class AccountsPage extends MyPage {
     int accountId,
     ScaffoldMessengerState messenger,
     NavigatorState navigator,
-    VoidCallback loadTable,
   ) async {
     refreshController.requestLoading();
+
     try {
       final response = await api.deleteAccount(
-        userId: store.getUser()?.userId ?? 0,
+        userId: store.getLoginData()?.userId ?? 0,
         accountId: accountId,
       );
       if (response.success) {
@@ -225,16 +225,9 @@ class AccountsPage extends MyPage {
             backgroundColor: Colors.green.shade400,
           ),
         );
-        navigator.pop(); // Close the dialog
-        () => loadTable(); // Refresh the table after deletion
-      } else {
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text('Failed to delete account'),
-            backgroundColor: Colors.red.shade400,
-          ),
-        );
+        return;
       }
+      throw Exception('Failed to delete account');
     } catch (error) {
       messenger.showSnackBar(
         SnackBar(
@@ -242,10 +235,6 @@ class AccountsPage extends MyPage {
           backgroundColor: Colors.red.shade400,
         ),
       );
-    } finally {
-      refreshController.refreshCompleted();
-      loadTable();
-      navigator.pop();
     }
   }
 
@@ -279,16 +268,16 @@ class AccountsPage extends MyPage {
                       loaderOverlay.show();
 
                       await deleteItem(
-                        store.getUser()?.userId ?? 0,
+                        store.getLoginData()?.userId ?? 0,
                         account.id,
                         messenger,
                         navigator,
-                        () {
-                          loaderOverlay.hide();
-                          refreshController.requestRefresh();
-                        },
                       );
+
                       loaderOverlay.hide();
+                      navigator.pop(); // Close the popup
+                      navigator.pop(); // Close the bottom sheet
+                      await refreshController.requestRefresh();
                     },
                   ),
                 ],
@@ -310,8 +299,8 @@ class AccountsPage extends MyPage {
           context,
           MaterialPageRoute(
             builder: (context) => AccountsFormPage(
-              onClosed: () {
-                refreshController.requestRefresh();
+              onClosed: () async {
+                await refreshController.requestRefresh();
               },
             ),
           ),

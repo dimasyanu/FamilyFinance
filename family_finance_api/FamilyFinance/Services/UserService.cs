@@ -8,6 +8,8 @@ using FamilyFinance.Models.Responses;
 using FamilyFinance.Models.Responses.ListItems;
 using FamilyFinance.Utils;
 using Microsoft.EntityFrameworkCore;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Png;
 
 namespace FamilyFinance.Services;
 
@@ -136,6 +138,32 @@ public class UserService(AppDbContext dbContext) : BaseService(dbContext), IUser
     }
 
     /// <summary>
+    /// Change the avatar for a user.
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="file"></param>
+    /// <returns></returns>
+    /// <exception cref="EntityNotFoundException"></exception>
+    public async Task<UserDto> ChangeAvatarAsync(int userId, IFormFile file)
+    {
+        var user = await DbContext.Users.FindAsync(userId)
+            ?? throw new EntityNotFoundException($"User with ID {userId} not found.");
+
+        // Store the file to wwwroot/avatars
+        var uploadsDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "avatars");
+        if (!Directory.Exists(uploadsDir)) {
+            Directory.CreateDirectory(uploadsDir);
+        }
+        var newFileName = $"{user.Username}.png";
+        var newFilePath = Path.Combine(uploadsDir, newFileName);
+        using (var image = await Image.LoadAsync(file.OpenReadStream())) {
+            await image.SaveAsync(newFilePath, new PngEncoder());
+        }
+
+        return new UserDto(user);
+    }
+
+    /// <summary>
     /// Update the password for a user.
     /// </summary>
     /// <param name="userId"></param>
@@ -147,7 +175,7 @@ public class UserService(AppDbContext dbContext) : BaseService(dbContext), IUser
     {
         var user = await DbContext.Users.FindAsync(userId)
             ?? throw new EntityNotFoundException($"User with ID {userId} not found.");
-        
+
         user.PasswordHash = PasswordUtil.HashPassword(newPassword);
         user.UpdatedAt = DateTime.Now;
         user.UpdatedBy = currentUserId;

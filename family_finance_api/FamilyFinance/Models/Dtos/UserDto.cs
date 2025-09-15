@@ -8,6 +8,7 @@ public class UserDto
     public string Name { get; set; } = string.Empty;
     public string Username { get; set; } = string.Empty;
     public bool IsActive { get; set; }
+    public string AvatarUrl { get; set; } = string.Empty;
 
     public UserDto()
     {
@@ -19,5 +20,6 @@ public class UserDto
         Name = user.Name;
         Username = user.Username;
         IsActive = user.DeletedAt == null;
+        AvatarUrl = Path.Combine("/avatars/", user.Username + ".png");
     }
 }

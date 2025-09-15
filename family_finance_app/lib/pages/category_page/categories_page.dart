@@ -102,7 +102,6 @@ class CategoriesPage extends MyPage {
         child: Container(
           padding: const EdgeInsets.all(8.0),
           child: PaginatedDataTable(
-            headingRowColor: WidgetStateProperty.all(Colors.grey.shade200),
             columns: columns,
             showEmptyRows: false,
             source: CategoriesTableSource(
@@ -162,7 +161,7 @@ class CategoriesPage extends MyPage {
 
   /// Load the categories table or any necessary data.
   Future<void> loadTable(BuildContext context) async {
-    final user = store.getUser();
+    final user = store.getLoginData();
     if (user == null) throw Exception('User not logged in');
     try {
       final response = await api.getCategories(
@@ -266,7 +265,7 @@ class CategoriesPage extends MyPage {
                       loaderOverlay.show();
 
                       await deleteItem(
-                        store.getUser()?.userId ?? 0,
+                        store.getLoginData()?.userId ?? 0,
                         category.id,
                         messenger,
                         navigator,

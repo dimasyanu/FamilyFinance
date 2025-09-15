@@ -4,13 +4,15 @@ abstract class MyPage {
   late final AppBar appBar;
   final String route;
   final String title;
+  late final ThemeData? theme;
   bool _isMounted = false;
   late void Function(VoidCallback) _setState;
 
   MyPage(BuildContext context, {required this.route, required this.title}) {
+    theme = Theme.of(context);
     appBar = AppBar(
       title: appBarTitle(context) ?? Text(title),
-      backgroundColor: appBarBackgroundColor() ?? Colors.white,
+      backgroundColor: appBarBackgroundColor() ?? theme!.colorScheme.surface,
     );
   }
 
@@ -23,7 +25,9 @@ abstract class MyPage {
   FloatingActionButtonLocation? floatingActionButtonLocation(
     BuildContext context,
   ) => null;
-  void dispose() {}
+  void dispose() {
+    _isMounted = false;
+  }
 
   Widget body(BuildContext context) {
     if (!_isMounted) {
@@ -40,6 +44,7 @@ abstract class MyPage {
   }
 
   void setState(VoidCallback fn) {
+    if (!_isMounted) return;
     _setState(fn);
   }
 }

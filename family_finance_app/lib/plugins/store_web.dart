@@ -6,8 +6,8 @@ import 'package:family_financial_app/constants/storage_key.dart';
 import 'package:family_financial_app/models/responses/login_response.dart';
 import 'package:localstorage/localstorage.dart';
 
-class WebStore extends Store {
-  WebStore() : super(null);
+class StoreWeb extends Store {
+  StoreWeb() : super(null);
 
   @override
   String get loginTitle => 'Web Family Financial';
@@ -15,7 +15,7 @@ class WebStore extends Store {
   @override
   Future<void> delete(String key) async {
     await Future.sync(() {
-      localStorage.removeItem(StorageKey.user);
+      localStorage.removeItem(StorageKey.login);
     });
   }
 
@@ -27,6 +27,13 @@ class WebStore extends Store {
   }
 
   @override
+  Future<String?> getString(String key) async {
+    final value = localStorage.getItem(key);
+    if (value == null) return null;
+    return await Future.value(value);
+  }
+
+  @override
   Future<void> set<T extends Serializable>(String key, T value) async {
     await Future.sync(() {
       localStorage.setItem(key, jsonEncode(value.toJson()));
@@ -34,16 +41,23 @@ class WebStore extends Store {
   }
 
   @override
-  LoginResponse? getUser() {
-    LoginResponse? user = super.getUser();
-    if (user == null) {
-      user = LoginResponse.fromJson(
-        jsonDecode(localStorage.getItem(StorageKey.user) ?? '{}')
-            as Map<String, dynamic>,
-      );
-      super.user = user;
-      return user;
-    }
+  Future<void> setString(String key, String value) async {
+    await Future.sync(() {
+      localStorage.setItem(key, value);
+    });
+  }
+
+  @override
+  LoginResponse? getLoginData() {
+    LoginResponse? user = super.getLoginData();
+    if (user != null) return user;
+
+    final loginDataStr = localStorage.getItem(StorageKey.login);
+    if (loginDataStr == null) return null;
+    user = LoginResponse.fromJson(
+      jsonDecode(loginDataStr) as Map<String, dynamic>,
+    );
+    super.loginData = user;
     return user;
   }
 }

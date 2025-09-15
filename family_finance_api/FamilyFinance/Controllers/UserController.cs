@@ -57,6 +57,19 @@ public class UserController(IUserService service) : BaseController
         return Ok(item, "User updated successfully.");
     }
 
+    [HttpPatch]
+    [Route("{userId:int}/ChangeAvatar")]
+    public async Task<ActionResult<Response<UserDto>>> ChangeAvatar(int userId, [FromBody] ChangeUserAvatarRequest request)
+    {
+        if (request == null) return BadRequest("Request cannot be null.");
+        if (userId != CurrentUser.Id) return Forbid("You can only change your own avatar.");
+        if (request.File == null) return BadRequest("File is required.");
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        var item = await _service.ChangeAvatarAsync(userId, request.File);
+        return Ok(item, "User avatar updated successfully.");
+    }
+
     [HttpDelete]
     [Route("{userId:int}")]
     public async Task<ActionResult> Delete(int userId)

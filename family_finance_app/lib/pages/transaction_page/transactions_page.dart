@@ -61,7 +61,7 @@ class TransactionsPage extends MyPage {
 
   @override
   Color? appBarBackgroundColor() {
-    return Colors.white;
+    return theme!.colorScheme.surfaceDim;
   }
 
   @override
@@ -120,6 +120,7 @@ class TransactionsPage extends MyPage {
         bottomNavigationBar: TransactionsBottomNavigationBar(
           tabController: _tabController!,
           foregroundColor: appBarForegroundColor()!,
+          backgroundColor: theme!.colorScheme.surface,
         ).getNavigationBar(context),
       ),
     );

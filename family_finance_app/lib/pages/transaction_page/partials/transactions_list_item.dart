@@ -18,13 +18,14 @@ class TransactionsListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
       child: Card(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12.0),
         ),
-        color: Colors.white,
+        color: theme.colorScheme.surfaceDim,
         shadowColor: Colors.grey.withValues(alpha: .25),
         child: InkWell(
           borderRadius: BorderRadius.circular(12.0),

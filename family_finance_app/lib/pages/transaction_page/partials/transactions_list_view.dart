@@ -51,13 +51,14 @@ class _TransactionsListViewState extends State<TransactionsListView> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return SmartRefresher(
       controller: refreshController,
-      onRefresh: () {
-        loadItems();
+      onRefresh: () async {
+        await loadItems();
       },
-      header: const WaterDropMaterialHeader(
-        backgroundColor: Colors.white,
+      header: WaterDropMaterialHeader(
+        backgroundColor: theme.colorScheme.surfaceDim,
         color: Colors.blue,
         distance: 80.0,
       ),
@@ -97,26 +98,24 @@ class _TransactionsListViewState extends State<TransactionsListView> {
     );
   }
 
-  void loadItems() {
+  Future<void> loadItems() async {
     final api = ApiTransactions(context);
     final messager = ScaffoldMessenger.of(context);
-    api
-        .getTransactions(type: widget.type)
-        .then((response) {
-          setState(() {
-            _transactions.clear();
-            _transactions.addAll(response.data?.items ?? []);
-          });
-        })
-        .catchError((error) {
-          debugPrint('Error loading transactions: $error');
-          messager.showSnackBar(
-            SnackBar(content: Text('Failed to load transactions: $error')),
-          );
-        })
-        .whenComplete(() {
-          refreshController.refreshCompleted();
-        });
+    try {
+      final response = await api.getTransactions(type: widget.type);
+      if (!mounted) return;
+      setState(() {
+        _transactions.clear();
+        _transactions.addAll(response.data?.items ?? []);
+      });
+    } catch (error) {
+      debugPrint('Error loading transactions: $error');
+      messager.showSnackBar(
+        SnackBar(content: Text('Failed to load transactions: $error')),
+      );
+    } finally {
+      refreshController.refreshCompleted();
+    }
   }
 
   void showDetail(ItemTransaction transaction) {
@@ -359,7 +358,7 @@ class _TransactionsListViewState extends State<TransactionsListView> {
                       loaderOverlay.show();
 
                       await deleteItem(
-                        store.getUser()?.userId ?? 0,
+                        store.getLoginData()?.userId ?? 0,
                         transaction.id,
                         messenger,
                         navigator,

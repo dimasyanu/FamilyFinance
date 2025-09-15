@@ -9,6 +9,6 @@ class Api {
   late final String accessToken;
 
   Api(this.context) {
-    accessToken = context?.read<Store>().getUser()?.accessToken ?? '';
+    accessToken = context?.read<Store>().getLoginData()?.accessToken ?? '';
   }
 }

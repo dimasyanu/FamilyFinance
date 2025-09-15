@@ -4,17 +4,17 @@ import 'package:family_financial_app/abstractions/store.dart';
 import 'package:family_financial_app/constants/storage_key.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-class MobileStore extends Store {
+class StoreMobile extends Store {
   final storage = FlutterSecureStorage();
 
-  MobileStore() : super(null);
+  StoreMobile() : super(null);
 
   @override
   String get loginTitle => 'Mobile Family Financial';
 
   @override
   Future<void> delete(String key) async {
-    await storage.delete(key: StorageKey.user);
+    await storage.delete(key: StorageKey.login);
   }
 
   @override
@@ -29,8 +29,20 @@ class MobileStore extends Store {
   }
 
   @override
+  Future<String?> getString(String key) async {
+    final value = await storage.read(key: key);
+    if (value == null) return null;
+    return value;
+  }
+
+  @override
   Future<void> set<T extends Serializable>(String key, T value) async {
     final jsonData = jsonEncode(value.toJson());
     await storage.write(key: key, value: jsonData);
+  }
+
+  @override
+  Future<void> setString(String key, String value) async {
+    await storage.write(key: key, value: value);
   }
 }

@@ -2,16 +2,18 @@ import 'package:flutter/material.dart';
 
 class TransactionsBottomNavigationBar {
   final Color foregroundColor;
+  final Color backgroundColor;
   final TabController tabController;
 
   TransactionsBottomNavigationBar({
     required this.tabController,
     required this.foregroundColor,
+    required this.backgroundColor,
   });
 
   Widget? getNavigationBar(BuildContext context) {
     return Container(
-      color: Colors.white,
+      color: backgroundColor,
       child: TabBar(
         controller: tabController,
         tabs: [

@@ -3,6 +3,7 @@ import 'package:family_financial_app/constants/storage_key.dart';
 import 'package:family_financial_app/models/responses/login_response.dart';
 import 'package:family_financial_app/models/responses/res.dart';
 import 'package:family_financial_app/app.dart';
+import 'package:family_financial_app/plugins/api_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
@@ -17,7 +18,9 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   final username = ValueNotifier('');
   final password = ValueNotifier('');
+  bool loading = true;
   bool showPassword = false;
+  ApiAuth? apiAuth;
 
   late final ValueNotifier<bool> isFormValid = ValueNotifier(
     username.value.isNotEmpty && password.value.isNotEmpty,
@@ -27,8 +30,13 @@ class _LoginState extends State<Login> {
   void initState() {
     super.initState();
 
+    apiAuth = ApiAuth(context);
     username.addListener(_updateFormValid);
     password.addListener(_updateFormValid);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await checkUser(context);
+    });
   }
 
   void _updateFormValid() {
@@ -49,9 +57,10 @@ class _LoginState extends State<Login> {
     final store = context.read<Store>();
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
+    setState(() => loading = true);
 
     try {
-      final userData = await store.get(StorageKey.user);
+      final userData = await store.get(StorageKey.login);
       if (userData == null || userData.isEmpty) return false;
 
       final loginResponse = LoginResponse.fromJson(userData);
@@ -60,6 +69,10 @@ class _LoginState extends State<Login> {
       if (loginResponse.username.isNotEmpty &&
           loginResponse.accessToken.isNotEmpty &&
           loginResponse.expiration.isAfter(now)) {
+        if (!await fetchUserData(store, messenger, loginResponse.accessToken)) {
+          return false;
+        }
+
         navigator.pushReplacement(
           MaterialPageRoute(builder: (context) => const App()),
         );
@@ -69,10 +82,39 @@ class _LoginState extends State<Login> {
     } catch (e) {
       debugPrint('Error reading user data: $e');
       messenger.showSnackBar(
-        SnackBar(content: Text('Error reading user data')),
+        SnackBar(
+          content: Text('Error reading user data'),
+          action: SnackBarAction(
+            label: 'Retry',
+            onPressed: () async {
+              await checkUser(context);
+            },
+          ),
+        ),
+      );
+      return false;
+    } finally {
+      setState(() {
+        loading = false;
+      });
+    }
+  }
+
+  Future<bool> fetchUserData(
+    Store store,
+    ScaffoldMessengerState messenger,
+    String accessToken,
+  ) async {
+    final user = await apiAuth?.userInfo(accessToken);
+
+    if (user == null || user.hasError || !user.success || user.data == null) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(user?.message ?? 'Failed to load user data')),
       );
       return false;
     }
+    store.set(StorageKey.user, user.data!);
+    return true;
   }
 
   void login(BuildContext context) {
@@ -113,7 +155,6 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
-    showPassword = false;
     final theme = Theme.of(context);
     final loginBtnStyle = ElevatedButton.styleFrom(
       backgroundColor: theme.colorScheme.primary,
@@ -124,26 +165,21 @@ class _LoginState extends State<Login> {
       ),
     );
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('images/drawing.png'),
-            fit: BoxFit.fitWidth,
-            alignment: AlignmentGeometry.topCenter,
-          ),
-        ),
-        child: FutureBuilder<bool>(
-          future: checkUser(context),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting ||
-                snapshot.connectionState != ConnectionState.done) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (snapshot.data ?? false) {
-              return const Center(child: CircularProgressIndicator());
-            }
+      body: Builder(
+        builder: (context) {
+          if (loading) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-            return LoaderOverlay(
+          return LoaderOverlay(
+            child: Container(
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('images/drawing.png'),
+                  fit: BoxFit.fitWidth,
+                  alignment: AlignmentGeometry.topCenter,
+                ),
+              ),
               child: Form(
                 child: Container(
                   alignment: Alignment.bottomLeft,
@@ -282,7 +318,9 @@ class _LoginState extends State<Login> {
                                 color: Colors.grey[500],
                               ),
                               onPressed: () {
-                                showPassword = !showPassword;
+                                setState(() {
+                                  showPassword = !showPassword;
+                                });
                               },
                             ),
                             suffixIconConstraints: BoxConstraints(
@@ -340,9 +378,9 @@ class _LoginState extends State<Login> {
                   ),
                 ),
               ),
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
   }

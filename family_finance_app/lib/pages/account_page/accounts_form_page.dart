@@ -7,10 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
+import 'package:pull_to_refresh_flutter3/pull_to_refresh_flutter3.dart';
 
 class AccountsFormPage extends StatefulWidget {
   final int? itemId;
-  final VoidCallback? onClosed;
+  final VoidFutureCallBack? onClosed;
   get isNew => itemId == null || itemId! <= 0;
 
   const AccountsFormPage({this.itemId, this.onClosed, super.key});
@@ -52,40 +53,42 @@ class _AccountsFormPageState extends State<AccountsFormPage> {
     final loaderOverlay = context.loaderOverlay;
     final messager = ScaffoldMessenger.of(context);
     loaderOverlay.show();
-    try {
-      final response = await api.getAccountById(
-        userId: store.getUser()?.userId ?? 0,
-        accountId: widget.itemId!,
-      );
-
-      if (response.hasError) {
-        throw Exception('Failed to load account: ${response.message}');
-      }
-      setState(() {
-        _accountName = response.data?.name ?? '';
-        _description = response.data?.description ?? '';
-        _accountNameController.text = _accountName;
-        _descriptionController.text = _description;
-        _colorController.text = response.data?.color ?? '';
-        _pickerColor = Utils.hexStringToColor(_colorController.text);
-      });
-    } catch (error) {
-      messager.showSnackBar(
-        SnackBar(
-          content: Text('Error loading account: $error'),
-          backgroundColor: Colors.red.shade400,
-        ),
-      );
-    } finally {
-      loaderOverlay.hide();
-    }
+    api
+        .getAccountById(
+          userId: store.getLoginData()?.userId ?? 0,
+          accountId: widget.itemId!,
+        )
+        .then((response) {
+          if (response.hasError) {
+            throw Exception('Failed to load account: ${response.message}');
+          }
+          setState(() {
+            _accountName = response.data?.name ?? '';
+            _description = response.data?.description ?? '';
+            _accountNameController.text = _accountName;
+            _descriptionController.text = _description;
+            _colorController.text = response.data?.color ?? '';
+            _pickerColor = Utils.hexStringToColor(_colorController.text);
+          });
+        })
+        .catchError((error) {
+          messager.showSnackBar(
+            SnackBar(
+              content: Text('Error loading account: $error'),
+              backgroundColor: Colors.red.shade400,
+            ),
+          );
+        })
+        .whenComplete(() {
+          loaderOverlay.hide();
+        });
   }
 
   Future<void> loadFormData(BuildContext context) async {
     if (!widget.isNew && !_isLoaded) {
-      await loadAccountData(context);
-      _isLoaded = true;
-      return;
+      loadAccountData(context).whenComplete(() {
+        _isLoaded = true;
+      });
     }
   }
 
@@ -154,32 +157,31 @@ class _AccountsFormPageState extends State<AccountsFormPage> {
                       ),
                       minimumSize: Size(double.infinity, 48),
                     ),
-                    onPressed: () {
+                    onPressed: () async {
                       final loaderOverlay = context.loaderOverlay;
                       if (_formKey.currentState!.validate()) {
                         loaderOverlay.show();
-                        save(context)
-                            .then((_) {
-                              messager.showSnackBar(
-                                SnackBar(
-                                  content: Text('Account saved successfully!'),
-                                  backgroundColor: Colors.green.shade400,
-                                ),
-                              );
+                        try {
+                          await save(context);
+                          messager.showSnackBar(
+                            SnackBar(
+                              content: Text('Account saved successfully!'),
+                              backgroundColor: Colors.green.shade400,
+                            ),
+                          );
 
-                              navigator.pop();
-                              onClosed();
-                            })
-                            .catchError((error) {
-                              messager.showSnackBar(
-                                SnackBar(
-                                  content: Text('Error saving account: $error'),
-                                  backgroundColor: Colors.red.shade400,
-                                ),
-                              );
-                            })
-                            .whenComplete(() => loaderOverlay.hide());
-
+                          navigator.pop();
+                        } catch (error) {
+                          messager.showSnackBar(
+                            SnackBar(
+                              content: Text('Error saving account: $error'),
+                              backgroundColor: Colors.red.shade400,
+                            ),
+                          );
+                        } finally {
+                          loaderOverlay.hide();
+                          onClosed();
+                        }
                         return;
                       }
 
@@ -213,7 +215,7 @@ class _AccountsFormPageState extends State<AccountsFormPage> {
     );
 
     await api.saveAccount(
-      userId: store.getUser()?.userId ?? 0,
+      userId: store.getLoginData()?.userId ?? 0,
       payload: payload,
     );
   }

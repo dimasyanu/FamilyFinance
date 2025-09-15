@@ -64,22 +64,6 @@ dev_dependencies:
 # The following section is specific to Flutter packages.
 flutter:
   fonts:
-    - family: MarlinSoft
-      fonts:
-        - asset: assets/fonts/marlin-soft-005-regular.otf
-        - asset: assets/fonts/marlin-soft-001-thin.otf
-          weight: 100
-        - asset: assets/fonts/marlin-soft-002-extra-light.otf
-          weight: 200
-        - asset: assets/fonts/marlin-soft-003-light.otf
-          weight: 300
-        - asset: assets/fonts/marlin-soft-006-medium.otf
-          weight: 500
-        - asset: assets/fonts/marlin-soft-007-bold.otf
-          weight: 600
-        - asset: assets/fonts/marlin-soft-008-extra-bold.otf
-          weight: 700
-    
     - family: MarlinSoftBasic
       fonts:
         - asset: assets/fonts/MarlinSoftBasic-Regular.otf
@@ -98,6 +82,7 @@ flutter:
   assets:
     - .env
     - assets/images/drawing.png
+    - assets/images/cat.png
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

@@ -1,6 +1,8 @@
-﻿using FamilyFinance.Models.Requests;
+﻿using FamilyFinance.Models.Dtos;
+using FamilyFinance.Models.Requests;
 using FamilyFinance.Models.Responses;
 using FamilyFinance.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FamilyFinance.Controllers;
@@ -16,6 +18,16 @@ public class AuthController(AuthService authService) : BaseController
     public async Task<ActionResult<Response<LoginResponse>>> Login(LoginRequest login)
     {
         var result = await _authService.Authenticate(login);
+        if (result is null) return Unauthorized();
+        return Ok(result);
+    }
+
+    [Authorize]
+    [HttpGet]
+    [Route("[action]")]
+    public async Task<ActionResult<Response<UserDto>>> UserInfo()
+    {
+        var result = await GetCurrentUser();
         if (result is null) return Unauthorized();
         return Ok(result);
     }

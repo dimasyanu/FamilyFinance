@@ -123,7 +123,7 @@ class _TransactionsFormPageState extends State<TransactionsFormPage> {
     final categoryApi = ApiCategory(context);
     final accountsApi = ApiAccounts(context);
     final store = context.read<Store>();
-    final user = store.user!.userId;
+    final user = store.loginData!.userId;
 
     final messager = ScaffoldMessenger.of(context);
     final loaderOverlay = context.loaderOverlay;
