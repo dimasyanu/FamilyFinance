@@ -9,17 +9,17 @@ class OverviewPage extends MyPage {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: <Widget>[MonthExpansesBarChart()],
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[MonthExpansesBarChart()],
+      ),
     );
   }
 
   @override
-  Future<void> onMounted(BuildContext context) async {
-    // Perform any additional setup or state initialization here
-    debugPrint('OverviewPage mounted');
-  }
+  Future<void> onMounted(BuildContext context) async {}
 
   @override
   void dispose() {
