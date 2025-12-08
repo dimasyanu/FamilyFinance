@@ -1,0 +1,35 @@
+package models
+
+import (
+	"time"
+
+	"github.com/dimasyanu/family-finance-go/internal/users/entities"
+	"github.com/dimasyanu/family-finance-go/internal/users/valueobjects"
+)
+
+type User struct {
+	Id           UserId                    `json:id`
+	Name         string                    `json:name`
+	Username     string                    `json:username`
+	EmailAddress valueobjects.EmailAddress `json:email_address`
+	CreatedAt    time.Time                 `json:created_at`
+	CreatedBy    string                    `json:created_by`
+	UpdatedAt    time.Time                 `json:updated_at`
+	UpdatedBy    string                    `json:updated_by`
+	IsDeleted    bool                      `json:is_deleted`
+	Roles        *[]models.Roles           `json:roles`
+}
+
+func UserFromEntity(entity *entities.UserEntity) *User {
+	return &User{
+		Id:           entity.Id,
+		Name:         entity.Name,
+		Username:     entity.Username,
+		EmailAddress: entity.EmailAddress,
+		CreatedAt:    entity.CreatedAt,
+		CreatedBy:    entity.CreatedBy,
+		UpdatedAt:    entity.UpdatedAt,
+		UpdatedBy:    entity.UpdatedBy,
+		IsDeleted:    entity.DeletedAt != nil,
+	}
+}

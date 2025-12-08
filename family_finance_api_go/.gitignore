@@ -1,0 +1,6 @@
+/app
+/app.db
+main
+.env*
+
+!.env.example
