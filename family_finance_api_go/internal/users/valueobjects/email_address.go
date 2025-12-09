@@ -14,5 +14,6 @@ func (emailAddress *EmailAddress) Validate() bool {
 }
 
 func NewEmailAddress(str string) EmailAddress {
-	return str
+	email := EmailAddress(str)
+	return email
 }
