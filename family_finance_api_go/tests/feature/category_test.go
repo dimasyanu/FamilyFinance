@@ -133,7 +133,7 @@ func (s *CategoryTestSuite) TestCategoryModification() {
 	var updateRes r.Res[response.Creation[uint]]
 	err = json.Unmarshal(rec.Body.Bytes(), &updateRes)
 	assert.NoError(s.t, err)
-	assert.Equal(s.t, cat.ID, uint(updateRes.Data.ID))
+	assert.Equal(s.t, cat.ID, uint(updateRes.Data.Id))
 
 	getReq, err := http.NewRequest(http.MethodGet, "/api/categories/"+strconv.FormatUint(uint64(cat.ID), 10), nil)
 	assert.NoError(s.t, err)

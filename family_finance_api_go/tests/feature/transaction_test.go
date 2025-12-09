@@ -111,7 +111,7 @@ func (s *TransactionTestSuite) TestTransactionCreation() {
 
 	dbItem := &models.Transaction{}
 	db.Model(&models.Transaction{}).First(dbItem)
-	assert.Equal(s.t, dbItem.ID, result.Data.ID)
+	assert.Equal(s.t, dbItem.ID, result.Data.Id)
 }
 
 func TestTransaction(t *testing.T) {

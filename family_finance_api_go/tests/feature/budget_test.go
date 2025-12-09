@@ -76,7 +76,7 @@ func (s *BudgetTestSuite) TestBudgetCreation() {
 	var resp r.Res[response.Creation[uint]]
 	err = json.Unmarshal(rec.Body.Bytes(), &resp)
 	assert.NoError(s.t, err)
-	assert.Greater(s.t, resp.Data.ID, uint(0))
+	assert.Greater(s.t, resp.Data.Id, uint(0))
 }
 
 func (s *BudgetTestSuite) TestBudgetRetrieval() {
@@ -146,7 +146,7 @@ func (s *BudgetTestSuite) TestBudgetUpdate() {
 	var resp r.Res[response.Creation[uint]]
 	err = json.Unmarshal(rec.Body.Bytes(), &resp)
 	assert.NoError(s.t, err)
-	assert.Equal(s.t, uint(budget.ID), resp.Data.ID)
+	assert.Equal(s.t, uint(budget.ID), resp.Data.Id)
 
 	// Verify update in database
 	var updatedBudget models.Budget

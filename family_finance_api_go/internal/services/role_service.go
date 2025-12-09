@@ -1,12 +1,11 @@
 package services
 
 import (
-	"fmt"
-
-	"github.com/dimasyanu/family-finance-go/internal/models"
 	"github.com/dimasyanu/family-finance-go/internal/models/request/filter"
 	"github.com/dimasyanu/family-finance-go/internal/models/response"
-	"github.com/dimasyanu/family-finance-go/internal/repositories"
+	"github.com/dimasyanu/family-finance-go/internal/roles/repositories"
+
+	"github.com/dimasyanu/family-finance-go/internal/roles/models"
 )
 
 type RoleService struct {
@@ -19,10 +18,6 @@ func NewRoleService(repo *repositories.RoleRepository) *RoleService {
 
 // Creates default roles if they do not already exist
 func (rs *RoleService) CreateDefaultRoles() {
-	for _, roleName := range models.DefaultRoles {
-		rs.repo.CreateIfNotExists(roleName)
-		fmt.Printf("Creating role: %s\n", roleName)
-	}
 }
 
 // Lists all roles without any filtering
@@ -33,7 +28,7 @@ func (rs *RoleService) ListAllRoles() (*[]models.Role, error) {
 // Lists roles based on the provided filter with pagination
 func (rs *RoleService) ListRoles(filter *filter.RoleListFilter) (*response.Paginated[models.Role], error) {
 	items, total := rs.repo.List(filter)
-	return &response.Paginated[models.Role]{Items: items, Total: total}, nil
+	return &models.Paginated[models.Role]{Items: items, Total: total}, nil
 }
 
 // Retrieves a role by its ID

@@ -30,7 +30,7 @@ func (suite *AuthTestSuite) SetupTest() {
 	os.Setenv("DB_ENGINE", "inmemory")
 	os.Setenv("JWT_SECRET", "super_secret_jwt_key_for_testing_purposes_only")
 
-	suite.handler, suite.services = handler.NewHandler()
+	suite.handler, suite.services = handler.InitializeServices()
 	suite.t = suite.T()
 }
 

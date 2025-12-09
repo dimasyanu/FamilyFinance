@@ -34,7 +34,7 @@ func (s *BaseFeatureTestSuite) SetupTest() {
 	os.Setenv("DB_ENGINE", "inmemory")
 	os.Setenv("JWT_SECRET", "super_secret_jwt_key_for_testing_purposes_only")
 
-	s.handler, s.services = handler.NewHandler()
+	s.handler, s.services = handler.InitializeServices()
 	s.t = s.T()
 
 	roleService := (*s.services)[services.RoleServiceKey].(*services.RoleService)

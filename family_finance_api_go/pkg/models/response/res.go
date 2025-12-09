@@ -1,9 +1,5 @@
 package response
 
-import (
-	"github.com/dimasyanu/family-finance-go/internal/models/response"
-)
-
 // Standard response structure
 type Res[T any] struct {
 	Success bool   `json:"success" default:"true"`
@@ -35,12 +31,12 @@ func OkWithData(data any, message *string) *Res[any] {
 }
 
 // Standard response for resource creation
-func Created[T any](id T) *Res[response.Creation[T]] {
-	return &Res[response.Creation[T]]{
+func Created[T any](id T) *Res[Creation[T]] {
+	return &Res[Creation[T]]{
 		Success: true,
 		Message: "Resource created successfully",
-		Data: &response.Creation[T]{
-			ID: id,
+		Data: &Creation[T]{
+			Id: id,
 		},
 	}
 }

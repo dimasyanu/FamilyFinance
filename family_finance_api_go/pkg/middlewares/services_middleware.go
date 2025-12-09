@@ -3,11 +3,12 @@ package middlewares
 import (
 	"context"
 
+	"github.com/dimasyanu/family-finance-go/internal/common/constants"
 	"github.com/dimasyanu/family-finance-go/internal/services"
 	"github.com/gin-gonic/gin"
 )
 
-func ServicesMiddleware(getServices func() map[services.ServiceKey]any) gin.HandlerFunc {
+func ServicesMiddleware(getServices func() map[constants.ServiceKeys]any) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Initialize and attach s to the context here if needed
 		s := getServices()

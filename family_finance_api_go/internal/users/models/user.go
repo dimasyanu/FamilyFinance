@@ -21,7 +21,7 @@ type User struct {
 	Roles        *[]roleModels.Role        `json:"roles,omitempty"`
 }
 
-func UserFromEntity(entity *entities.UserEntity) *User {
+func FromEntity(entity *entities.UserEntity) *User {
 	return &User{
 		Id:           entity.Id,
 		Name:         entity.Name,
@@ -31,6 +31,15 @@ func UserFromEntity(entity *entities.UserEntity) *User {
 		CreatedBy:    entity.CreatedBy,
 		UpdatedAt:    entity.UpdatedAt,
 		UpdatedBy:    entity.UpdatedBy,
-		IsDeleted:    entity.DeletedAt != nil,
+		IsDeleted:    !entity.DeletedAt.Valid,
 	}
+}
+
+func FromEntities(entities *[]entities.UserEntity) (*[]User, error) {
+	users := make([]User, len(*entities))
+	for i, entity := range *entities {
+		user := FromEntity(&entity)
+		users[i] = *user
+	}
+	return &users, nil
 }

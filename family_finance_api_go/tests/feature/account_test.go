@@ -66,7 +66,7 @@ func (s *AccountTestSuite) TestAccountCreation() {
 	var creationResp r.Res[response.Creation[uint]]
 	err = json.Unmarshal(rec.Body.Bytes(), &creationResp)
 	assert.NoError(s.t, err)
-	assert.Greater(s.t, creationResp.Data.ID, uint(0))
+	assert.Greater(s.t, creationResp.Data.Id, uint(0))
 }
 
 func (s *AccountTestSuite) TestAccountRetrieval() {
@@ -118,7 +118,7 @@ func (s *AccountTestSuite) TestAccountUpdate() {
 	var updateResp r.Res[response.Creation[uint]]
 	err = json.Unmarshal(rec.Body.Bytes(), &updateResp)
 	assert.NoError(s.t, err)
-	assert.Equal(s.t, uint(account.ID), updateResp.Data.ID)
+	assert.Equal(s.t, uint(account.ID), updateResp.Data.Id)
 }
 
 func (s *AccountTestSuite) TestAccountDeletion() {

@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type Account struct {
+type AccountEntity struct {
 	Name        string  `gorm:"column:name;type:varchar(100);not null"`
 	Description string  `gorm:"column:description;type:text"`
 	Color       string  `gorm:"column:color;type:varchar(20)"`
@@ -23,8 +23,8 @@ type Account struct {
 	gorm.Model
 }
 
-func FromCreateAccountRequest(payload *request.SaveAccountRequest) *Account {
-	return &Account{
+func FromCreateAccountRequest(payload *request.SaveAccountRequest) *AccountEntity {
+	return &AccountEntity{
 		UserID:      payload.UserID,
 		Name:        payload.Name,
 		Description: payload.Description,

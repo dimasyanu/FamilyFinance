@@ -4,9 +4,10 @@ import (
 	"os"
 	"testing"
 
+	"github.com/dimasyanu/family-finance-go/internal/common/constants"
 	"github.com/dimasyanu/family-finance-go/internal/handler"
-	"github.com/dimasyanu/family-finance-go/internal/models"
 	"github.com/dimasyanu/family-finance-go/internal/models/request/filter"
+	"github.com/dimasyanu/family-finance-go/internal/roles/models"
 	"github.com/dimasyanu/family-finance-go/internal/services"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -18,7 +19,7 @@ type RoleUnitTestSuite struct {
 	suite.Suite
 	handler  *gin.Engine
 	t        *testing.T
-	services *map[services.ServiceKey]any
+	services *map[constants.ServiceKeys]any
 }
 
 func (s *RoleUnitTestSuite) SetupTest() {
@@ -26,7 +27,7 @@ func (s *RoleUnitTestSuite) SetupTest() {
 	os.Setenv("DB_ENGINE", "inmemory")
 	os.Setenv("JWT_SECRET", "super_secret_jwt_key_for_testing_purposes_only")
 
-	s.handler, s.services = handler.NewHandler()
+	s.handler, s.services = handler.InitializeServices()
 	s.t = s.T()
 }
 
@@ -36,7 +37,7 @@ func (s *RoleUnitTestSuite) TearDownTest() {
 	os.Unsetenv("JWT_SECRET")
 
 	// Clean up database
-	db := (*s.services)[services.DbKey].(*gorm.DB)
+	db := (*s.services)[constants.DbKey].(*gorm.DB)
 
 	db.Exec("DELETE FROM users;")
 	db.Exec("DELETE FROM roles;")
@@ -49,7 +50,7 @@ func (s *RoleUnitTestSuite) TearDownTest() {
 }
 
 func (s *RoleUnitTestSuite) TestListRoles() {
-	roleService := (*s.services)[services.RoleServiceKey].(*services.RoleService)
+	roleService := (*s.services)[constants.RoleRepositoryKey].(*services.RoleService)
 
 	roles, err := roleService.ListRoles(nil)
 	assert.NoError(s.t, err)
@@ -79,7 +80,7 @@ func (s *RoleUnitTestSuite) TestListRoles() {
 }
 
 func (s *RoleUnitTestSuite) TestRoleCreation() {
-	roleService := (*s.services)[services.RoleServiceKey].(*services.RoleService)
+	roleService := (*s.services)[constants.RoleRepositoryKey].(*services.RoleService)
 
 	roles, err := roleService.ListAllRoles()
 	assert.NoError(s.t, err)
@@ -99,7 +100,7 @@ func (s *RoleUnitTestSuite) TestRoleCreation() {
 }
 
 func (s *RoleUnitTestSuite) TestRoleUpdateAndDelete() {
-	roleService := (*s.services)[services.RoleServiceKey].(*services.RoleService)
+	roleService := (*s.services)[constants.RoleRepositoryKey].(*services.RoleService)
 
 	newRole := &models.Role{Name: "new-role"}
 	err := roleService.CreateRole(newRole)

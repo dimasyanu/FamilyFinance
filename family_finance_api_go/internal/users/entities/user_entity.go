@@ -1,6 +1,7 @@
 package entities
 
 import (
+	commonModels "github.com/dimasyanu/family-finance-go/internal/common/models"
 	"github.com/dimasyanu/family-finance-go/internal/models/request"
 	roleEntities "github.com/dimasyanu/family-finance-go/internal/roles/entities"
 	userVobj "github.com/dimasyanu/family-finance-go/internal/users/valueobjects"
@@ -15,6 +16,9 @@ type UserEntity struct {
 	PasswordHash string                `gorm:"column:password_hash;type:varchar(255);not null" json:"-"`
 
 	Roles []*roleEntities.RoleEntity `gorm:"many2many:user_roles;"`
+
+	commonModels.Timestamp
+	commonModels.SoftDelete
 }
 
 func UserFromCreateRequest(req *request.CreateUserRequest) (*UserEntity, error) {

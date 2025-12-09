@@ -81,10 +81,10 @@ func (s *UserTestSuite) TestUserCreation() {
 	var createdRes r.Res[response.Creation[uint]]
 	err = json.Unmarshal(rec.Body.Bytes(), &createdRes)
 	assert.NoError(s.t, err)
-	assert.GreaterOrEqual(s.t, createdRes.Data.ID, uint(2))
+	assert.GreaterOrEqual(s.t, createdRes.Data.Id, uint(2))
 
 	// Get the new user
-	getUser, err := http.NewRequest(http.MethodGet, "/api/users/"+strconv.Itoa(int(createdRes.Data.ID)), nil)
+	getUser, err := http.NewRequest(http.MethodGet, "/api/users/"+strconv.Itoa(int(createdRes.Data.Id)), nil)
 	assert.NoError(s.t, err)
 	getUser.Header.Set("Content-Type", "application/json")
 	getUser.Header.Add("Authorization", "Bearer "+s.accessToken)
