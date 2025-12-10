@@ -1,5 +1,5 @@
 package contracts
 
-type IRequestHandler[TRequest IRequest[IMediatorResult], IMediatorResult any] interface {
-	Handle(request TRequest) (IMediatorResult, error)
+type IRequestHandler[TResult any] interface {
+	Handle() (TResult, error)
 }

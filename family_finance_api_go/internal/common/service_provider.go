@@ -60,11 +60,9 @@ func SeedDatabase(svc *map[constants.ServiceKeys]any) {
 	}
 }
 
-func GetServices(db *gorm.DB) map[constants.ServiceKeys]any {
-	return map[constants.ServiceKeys]any{
+func GetServices(db *gorm.DB) *map[constants.ServiceKeys]any {
+	services := &map[constants.ServiceKeys]any{
 		constants.DbKey: db,
-
-		constants.MediatorServiceKey: tools.NewMediator(),
 
 		constants.AccountRepositoryKey:     accountRepos.NewAccountRepository(db),
 		constants.BudgetRepositoryKey:      budgetRepos.NewBudgetRepository(db),
@@ -73,6 +71,11 @@ func GetServices(db *gorm.DB) map[constants.ServiceKeys]any {
 		constants.TransactionRepositoryKey: transactionRepos.NewTransactionRepository(db),
 		constants.UserRepositoryKey:        userRepos.NewUserRepository(db),
 	}
+	(*services)[constants.MediatorServiceKey] = tools.NewMediator(func(b *tools.MediatorBuilder) {
+		b.UseServiceProviders(services)
+		b.Register()
+	})
+	return services
 }
 
 func InitializeServices(envFile ...string) (*gin.Engine, *map[constants.ServiceKeys]any) {
@@ -100,10 +103,10 @@ func InitializeServices(envFile ...string) (*gin.Engine, *map[constants.ServiceK
 
 	// Initialize routes
 	routes := routes.SetupAPIRoutes(func() map[constants.ServiceKeys]any {
-		return GetServices(db)
+		return *GetServices(db)
 	})
 
 	svc := GetServices(db)
-	SeedDatabase(&svc)
-	return routes, &svc
+	SeedDatabase(svc)
+	return routes, svc
 }

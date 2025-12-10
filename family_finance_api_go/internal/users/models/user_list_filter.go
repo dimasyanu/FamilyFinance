@@ -9,3 +9,12 @@ type UserFilter struct {
 
 	models.ListFilter
 }
+
+func NewUserFilter() *UserFilter {
+	return &UserFilter{
+		ListFilter: models.ListFilter{
+			Limit:  10,
+			Offset: 0,
+		},
+	}
+}

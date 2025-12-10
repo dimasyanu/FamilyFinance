@@ -16,3 +16,7 @@ func NewGetUsersQuery(filter *models.UserFilter, sortingOption *common.SortingOp
 		SortingOption: sortingOption,
 	}
 }
+
+func (q *GetUsersQuery[TResult]) Handle() (TResult, error) {
+
+}

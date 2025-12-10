@@ -5,11 +5,10 @@ import (
 	"strconv"
 
 	"github.com/dimasyanu/family-finance-go/internal/common/constants"
-	commonModels "github.com/dimasyanu/family-finance-go/internal/common/models"
 	"github.com/dimasyanu/family-finance-go/internal/common/tools"
 	"github.com/dimasyanu/family-finance-go/internal/models/request"
 	"github.com/dimasyanu/family-finance-go/internal/services"
-	"github.com/dimasyanu/family-finance-go/internal/users/handlers/queries"
+	queries "github.com/dimasyanu/family-finance-go/internal/users/handlers"
 	"github.com/dimasyanu/family-finance-go/internal/users/models"
 	"github.com/dimasyanu/family-finance-go/pkg/models/response"
 	r "github.com/dimasyanu/family-finance-go/pkg/models/response"
@@ -33,14 +32,11 @@ func (c *UserController) getService(ctx *gin.Context) *services.UserService {
 }
 
 func (uc *UserController) GetUsers(c *gin.Context) {
-	f := &models.UserFilter{
-		ListFilter: commonModels.ListFilter{
-			Limit:  10,
-			Offset: 0,
-		},
-	}
+	// Parse query parameters into filter
+	f := models.NewUserFilter()
 	_ = c.BindQuery(f)
 
+	// Create and send the query via Mediator
 	query := queries.NewGetUsersQuery(f, nil)
 	users, err := uc.Mediator.Send(query)
 	if err != nil {
