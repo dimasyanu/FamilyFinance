@@ -12,7 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupAPIRoutes(servicesFunc func() map[constants.ServiceKeys]any) *gin.Engine {
+func SetupAPIRoutes(servicesFunc func() map[constants.ServiceKey]any) *gin.Engine {
 	services := servicesFunc()
 	var (
 		authController        *controllers.AuthController         = controllers.NewAuthController(&services)

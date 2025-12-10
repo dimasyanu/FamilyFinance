@@ -1,5 +1,8 @@
 package contracts
 
+import "context"
+
 type IRequestHandler[TResult any] interface {
-	Handle() (TResult, error)
+	Init(ctx context.Context) error
+	Handle() (*TResult, error)
 }

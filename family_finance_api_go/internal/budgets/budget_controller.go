@@ -19,7 +19,7 @@ type BudgetController struct {
 	mediator *tools.Mediator
 }
 
-func NewBudgetController(services *map[constants.ServiceKeys]any) *BudgetController {
+func NewBudgetController(services *map[constants.ServiceKey]any) *BudgetController {
 	mediator := (*services)[constants.MediatorServiceKey].(*tools.Mediator)
 	return &BudgetController{
 		mediator: mediator,

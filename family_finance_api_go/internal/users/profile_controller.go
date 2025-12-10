@@ -3,20 +3,17 @@ package users
 import (
 	"net/http"
 
+	"github.com/dimasyanu/family-finance-go/internal/common/abstractions"
 	"github.com/dimasyanu/family-finance-go/internal/common/constants"
-	"github.com/dimasyanu/family-finance-go/internal/common/tools"
 	"github.com/gin-gonic/gin"
 )
 
 type ProfileController struct {
-	mediator *tools.Mediator
+	abstractions.BaseController
 }
 
-func NewProfileController(services *map[constants.ServiceKeys]any) *ProfileController {
-	mediator := (*services)[constants.MediatorServiceKey].(*tools.Mediator)
-	return &ProfileController{
-		mediator: mediator,
-	}
+func NewProfileController(services *map[constants.ServiceKey]any) *ProfileController {
+	return &ProfileController{}
 }
 
 func (c *ProfileController) GetProfile(ctx *gin.Context) {

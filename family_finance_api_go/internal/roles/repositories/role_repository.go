@@ -1,12 +1,24 @@
 package repositories
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/dimasyanu/family-finance-go/internal/roles/entities"
 	"github.com/dimasyanu/family-finance-go/internal/roles/models"
+	"github.com/dimasyanu/family-finance-go/internal/roles/valueobjects"
 	"gorm.io/gorm"
 
 	commonModels "github.com/dimasyanu/family-finance-go/internal/common/models"
+	"github.com/dimasyanu/family-finance-go/internal/common/utils"
 )
+
+var orderFields = []string{
+	"id",
+	"name",
+	"created_at",
+	"updated_at",
+}
 
 type RoleRepository struct {
 	db *gorm.DB
@@ -19,7 +31,7 @@ func NewRoleRepository(db *gorm.DB) *RoleRepository {
 // Lists all roles without any filtering
 func (r *RoleRepository) ListAll() (*[]entities.RoleEntity, error) {
 	roles := &[]entities.RoleEntity{}
-	result := r.db.Find(roles)
+	result := r.db.Order("name asc").Find(roles)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -27,7 +39,7 @@ func (r *RoleRepository) ListAll() (*[]entities.RoleEntity, error) {
 }
 
 // Retrieves roles based on the provided filter with pagination
-func (r *RoleRepository) List(f *models.RoleListFilter) (*[]entities.RoleEntity, int64) {
+func (r *RoleRepository) List(f *models.RoleListFilter, so *commonModels.SortingOption) (*[]entities.RoleEntity, int16) {
 	roles := &[]entities.RoleEntity{}
 	var total int64
 
@@ -48,16 +60,24 @@ func (r *RoleRepository) List(f *models.RoleListFilter) (*[]entities.RoleEntity,
 
 	query.Count(&total)
 
-	result := query.Limit(f.Limit).Offset(f.Offset).Find(roles)
+	so.Field = strings.ToLower(so.Field)
+	if so.Field == "" || !utils.InArray(orderFields, so.Field) {
+		so.Field = "updated_at"
+		so.Direction = "desc"
+	} else if so.Direction == "" {
+		so.Direction = "asc"
+	}
+
+	result := query.Order(fmt.Sprintf("%s %s", so.Field, so.Direction)).Limit(f.Limit).Offset(f.Offset).Find(roles)
 	if result.Error != nil {
 		return &[]entities.RoleEntity{}, 0
 	}
 
-	return roles, total
+	return roles, int16(total)
 }
 
 // Retrieves a role by its ID
-func (r *RoleRepository) GetByID(id int64) (*entities.RoleEntity, error) {
+func (r *RoleRepository) GetByID(id valueobjects.RoleId) (*entities.RoleEntity, error) {
 	var role entities.RoleEntity
 	result := r.db.First(&role, id)
 	if result.Error != nil {

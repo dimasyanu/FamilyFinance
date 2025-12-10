@@ -1,4 +1,4 @@
-package tools
+package utils
 
 import (
 	"reflect"
@@ -9,7 +9,7 @@ import (
 
 type MediatorBuilder struct {
 	handlers map[reflect.Type]contracts.IRequestHandler[any]
-	services *map[constants.ServiceKeys]any
+	services *map[constants.ServiceKey]any
 }
 
 func (b *MediatorBuilder) Register(handlers ...contracts.IRequestHandler[any]) {
@@ -22,7 +22,7 @@ func (b *MediatorBuilder) Register(handlers ...contracts.IRequestHandler[any]) {
 	}
 }
 
-func (b *MediatorBuilder) UseServiceProviders(services *map[constants.ServiceKeys]any) {
+func (b *MediatorBuilder) UseServiceProviders(services *map[constants.ServiceKey]any) {
 	b.services = services
 }
 

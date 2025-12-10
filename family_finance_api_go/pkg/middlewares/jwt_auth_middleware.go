@@ -5,7 +5,9 @@ import (
 	"os"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/dimasyanu/family-finance-go/internal/services"
+	"github.com/dimasyanu/family-finance-go/internal/common/constants"
+	"github.com/dimasyanu/family-finance-go/internal/users/models"
+	"github.com/dimasyanu/family-finance-go/internal/users/repositories"
 	r "github.com/dimasyanu/family-finance-go/pkg/models/response"
 	"github.com/gin-gonic/gin"
 )
@@ -45,12 +47,12 @@ func validateToken(c *gin.Context, token string) error {
 		return err
 	}
 
-	userService := c.Request.Context().Value(services.UserServiceKey).(*services.UserService)
+	userRepo := c.Request.Context().Value(constants.UserRepositoryKey).(*repositories.UserRepository)
 	raw := t.Claims.(jwt.MapClaims)
 
-	// Verify user exists
-	user := userService.GetByUsername(raw["username"].(string))
-	if user == nil {
+	// Verify userEntity exists
+	userEntity, err := userRepo.GetByUsername(raw["username"].(string))
+	if err != nil || userEntity == nil {
 		return jwt.ErrInvalidKey
 	}
 
@@ -61,7 +63,8 @@ func validateToken(c *gin.Context, token string) error {
 	}
 
 	// Set user info in context
-	c.Set("user_id", uint(user.ID))
+	c.Set(constants.AuthorizedUserKey, models.FromEntity(userEntity))
+	c.Set("user_id", uint(userEntity.Id))
 
 	return nil
 }

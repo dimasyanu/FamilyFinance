@@ -28,7 +28,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func SeedDatabase(svc *map[constants.ServiceKeys]any) {
+func SeedDatabase(svc *map[constants.ServiceKey]any) {
 	// Create default roles
 	roleRepo := (*svc)[constants.RoleRepositoryKey].(*roleRepos.RoleRepository)
 	for _, roleName := range roleModels.DefaultRoles {
@@ -60,8 +60,8 @@ func SeedDatabase(svc *map[constants.ServiceKeys]any) {
 	}
 }
 
-func GetServices(db *gorm.DB) *map[constants.ServiceKeys]any {
-	services := &map[constants.ServiceKeys]any{
+func GetServices(db *gorm.DB) *map[constants.ServiceKey]any {
+	services := &map[constants.ServiceKey]any{
 		constants.DbKey: db,
 
 		constants.AccountRepositoryKey:     accountRepos.NewAccountRepository(db),
@@ -78,7 +78,7 @@ func GetServices(db *gorm.DB) *map[constants.ServiceKeys]any {
 	return services
 }
 
-func InitializeServices(envFile ...string) (*gin.Engine, *map[constants.ServiceKeys]any) {
+func InitializeServices(envFile ...string) (*gin.Engine, *map[constants.ServiceKey]any) {
 	// Load configuration
 	config := config.LoadConfig(envFile...)
 
@@ -102,7 +102,7 @@ func InitializeServices(envFile ...string) (*gin.Engine, *map[constants.ServiceK
 	}
 
 	// Initialize routes
-	routes := routes.SetupAPIRoutes(func() map[constants.ServiceKeys]any {
+	routes := routes.SetupAPIRoutes(func() map[constants.ServiceKey]any {
 		return *GetServices(db)
 	})
 

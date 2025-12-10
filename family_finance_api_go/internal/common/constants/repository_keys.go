@@ -1,18 +1,19 @@
 package constants
 
-type ServiceKeys string
+type ServiceKey string
 
 const (
-	DbKey ServiceKeys = "db"
+	DbKey             ServiceKey = "db"
+	AuthorizedUserKey ServiceKey = "authorizedUser"
 
-	HashingServiceKey  ServiceKeys = "hashingService"
-	MediatorServiceKey ServiceKeys = "mediatorService"
+	HashingServiceKey  ServiceKey = "hashingService"
+	MediatorServiceKey ServiceKey = "mediatorService"
 
-	UserRepositoryKey        ServiceKeys = "userRepository"
-	AccountRepositoryKey     ServiceKeys = "accountRepository"
-	BudgetRepositoryKey      ServiceKeys = "budgetRepository"
-	AuthRepositoryKey        ServiceKeys = "authRepository"
-	CategoryRepositoryKey    ServiceKeys = "categoryRepository"
-	RoleRepositoryKey        ServiceKeys = "roleRepository"
-	TransactionRepositoryKey ServiceKeys = "transactionRepository"
+	UserRepositoryKey        ServiceKey = "userRepository"
+	AccountRepositoryKey     ServiceKey = "accountRepository"
+	BudgetRepositoryKey      ServiceKey = "budgetRepository"
+	AuthRepositoryKey        ServiceKey = "authRepository"
+	CategoryRepositoryKey    ServiceKey = "categoryRepository"
+	RoleRepositoryKey        ServiceKey = "roleRepository"
+	TransactionRepositoryKey ServiceKey = "transactionRepository"
 )

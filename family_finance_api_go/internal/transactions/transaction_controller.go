@@ -24,7 +24,7 @@ type TransactionController struct {
 	abs.BaseController
 }
 
-func NewTransactionController(services *map[constants.ServiceKeys]any) *TransactionController {
+func NewTransactionController(services *map[constants.ServiceKey]any) *TransactionController {
 	mediator := (*services)[constants.MediatorServiceKey].(*tools.Mediator)
 	return &TransactionController{
 		mediator: mediator,

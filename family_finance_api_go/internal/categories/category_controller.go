@@ -19,7 +19,7 @@ type CategoryController struct {
 	mediator *tools.Mediator
 }
 
-func NewCategoryController(services *map[constants.ServiceKeys]any) *CategoryController {
+func NewCategoryController(services *map[constants.ServiceKey]any) *CategoryController {
 	mediator := (*services)[constants.MediatorServiceKey].(*tools.Mediator)
 	return &CategoryController{
 		mediator: mediator,

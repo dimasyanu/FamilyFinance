@@ -19,7 +19,7 @@ type RoleUnitTestSuite struct {
 	suite.Suite
 	handler  *gin.Engine
 	t        *testing.T
-	services *map[constants.ServiceKeys]any
+	services *map[constants.ServiceKey]any
 }
 
 func (s *RoleUnitTestSuite) SetupTest() {

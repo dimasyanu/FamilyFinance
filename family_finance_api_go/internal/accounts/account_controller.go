@@ -20,7 +20,7 @@ type AccountController struct {
 	mediator *tools.Mediator
 }
 
-func NewAccountController(services *map[constants.ServiceKeys]any) *AccountController {
+func NewAccountController(services *map[constants.ServiceKey]any) *AccountController {
 	mediator := (*services)[constants.MediatorServiceKey].(*tools.Mediator)
 	return &AccountController{
 		mediator: mediator,

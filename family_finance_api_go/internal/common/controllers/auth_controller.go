@@ -4,29 +4,22 @@ import (
 	"net/http"
 
 	"github.com/dimasyanu/family-finance-go/internal/common/constants"
-	"github.com/dimasyanu/family-finance-go/internal/common/tools"
 	"github.com/dimasyanu/family-finance-go/internal/services"
-	abs "github.com/dimasyanu/family-finance-go/pkg/abstractions"
+	"github.com/dimasyanu/family-finance-go/internal/users/repositories"
 	"github.com/dimasyanu/family-finance-go/pkg/models/response"
 	r "github.com/dimasyanu/family-finance-go/pkg/models/response"
 	"github.com/gin-gonic/gin"
 )
 
 type AuthController struct {
-	mediator *tools.Mediator
-
-	abs.BaseController
 }
 
-func NewAuthController(services *map[constants.ServiceKeys]any) *AuthController {
-	mediator := (*services)[constants.MediatorServiceKey].(*tools.Mediator)
-	return &AuthController{
-		mediator: mediator,
-	}
+func NewAuthController(services *map[constants.ServiceKey]any) *AuthController {
+	return &AuthController{}
 }
 
 func (c *AuthController) Login(ctx *gin.Context) {
-	service := ctx.Request.Context().Value(services.AuthServiceKey).(*services.AuthService)
+	service := ctx.Request.Context().Value(constants.UserRepositoryKey).(*repositories.UserRepository)
 
 	payload := &struct {
 		Username string `json:"username"`
